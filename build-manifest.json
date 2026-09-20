@@ -1,0 +1,212 @@
+[
+  {
+    "path": "index.html",
+    "bytes": 2511,
+    "sha256": "a5d647796d8546febd4d1192afbe78a17e93f2e7dea1996dadd71faf76bcf229"
+  },
+  {
+    "path": ".nojekyll",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "background-assets.js",
+    "bytes": 2081776,
+    "sha256": "841755a6b5ed47344c7f3339f330503003ac193cb2d48e8646e15d52b076bdd3"
+  },
+  {
+    "path": "js/shared/currency-assets.js",
+    "bytes": 58810,
+    "sha256": "6b369562829ab7726d10c5bdfdadd08d5beff2a6ad94be03a31be0771c2cc674"
+  },
+  {
+    "path": "js/shared/design-defaults.js",
+    "bytes": 4374,
+    "sha256": "cca6a448d09f8889f5c119f05b11b6c41f354cb602182090232c1ed5afb0d53f"
+  },
+  {
+    "path": "js/shared/state.js",
+    "bytes": 649,
+    "sha256": "fd98dea3b37880d88aa3a397ff0737f39d56a885e651977e02c34c59e95e904f"
+  },
+  {
+    "path": "js/shared/colors.js",
+    "bytes": 705,
+    "sha256": "3160f30e7c7de8fedf41d4c93c05ddadb0ea72244495e8cd5cf08ed578a9e117"
+  },
+  {
+    "path": "js/shared/layout.js",
+    "bytes": 2483,
+    "sha256": "1320180ad69b33d18fb530b7bb735db5ba33595eb8fc6ad2fd58eab88b162a02"
+  },
+  {
+    "path": "js/shared/render.js",
+    "bytes": 11807,
+    "sha256": "ec539bf8bd6676728c45b4cb9caed6b485c9440ca799639e9e93ce00b5608d6e"
+  },
+  {
+    "path": "js/shared/currency-ui.js",
+    "bytes": 2727,
+    "sha256": "7b3ffd92e9bbab31983029a5278c33683d69f8fdd6ab7c6c871036e5a69ee8f7"
+  },
+  {
+    "path": "js/shared/media.js",
+    "bytes": 2877,
+    "sha256": "4f12235ce83649343f8fe6062b337f062a8935d65cb92ccccc13bb91b6cec2ad"
+  },
+  {
+    "path": "js/shared/font-assets.js",
+    "bytes": 2336185,
+    "sha256": "624aa3b5a68d479ce00e974ce98bddba1d12dc6304d2a6bf752bdfd150c68e17"
+  },
+  {
+    "path": "js/shared/fonts.js",
+    "bytes": 928,
+    "sha256": "f3fdf17f4bbe9d1542415f0f07f148a6afa9c03f2bb38ce61c99281a1be49478"
+  },
+  {
+    "path": "js/shared/startup-design.js",
+    "bytes": 2182,
+    "sha256": "c9f7eaefee3bf80c3976fd9aa1b9d9b8abd621fd20b2a0e6b0f7d67a93e4cda2"
+  },
+  {
+    "path": "js/player-main.js",
+    "bytes": 899,
+    "sha256": "cd89d5a7c139b5bfb1058cdbb4ad058a348a08d751299f43b9a552127c2e01c6"
+  },
+  {
+    "path": "js/game/order-assets.js",
+    "bytes": 15068174,
+    "sha256": "50e826c4b6f04eed6c9e04180f1c8524982a295989521842c072cdc486abba0a"
+  },
+  {
+    "path": "js/game/content/catalog.js",
+    "bytes": 2903,
+    "sha256": "637cc587342cbdc272787c2e93d797eae4aceee48e8a2a19366766cdea67b631"
+  },
+  {
+    "path": "js/game/content/validation.js",
+    "bytes": 6467,
+    "sha256": "b77df1bd2cfcc324f7ac1ac3b839bafcc122beb47fec8a2fda82da86748ca932"
+  },
+  {
+    "path": "js/game/domain/runtime.js",
+    "bytes": 8575,
+    "sha256": "ab9491a24b2a04806f34b3459ee78bdd747c2adbcfd8a609f49bd1cac32763e2"
+  },
+  {
+    "path": "js/game/persistence/save.js",
+    "bytes": 8014,
+    "sha256": "776c645f33b7aa81a2f61b0d9a79ff8957f7acf58bbcb9affbd8b9d4d77676ac"
+  },
+  {
+    "path": "js/game/order-queue.js",
+    "bytes": 3801,
+    "sha256": "6e1dce0018744149cba64b35f1add3e9dd4ea6f111b709d65afbc9f93ddc4667"
+  },
+  {
+    "path": "js/game/order-check-asset.js",
+    "bytes": 29699,
+    "sha256": "34a4fe81391fe69b3dc97a8adf7b741b37dfc3bfcbee07926f668ab583dce0fd"
+  },
+  {
+    "path": "js/game/order-markers.js",
+    "bytes": 1750,
+    "sha256": "ae3aa5c3d670a2ee676ec80fa17b2331b93e62bbb9af7a47bc85b7709eeb38c0"
+  },
+  {
+    "path": "js/game/order-customers.js",
+    "bytes": 5598,
+    "sha256": "961aa4360d84967ba8121046198305c2570999b5d4a60ff4d9a14494a40df72e"
+  },
+  {
+    "path": "js/game/order-feedback.js",
+    "bytes": 731,
+    "sha256": "052523af127bacb459db8d73ee13c98af43d534610e31ef6cd302ce261b45016"
+  },
+  {
+    "path": "game-assets.js",
+    "bytes": 724121,
+    "sha256": "c7d8de534848d05d954ccf34d4828c28692d440240246d9a3731def37a85aa13"
+  },
+  {
+    "path": "merge-game.js",
+    "bytes": 3561,
+    "sha256": "20349b676668c2549f5043c6fe0e54ca0e271758b2f31ddb2f82c8a253aad3c0"
+  },
+  {
+    "path": "js/game/input.js",
+    "bytes": 3841,
+    "sha256": "5e2a1483c0c802c94d6e2584441a1465b8fd84c8fe522037f15f60f301d21023"
+  },
+  {
+    "path": "js/game/order-preview.js",
+    "bytes": 2164,
+    "sha256": "4b5bb8f7518dab197b54f61b42732f8a4b68ce03eca0228f36c2fc7138f9ba1c"
+  },
+  {
+    "path": "js/game/animations.js",
+    "bytes": 14532,
+    "sha256": "2a33cda17ac82fee977640d29e208c9c0f3f48ae1707db5ca595126742b07d69"
+  },
+  {
+    "path": "js/game/feedback.js",
+    "bytes": 997,
+    "sha256": "d5eeeb49f7b48fd3df1ca998050381be1304256a7f037aeb0593ae39fd373e91"
+  },
+  {
+    "path": "js/game/controller.js",
+    "bytes": 4480,
+    "sha256": "16b01cafcc18f98f2831feba4f7a1720a4a682c633308a56deca583198c4c512"
+  },
+  {
+    "path": "js/game/renovation-motion.js",
+    "bytes": 1978,
+    "sha256": "001d17366d1716fd3832d7ebb1e09eece3178f25a4524cf2801cb6e53951a0eb"
+  },
+  {
+    "path": "js/game/renovation-screen.js",
+    "bytes": 18530,
+    "sha256": "64c2bf4e7e18b1dd656ceed271d3b953b276eb6a4bfcc04c3895b17c7ab59421"
+  },
+  {
+    "path": "js/mobile-play.js",
+    "bytes": 2232,
+    "sha256": "f6e951aacf1a99ece930a854cfcf65d77b66f661ffc50bf515039602137545c6"
+  },
+  {
+    "path": "player.css",
+    "bytes": 2771,
+    "sha256": "5d246610227385fa35625b9580beacca4c976d8d5b20b90e0aa733fad16977c0"
+  },
+  {
+    "path": "js/game/renovation-assets.js",
+    "bytes": 20548178,
+    "sha256": "3ac58eabce6bed1ce1159010252658c8f7759534d56517a298ddb6202223ab92"
+  },
+  {
+    "path": "assets/play-background.mp4",
+    "bytes": 4161295,
+    "sha256": "158ac0afa7158fdce62e752c28c6df8b534add2ccfc70756516f58852811ad59"
+  },
+  {
+    "path": "assets/fonts/changaone/OFL.txt",
+    "bytes": 4396,
+    "sha256": "67261c7ceb3e627da5c94d6617dac6da29bf36b910bee304a7680ad62e2c8b46"
+  },
+  {
+    "path": "assets/fonts/fredoka/OFL.txt",
+    "bytes": 4388,
+    "sha256": "5c9e7eee5c6b25f4b05b8d53b2e470ea4962f9ced742d044a98f7d95d1375bab"
+  },
+  {
+    "path": "assets/fonts/lilitaone/OFL.txt",
+    "bytes": 4392,
+    "sha256": "255d5debbb80eb2ea762644311f266a279e8778f00156655a516e2b7781a63e1"
+  },
+  {
+    "path": "assets/fonts/zcoolkuaile/OFL.txt",
+    "bytes": 4398,
+    "sha256": "538078469839b4a2e7ad22bef4ebe41681a4e53749bb2a072144024f1d6d703d"
+  }
+]

@@ -1,0 +1,12 @@
+'use strict';
+const COLS=7, ROWS=9;
+let state={...DEFAULT_STATE};
+let geometry, toastTimer;
+const assets={image:null,video:null,texture:null};
+const $=id=>document.getElementById(id);
+const canvas=$('preview');
+const ctx=canvas.getContext('2d',{alpha:true,colorSpace:'srgb'});
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const fmt=v=>Number(v.toFixed(2));
+const rgba=(hex,a)=>`rgba(${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)},${a})`;
+const mix=(a,b,t)=>'#'+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0')).join('');
