@@ -1,6 +1,7 @@
 'use strict';
 const ORDER_ANIMAL_TYPES=Object.freeze({Squirrel:'飞鼠',Wolf:'狼',Otter:'獭獭',Rabbit:'兔兔',Bear:'熊'});
 const DEFAULT_STATE = Object.freeze({
+  energyInitial:100,energyMax:999,energyRecoverySeconds:300,
   fxOrderAnimal:'Rabbit',
   ...Object.fromEntries(Object.keys(ORDER_ANIMAL_TYPES).flatMap(k=>[[`fxAnimal${k}Scale`,100],[`fxAnimal${k}X`,0],[`fxAnimal${k}Y`,0]])),
   fxAnimalRabbitScale:84,fxAnimalRabbitX:0,fxAnimalRabbitY:-105,

@@ -25,7 +25,7 @@ function drawCurrencyUI(c,g){
   rounded(c,pillX,y,pillW,h,radius);c.lineWidth=1.5;c.strokeStyle='#BFA98F';c.stroke();
   c.font=currencyFont();c.textAlign='right';c.textBaseline='middle';
   // Anchor to the capsule's right edge, independent of digit count and spacing.
-  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.displayCoins()??gameRuntime.state.currencies.coins):entry.icon==='energy'&&window.mergePlayTest?.active?String(gameRuntime.state.currencies.energy):entry.value;
+  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.displayCoins()??gameRuntime.state.currencies.coins):entry.icon==='energy'?String(window.mergePlayTest?.active?gameRuntime.state.currencies.energy:Math.min(state.energyInitial,state.energyMax)):entry.value;
   c.fillStyle=state.fxCurrencyTextColor;drawCurrencyText(c,value,pillX+pillW-36+state.fxCurrencyTextX,y+h*.54+state.fxCurrencyTextY,state.fxCurrencyLetterSpacing);
   const icon=entry.icon&&artwork['background'+entry.icon];
   if(entry.icon==='energy'&&window.mergePlayTest?.active){const seconds=gameRuntime.energySeconds();if(seconds){c.save();c.font='bold 24px sans-serif';c.textAlign='center';c.fillStyle='#31585B';c.fillText(Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'),pillX+pillW/2,y+h+20);c.restore();}}

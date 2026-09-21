@@ -21,8 +21,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 4374,
-    "sha256": "cca6a448d09f8889f5c119f05b11b6c41f354cb602182090232c1ed5afb0d53f"
+    "bytes": 4435,
+    "sha256": "433752f8a32e53bd708871b360264158aeeda566a2c3bfc519e1ff03eb596fb1"
   },
   {
     "path": "js/shared/state.js",
@@ -46,8 +46,8 @@
   },
   {
     "path": "js/shared/currency-ui.js",
-    "bytes": 3126,
-    "sha256": "2fd097baabfe20ddd4de8c67e1ed5412e41d59d6f3ec9585bd018d2f48fd7cb9"
+    "bytes": 3171,
+    "sha256": "7c55033e04deaa31b0dfca55064e53b580f5d8ce52123fed0c09cb2114e591a1"
   },
   {
     "path": "js/shared/media.js",
@@ -81,23 +81,23 @@
   },
   {
     "path": "js/game/content/catalog.js",
-    "bytes": 2909,
-    "sha256": "1b9eedcb4a961c4112b5a71d732ced1c7933e2a57763ddaa7f84d535aa5e9566"
+    "bytes": 2956,
+    "sha256": "5b373a254f9b3c2ffe3e5b85d0d5206c0f6ccbe18e17c12b3d536da29f679737"
   },
   {
     "path": "js/game/content/validation.js",
-    "bytes": 6467,
-    "sha256": "b77df1bd2cfcc324f7ac1ac3b839bafcc122beb47fec8a2fda82da86748ca932"
+    "bytes": 6744,
+    "sha256": "58288f2510002d47ca189ea633a7061ae19a880ecc52e2de3740dda8c8dce566"
   },
   {
     "path": "js/game/domain/runtime.js",
-    "bytes": 9628,
-    "sha256": "278c398d558c7ab7cd754461707ce5b0e49fb7ecc402122012a5f4b53b8d2d33"
+    "bytes": 10678,
+    "sha256": "b177bdf0173c486f35672454100d37fae07b4b1ac892bcd8ed3b39ff214ce7f9"
   },
   {
     "path": "js/game/persistence/save.js",
-    "bytes": 8283,
-    "sha256": "a69c84db97910364ff9faf3982db7cd27e2e99b6c8071a168eff015a07f0536b"
+    "bytes": 8307,
+    "sha256": "f518074dad9c6baa6f26e48bc3dd0cbeff111d703938361e4a2b4fd346c6c026"
   },
   {
     "path": "js/game/order-queue.js",
@@ -152,12 +152,12 @@
   {
     "path": "js/game/feedback.js",
     "bytes": 1264,
-    "sha256": "0c8445865c3e59f78e7f1a949c73dc579a8cae55bc4ca42769744ff684419e34"
+    "sha256": "aa6d353f461ef5fb8db36e055246fe730466c6aa828db4e5f697875050fe2909"
   },
   {
     "path": "js/game/controller.js",
-    "bytes": 4729,
-    "sha256": "32c49a4a2a1844bd0e420510e48e408b35102e9319dbccb8426cb0856d9b562a"
+    "bytes": 4963,
+    "sha256": "ebc47fd5b8c2bf24c802e101bfd39a1209069d283d68f2e73129013efb4ec9ce"
   },
   {
     "path": "js/game/renovation-motion.js",

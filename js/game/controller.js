@@ -3,6 +3,8 @@
  const board=new MergeTestBoard(),pictures={};let active=false,loading=false,drag=null,selected=-1,keyboardSource=-1,effects=new Map();
  validateGameContent(GameContent);
  const runtime=new GameRuntime(GameContent,board,orderQueue);
+ window.configureGameEnergy=()=>runtime.configureEnergy({initial:state.energyInitial,max:state.energyMax,recoveryMs:state.energyRecoverySeconds*1000});
+ window.configureGameEnergy();
  let saveService=null,resumePending=false;
  try{saveService=new GameSaveService(runtime,new GameSaveRepository(window.localStorage));resumePending=saveService.load();}catch(error){console.warn('游戏存档不可用，编辑器和测试仍可运行。',error);}
  runtime.scheduleSave=()=>saveService?.schedule();
@@ -32,7 +34,7 @@
  function message(text){if(editor)editor.message(text);else if(active)notify(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
  function lockEditor(locked){document.body.classList.toggle('testing',locked);editor?.lock(locked);resizePreview();}
- function restart(){drag=null;keyboardSource=-1;effects.clear();flights.clear();selected=board.reset();resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
+ function restart(){window.configureGameEnergy();runtime.resetEnergy();drag=null;keyboardSource=-1;effects.clear();flights.clear();selected=board.reset();resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
  async function toggle(){
   if(window.renovationScreen?.active||window.renovationScreen?.transitioning)return;
   if(loading)return;if(active){active=false;drag=null;keyboardSource=-1;effects.clear();flights.clear();lockEditor(false);drawCanvas();return;}

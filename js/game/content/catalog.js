@@ -13,7 +13,7 @@ const GameContent = (() => {
  tasks.push({id:'restaurant_premium_reserved',name:'后续装修（未开放）',zoneId:'zone_restaurant',phase:'premium',available:false,coinCost:0,prerequisiteIds:[basicIds[4]],rewards:[],unlockIds:[]});
  const areas=[{id:'area_restaurant',zoneIds:['zone_restaurant'],phaseRule:'all-basic-before-premium',rewards:[]}];
  const zones=[{id:'zone_restaurant',areaId:'area_restaurant',basicTaskIds:basicIds,premiumTaskIds:['restaurant_premium_reserved']}];
- const data={contentVersion:2,chains,items,producers,customers,unlocks,orders,levels:[{id:'level_1',level:1,xpToNext:null,rewards:[],unlockIds:[]}],areas,zones,tasks};
+ const data={contentVersion:2,energy:{initial:100,max:999,recoveryMs:300000},chains,items,producers,customers,unlocks,orders,levels:[{id:'level_1',level:1,xpToNext:null,rewards:[],unlockIds:[]}],areas,zones,tasks};
  const freeze=o=>{Object.values(o).forEach(v=>{if(v&&typeof v==='object')freeze(v);});return Object.freeze(o);};
  return freeze(data);
 })();
