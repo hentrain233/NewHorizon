@@ -136,8 +136,8 @@
   },
   {
     "path": "js/game/input.js",
-    "bytes": 3870,
-    "sha256": "355e286c28b0aaa37284e3734f0bf354ef5d4bc781e922aa7605e75d483a266b"
+    "bytes": 5117,
+    "sha256": "d12b4fc438a6d4660d12838d8d3fea3bf02243cefed24c2e711320adaab000d3"
   },
   {
     "path": "js/game/order-preview.js",
