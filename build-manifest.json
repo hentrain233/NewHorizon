@@ -47,7 +47,7 @@
   {
     "path": "js/shared/currency-ui.js",
     "bytes": 3126,
-    "sha256": "7a4122de635b00a1110c04c0cd2fdab97cce321976d07c5ed197021d513a326e"
+    "sha256": "2fd097baabfe20ddd4de8c67e1ed5412e41d59d6f3ec9585bd018d2f48fd7cb9"
   },
   {
     "path": "js/shared/media.js",
@@ -181,8 +181,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 853,
-    "sha256": "366fe21a303c5ac2d72aff5f1f746b11233d94db17a477aa43bc8c8383ae3eba"
+    "bytes": 882,
+    "sha256": "9c8071453ca232f15be86ad494f08cee711fe6598bc87b64a828199466be7b73"
   },
   {
     "path": "js/game/renovation-assets.js",

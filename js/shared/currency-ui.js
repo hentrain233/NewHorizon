@@ -1,6 +1,6 @@
 'use strict';
 // Coins and energy belong to GameRuntime. Premium currency remains a placeholder.
-const CURRENCY_PREVIEW=[{icon:'energy',value:'194'},{icon:'coin',value:'320'},{icon:null,value:'—'}];
+const CURRENCY_PREVIEW=[{icon:'energy',value:'100'},{icon:'coin',value:'100'},{icon:null,value:'—'}];
 function drawCurrencyText(c,text,x,y,spacing){
  if(!spacing){c.save();c.textAlign='right';c.fillText(text,x,y);c.restore();return;}
  const chars=Array.from(text),widths=chars.map(ch=>c.measureText(ch).width);
