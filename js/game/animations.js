@@ -138,7 +138,9 @@ function createPlaytestRenderer(session){
  }
  function drawIcon(c,g,item,index,time,alpha=1){
   const box=g.cells[index],img=session.pictures[item.type+item.level];if(!img)return;const elapsed=time-(session.effects.get(index)??-1000);
-  const shake=elapsed<320?Math.sin(elapsed*.065)*(1-elapsed/320)*box.width*.025:0;
+  const failed=time-(session.failures?.get(index)??-1000);
+  const shake=failed<360?Math.sin(failed*.075)*(1-failed/360)*box.width*.075:elapsed<320?Math.sin(elapsed*.065)*(1-elapsed/320)*box.width*.025:0;
+  if(failed>=360)session.failures?.delete(index);
   if(elapsed>=320)session.effects.delete(index);
   c.save();rounded(c,box.x,box.y,box.width,box.height,box.width*state.cellRadius/100);c.clip();c.globalAlpha=alpha;
   const flight=session.flights.get(index);let scale=1;

@@ -1,17 +1,33 @@
 'use strict';
 // Small domain facade. No DOM, Canvas, timers, asset loading or storage APIs.
 class GameRuntime {
- constructor(content,board,orders){
+ constructor(content,board,orders,now=Date.now){
+  this.now=now;
   this.content=content;this.board=board;this.orders=orders;this.listeners=new Map();this.scheduleSave=()=>{};
   this.transactionDepth=0;this.pendingEvents=[];this.dirty=false;
-  this.state={progression:{level:1,xp:0},currencies:{coins:320,energy:0,gems:0},inventory:{capacity:0,items:[]},unlocks:content.unlocks.filter(u=>u.initial).map(u=>u.id),discoveries:[],renovation:{completedTaskIds:[],rewardedAreaIds:[]},rewardQueue:[],recovery:[]};
+  this.state={progression:{level:1,xp:0},currencies:{coins:100,energy:100,gems:0},energy:{updatedAt:now()},inventory:{capacity:0,items:[]},unlocks:content.unlocks.filter(u=>u.initial).map(u=>u.id),discoveries:[],renovation:{completedTaskIds:[],rewardedAreaIds:[]},rewardQueue:[],recovery:[]};
   orders.isEligible=id=>!id||this.isUnlocked(id);
   board.isProducerAvailable=p=>!p.unlockId||this.isUnlocked(p.unlockId);
+  board.spendGenerationEnergy=p=>this.spendEnergy(p.energyCost);
   board.onChange=(type,item)=>{this.discover(item);this.changed(type,{item});};
-  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=320;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
+  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
   // Nested rewards/unlocks publish only after the complete operation is committed.
   for(const name of ['addXP','unlock','storeItem','retrieveItem','enqueueRewards','claimReward','purchaseTask']){const method=this[name].bind(this);this[name]=(...args)=>{this.transactionDepth++;try{return method(...args);}finally{if(--this.transactionDepth===0){const events=this.pendingEvents.splice(0);for(const [type,payload]of events)this.emit(type,payload);if(this.dirty){this.dirty=false;this.scheduleSave();}}}};}
  }
+ // Persist the recovery anchor, not a ticking countdown. Offline recovery uses the same clock.
+ recoverEnergy(){
+  const now=this.now(),clock=this.state.energy,c=this.state.currencies;
+  if(now<clock.updatedAt){clock.updatedAt=now;this.changed('ENERGY_CLOCK_CHANGED');return;}
+  if(c.energy>=100){clock.updatedAt=now;return;}
+  const points=Math.floor((now-clock.updatedAt)/300000);
+  if(points>0){c.energy=Math.min(100,c.energy+points);clock.updatedAt=c.energy===100?now:clock.updatedAt+points*300000;this.changed('ENERGY_CHANGED');}
+ }
+ spendEnergy(amount){
+  if(!Number.isSafeInteger(amount)||amount<0)return false;
+  this.recoverEnergy();if(this.state.currencies.energy<amount)return false;
+  this.state.currencies.energy-=amount;if(amount)this.changed('ENERGY_CHANGED');return true;
+ }
+ energySeconds(){return this.state.currencies.energy>=100?0:Math.max(0,Math.ceil((300000-(this.now()-this.state.energy.updatedAt))/1000));}
  on(type,listener){const list=this.listeners.get(type)||new Set();list.add(listener);this.listeners.set(type,list);return ()=>list.delete(listener);}
  emit(type,payload){if(this.transactionDepth){this.pendingEvents.push([type,payload]);return;}for(const fn of this.listeners.get(type)||[])try{fn(payload);}catch(error){console.error('Game event listener failed',type,error);}}
  changed(type,payload={}){this.emit(type,payload);if(this.transactionDepth)this.dirty=true;else this.scheduleSave();}

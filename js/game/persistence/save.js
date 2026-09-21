@@ -21,7 +21,10 @@ function hydrateGameSave(runtime,raw,warn=console.warn){
  const recover=(value,domain)=>{warn('Missing content retained in recovery:',domain,value);recovery.push({domain,value});return null;};
  const item=(value,domain)=>{if(value===null)return null;const d=c.items.find(i=>i.id===value?.itemId);return d?{type:d.type,level:d.tier}:recover(value,domain);};
  const board=s.board.map(i=>item(i,'board'));
- if(s.domains.currencies)for(const key of Object.keys(fresh.currencies))fresh.currencies[key]=integer(s.domains.currencies[key]??fresh.currencies[key],key);
+  if(s.domains.currencies)for(const key of Object.keys(fresh.currencies))fresh.currencies[key]=integer(s.domains.currencies[key]??fresh.currencies[key],key);
+ // Pre-energy saves used zero as a visual placeholder, not an exhausted energy account.
+ if(s.domains.energy){fresh.energy={updatedAt:integer(s.domains.energy.updatedAt,'energy timestamp')};}
+ else{fresh.currencies.energy=100;fresh.energy={updatedAt:runtime.now()};}
  if(s.domains.progression){const p=s.domains.progression;integer(p.level,'level');integer(p.xp,'xp');if(!c.levels.some(l=>l.level===p.level)){recover(p,'progression');fresh.progression={level:c.levels[0].level,xp:0};}else fresh.progression={level:p.level,xp:p.xp};}
  if(s.domains.inventory){const i=s.domains.inventory;if(!Array.isArray(i.items))throw new Error('Invalid inventory');fresh.inventory={capacity:integer(i.capacity,'inventory capacity'),items:i.items.map(v=>item(v,'inventory')).filter(Boolean)};if(fresh.inventory.items.length>fresh.inventory.capacity)throw new Error('Inventory exceeds capacity');}
  for(const [field,defs]of [['unlocks',c.unlocks],['discoveries',c.items]])if(s.domains[field]){if(!Array.isArray(s.domains[field]))throw new Error('Invalid '+field);fresh[field]=[...new Set(s.domains[field].filter(id=>defs.some(d=>d.id===id)||(recover(id,field),false)))];}

@@ -1,5 +1,5 @@
 'use strict';
-// Test coins come from GameRuntime; energy and premium remain visual placeholders.
+// Coins and energy belong to GameRuntime. Premium currency remains a placeholder.
 const CURRENCY_PREVIEW=[{icon:'energy',value:'194'},{icon:'coin',value:'320'},{icon:null,value:'—'}];
 function drawCurrencyText(c,text,x,y,spacing){
  if(!spacing){c.save();c.textAlign='right';c.fillText(text,x,y);c.restore();return;}
@@ -25,9 +25,10 @@ function drawCurrencyUI(c,g){
   rounded(c,pillX,y,pillW,h,radius);c.lineWidth=1.5;c.strokeStyle='#BFA98F';c.stroke();
   c.font=currencyFont();c.textAlign='right';c.textBaseline='middle';
   // Anchor to the capsule's right edge, independent of digit count and spacing.
-  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.displayCoins()??gameRuntime.state.currencies.coins):entry.value;
+  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.displayCoins()??gameRuntime.state.currencies.coins):entry.icon==='energy'&&window.mergePlayTest?.active?String(gameRuntime.state.currencies.energy):entry.value;
   c.fillStyle=state.fxCurrencyTextColor;drawCurrencyText(c,value,pillX+pillW-36+state.fxCurrencyTextX,y+h*.54+state.fxCurrencyTextY,state.fxCurrencyLetterSpacing);
   const icon=entry.icon&&artwork['background'+entry.icon];
+  if(entry.icon==='energy'&&window.mergePlayTest?.active){const seconds=gameRuntime.energySeconds();if(seconds){c.save();c.font='bold 24px sans-serif';c.textAlign='center';c.fillStyle='#31585B';c.fillText(Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'),pillX+pillW/2,y+h+20);c.restore();}}
   if(icon){
    const size=entry.icon==='energy'?145:137,ratio=icon.width/icon.height;
    const ih=size*state.fxCurrencyIconScale/100,iw=ih*ratio;

@@ -7,11 +7,15 @@
  try{saveService=new GameSaveService(runtime,new GameSaveRepository(window.localStorage));resumePending=saveService.load();}catch(error){console.warn('游戏存档不可用，编辑器和测试仍可运行。',error);}
  runtime.scheduleSave=()=>saveService?.schedule();
  // Temporary renovation testing: a page load starts the restaurant from damaged.
- // Keep shared coins, board, orders and camera; only this area's purchases reset.
+ // Test refresh resets coins and restaurant purchases, but preserves energy and other progress.
+ runtime.state.currencies.coins=100;
+ runtime.recoverEnergy();
+ setInterval(()=>{if(!document.hidden)runtime.recoverEnergy();},1000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)runtime.recoverEnergy();});
  const restaurantTasks=new Set(GameContent.tasks.filter(t=>t.zoneId==='zone_restaurant').map(t=>t.id));
  runtime.state.renovation.completedTaskIds=runtime.state.renovation.completedTaskIds.filter(id=>!restaurantTasks.has(id));
  runtime.state.renovation.rewardedAreaIds=runtime.state.renovation.rewardedAreaIds.filter(id=>id!=='area_restaurant');
- if(resumePending)runtime.scheduleSave();
+ runtime.scheduleSave();
  window.gameRuntime=runtime;
  window.flushGameSave=()=>saveService?.flush()??false;
  window.addEventListener('pagehide',()=>saveService?.flush());
@@ -19,7 +23,7 @@
  let ready;const flights=new Map();
  const center=b=>({x:b.x+b.width/2,y:b.y+b.height/2});
  const busy=i=>flights.has(i);
- const session={get active(){return active;},set active(v){active=v;},get drag(){return drag;},set drag(v){drag=v;},get selected(){return selected;},set selected(v){selected=v;},get keyboardSource(){return keyboardSource;},set keyboardSource(v){keyboardSource=v;},get board(){return board;},get flights(){return flights;},get effects(){return effects;},set effects(v){effects=v;},get pictures(){return pictures;}};
+ const session={failures:new Map(),get active(){return active;},set active(v){active=v;},get drag(){return drag;},set drag(v){drag=v;},get selected(){return selected;},set selected(v){selected=v;},get keyboardSource(){return keyboardSource;},set keyboardSource(v){keyboardSource=v;},get board(){return board;},get flights(){return flights;},get effects(){return effects;},set effects(v){effects=v;},get pictures(){return pictures;}};
  const {draw}=createPlaytestRenderer(session);
  const label=item=>item?`${board.definition(item)?.name||item.type} · ${item.level} 级`:'';
  const feedback=createPlaytestFeedback(session,label,message,center);

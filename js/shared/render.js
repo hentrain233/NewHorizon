@@ -8,7 +8,7 @@ function drawMedia(c,media,box,opt){
  if(opt.fit!=='stretch'){const ratio=(opt.fit==='cover'?Math.max:Math.min)(box.width/iw,box.height/ih);dw=iw*ratio;dh=ih*ratio;}
  dw*=opt.scale;dh*=opt.scale;
  const dx=box.x+(box.width-dw)*opt.x/100,dy=box.y+(box.height-dh)*opt.y/100;
- c.save();c.beginPath();c.rect(box.x,box.y,box.width,box.height);c.clip();c.globalAlpha=opt.opacity/100;c.filter=`blur(${opt.blur||0}px) brightness(${opt.brightness??100}%) saturate(${opt.saturation??100}%)`;c.drawImage(media,dx,dy,dw,dh);c.restore();
+ c.save();c.beginPath();c.rect(box.x,box.y,box.width,box.height);c.clip();c.globalAlpha=opt.opacity/100;c.drawImage(filteredMedia(media,opt,dw),dx,dy,dw,dh);c.restore();
 }
 function drawTopBackground(c,g){
  if(state.transparentTop||state.boardOnly)return;
@@ -111,7 +111,7 @@ function playSceneLayers(g,includeHelpers){
  const make=()=>{const layer=document.createElement('canvas');layer.width=g.W;layer.height=g.H;return layer;};
  const back=make(),front=make(),b=back.getContext('2d'),f=front.getContext('2d');
  for(const c of [b,f]){c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';}
- drawTopBackground(b,g);drawBoardArea(b,g);drawSupports(b,g);drawShadow(b,g);
+ if(state.backgroundType!=='video')drawTopBackground(b,g);drawBoardArea(b,g);drawSupports(b,g);drawShadow(b,g);
  drawBar(f,g);drawBarTopStroke(f,g);drawBoard(f,g);drawGrid(f,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(f,g);
  return playSceneCache={key,refs,back,front};
 }
@@ -119,8 +119,8 @@ function drawCanvas(target=canvas,includeHelpers=true){
  const g=geometry||calculateLayout();if(target.width!==g.W)target.width=g.W;if(target.height!==g.H)target.height=g.H;
  const c=target===canvas?ctx:target.getContext('2d',{alpha:true,colorSpace:'srgb'});c.clearRect(0,0,g.W,g.H);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
  if(target===canvas&&window.renovationScreen?.active){window.renovationScreen.draw(c,g);return target;}
- const cached=target===canvas&&window.mergePlayTest?.active&&state.backgroundType!=='video'&&g.W*g.H<=8000000?playSceneLayers(g,includeHelpers):null;
- if(cached)c.drawImage(cached.back,0,0);else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
+ const cached=target===canvas&&window.mergePlayTest?.active&&g.W*g.H<=8000000?playSceneLayers(g,includeHelpers):null;
+ if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
  if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function')drawOrderCustomers(c,g);
  if(cached)c.drawImage(cached.front,0,0);else{drawBar(c,g);drawBarTopStroke(c,g);drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g);

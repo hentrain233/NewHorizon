@@ -1,7 +1,8 @@
 'use strict';
 function createPlaytestFeedback(session,label,message,center){
  function feedback(result){
-  if(result.kind==='full'){message('盘面已满，请先合成或重新开始。');return;}
+  if(result.kind==='none'&&result.source>=0&&session.board.slots[result.source])session.failures.set(result.source,performance.now());
+  if(result.kind==='full'||result.kind==='no-energy'){session.failures.set(result.source,performance.now());message(result.kind==='full'?'盘面已满，请先合成。':'体力不足，每 5 分钟恢复 1 点。');return;}
   if(result.index>=0){session.selected=result.index;session.effects.set(result.index,performance.now());}
   if(result.kind==='spawn'){
    const from=center(geometry.cells[result.source]),to=center(geometry.cells[result.index]);

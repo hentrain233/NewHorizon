@@ -11,12 +11,12 @@ function bindPlaytestInput(session,feedback,message,busy,label,center){
   if(session.board.slots[i]){const origin=center(geometry.cells[i]);session.drag={from:i,target:i,startX:e.clientX,startY:e.clientY,p,offset:{x:origin.x-p.x,y:origin.y-p.y},lift:performance.now(),moved:false,id:e.pointerId};canvas.setPointerCapture(e.pointerId);}
   message(label(session.board.slots[i])||'空格');drawCanvas();
  });
- canvas.addEventListener('pointermove',e=>{if(!session.active)return;if(orderPan?.id===e.pointerId){e.preventDefault();setOrderScroll(orderPan.scroll+(orderPan.x-point(e).x)*1170/geometry.W,geometry);drawCanvas();return;}if(!session.drag||session.drag.id!==e.pointerId)return;e.preventDefault();if(!session.drag.moved&&Math.hypot(e.clientX-session.drag.startX,e.clientY-session.drag.startY)>5){session.drag.moved=true;session.drag.lift=performance.now();}session.drag.p=point(e);session.drag.target=at(session.drag.p);drawCanvas();});
+ canvas.addEventListener('pointermove',e=>{if(!session.active)return;if(orderPan?.id===e.pointerId){e.preventDefault();setOrderScroll(orderPan.scroll+(orderPan.x-point(e).x)*1170/geometry.W,geometry);return;}if(!session.drag||session.drag.id!==e.pointerId)return;e.preventDefault();if(!session.drag.moved&&Math.hypot(e.clientX-session.drag.startX,e.clientY-session.drag.startY)>5){session.drag.moved=true;session.drag.lift=performance.now();}session.drag.p=point(e);session.drag.target=at(session.drag.p);});
  canvas.addEventListener('pointerup',e=>{
   if(orderPan?.id===e.pointerId){orderPan=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);return;}
   if(!session.active||!session.drag||session.drag.id!==e.pointerId)return;const current=session.drag;session.drag=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
   const p=point(e),to=at(p),order=current.moved?hitOrderCustomer(p,geometry):null;
-  if(order){if(!window.mergePlayTest.submitOrderItem(order.id,current.from))message('这个订单不需要该物品，已放回原格。');}
+  if(order){if(!window.mergePlayTest.submitOrderItem(order.id,current.from)){session.failures.set(current.from,performance.now());message('这个订单不需要该物品，已放回原格。');}}
   else if(current.moved){if(!busy(to))feedback(session.board.move(current.from,to));}else if(to===current.from){feedback(session.board.generate(current.from));}drawCanvas();
  });
  canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',()=>{if(session.drag||orderPan)cancel();});window.addEventListener('blur',cancel);
