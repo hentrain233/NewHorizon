@@ -1,5 +1,5 @@
 /* Runtime navigation: curved sides as well as corners, with artwork above the plate. */
-.renovation-nav,.renovation-nav:hover,.mobile-play .renovation-nav{width:15%;height:auto;aspect-ratio:1;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;touch-action:manipulation;overflow:visible}
+.renovation-nav,.renovation-nav:hover,.mobile-play .renovation-nav{width:17.25%;height:auto;aspect-ratio:1;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;touch-action:manipulation;overflow:visible}
 .renovation-nav svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 1px #334d5260);pointer-events:none}
 .renovation-nav img{position:relative;display:block;width:88%;height:88%;margin:6%;object-fit:contain;pointer-events:none}
 .renovation-nav .nav-return{position:absolute;bottom:3%;left:0;right:0;color:#81583c;font-size:clamp(9px,1.2vw,13px);font-weight:bold;pointer-events:none}

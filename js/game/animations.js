@@ -1,5 +1,7 @@
 'use strict';
 function createPlaytestRenderer(session){
+ const iconScales={ice1:.5,fish1:.75,shell6:.9,shell10:1.1};
+ const iconScale=item=>iconScales[item.type+item.level]??1;
  const itemShadows=new Map();
  function itemShadow(item,img){
   const key=item.type+item.level;if(itemShadows.has(key))return itemShadows.get(key);
@@ -19,7 +21,10 @@ function createPlaytestRenderer(session){
    edge.addColorStop(0,'transparent');edge.addColorStop(.08,'#000');edge.addColorStop(.92,'#000');edge.addColorStop(1,'transparent');
    s.fillStyle=edge;s.fillRect(0,0,n,n);
   }
-  itemShadows.set(key,out);return out;
+  // Blur once here. On screen it matches blur(cell * 0.008) while the shadow is drawn at the item's resting scale.
+  const blurred=document.createElement('canvas');blurred.width=blurred.height=n;
+  const o=blurred.getContext('2d');o.filter=`blur(${(2.048/iconScale(item)).toFixed(3)}px)`;o.drawImage(out,0,0);
+  itemShadows.set(key,blurred);return blurred;
  }
  // Integrate a positive velocity curve: slow near 40%, then accelerate; fixed duration.
  const sweepPath=[0];
@@ -53,19 +58,21 @@ function createPlaytestRenderer(session){
    let pick=((random+1)%1)*sum,colorIndex=0;
    if(sum>0){for(let k=0;k<3;k++){pick-=weights[k];if(pick<0){colorIndex=k;break;}}}
    const color=state['fxStarColor'+(colorIndex+1)];
-   if(pulse>.001)c.drawImage(starSprite(color,b.width*.012/r),-r*2,-r*2,r*4,r*4);c.restore();
+   if(pulse>.001)c.drawImage(starSprite(color),-r*2,-r*2,r*4,r*4);c.restore();
   }
   c.restore();
  }
  const starSprites=new Map();
  function starSprite(color,blurRatio,outline=null){
-  const key=color+':'+blurRatio.toFixed(2)+':'+(outline||'');if(starSprites.has(key))return starSprites.get(key);
+  // Game stars scale one cached sprite. Renovation passes a fixed ratio plus an outline, so that key stays separate.
+  const baked=outline?blurRatio:.092,key=color+':'+(outline||'')+':'+(outline?Number(blurRatio).toFixed(2):'');
+  if(starSprites.has(key))return starSprites.get(key);
   const sprite=document.createElement('canvas');sprite.width=sprite.height=128;
   const c=sprite.getContext('2d'),r=32;c.translate(64,64);
    const halo=c.createRadialGradient(0,0,0,0,0,r*1.8);
    halo.addColorStop(0,'rgba(255,245,217,.18)');halo.addColorStop(1,'rgba(255,255,255,0)');
    c.fillStyle=halo;c.beginPath();c.arc(0,0,r*1.8,0,Math.PI*2);c.fill();
-   c.fillStyle=color;c.shadowColor=color;c.shadowBlur=r*blurRatio;
+   c.fillStyle=color;c.shadowColor=color;c.shadowBlur=r*baked;
    // Thin axis-aligned rays flowing into a small solid center, matching the reference.
    c.beginPath();c.moveTo(0,-r*1.25);
    c.bezierCurveTo(r*.025,-r*.12,r*.12,-r*.025,r,0);
@@ -86,7 +93,7 @@ function createPlaytestRenderer(session){
   const duration=state.fxSweepDuration*1000,cycle=duration+state.fxSweepCooldown*1000;
   const elapsed=(time+index*.137*cycle)%cycle;if(elapsed>=duration)return;
   const frameCount=Math.max(1,Math.ceil(duration*.06)),frame=Math.round(elapsed/duration*frameCount),phase=frame/frameCount*.3;
-  const signature=[frameCount,state.fxSweepWidth,state.fxSweepTaper,state.fxSweepCurve,state.fxSweepAngle].join(":");
+  const signature=[frameCount,state.fxSweepWidth,state.fxSweepTaper,state.fxSweepCurve,state.fxSweepAngle,state.fxSweepSaturation,state.fxSweepBrightness].join(":");
   if(signature!==sweepSignature){sweepSignature=signature;sweepFrames.clear();}
   const img=session.pictures[item.type+item.level];if(!img)return;
   foilCanvas??=document.createElement('canvas');
@@ -122,18 +129,19 @@ function createPlaytestRenderer(session){
    }
   }
   const saved=document.createElement('canvas');saved.width=saved.height=n;const rotated=saved.getContext('2d');rotated.translate(n/2,n/2);rotated.rotate(state.fxSweepAngle*Math.PI/180);rotated.drawImage(bandCanvas,-n/2-pad,-n/2-pad);
+  const graded=document.createElement('canvas');graded.width=graded.height=n;const grade=graded.getContext('2d');
+  grade.filter=`saturate(${state.fxSweepSaturation}%) brightness(${state.fxSweepBrightness}%)`;grade.drawImage(saved,0,0);
   if(sweepFrames.size>=64)sweepFrames.delete(sweepFrames.keys().next().value);
-  sweepFrames.set(frame,saved);
+  sweepFrames.set(frame,graded);
   }
   f.drawImage(sweepFrames.get(frame),0,0);
   f.globalCompositeOperation='source-over';
-  const b=g.cells[index],size=b.width*.94;
-  c.save();rounded(c,b.x,b.y,b.width,b.height,b.width*state.cellRadius/100);c.clip();
+  const b=g.cells[index],size=b.width*.94*iconScale(item);
+  c.save();if(iconScale(item)<=1){rounded(c,b.x,b.y,b.width,b.height,b.width*state.cellRadius/100);c.clip();}
   const opacity=state.fxSweepOpacity/100*(.57+.22*slow)/.79*Math.min(1,t/.08,(1-t)/.08);
   const dx=b.x+(b.width-size)/2,dy=b.y+(b.height-size)/2;
   // One selected blend operation, with no hidden second pass altering the chosen result.
   c.globalCompositeOperation=state.fxSweepBlend;c.globalAlpha=opacity;
-  c.filter=`saturate(${state.fxSweepSaturation}%) brightness(${state.fxSweepBrightness}%)`;
   c.drawImage(foilCanvas,dx,dy,size,size);c.restore();
  }
  function drawIcon(c,g,item,index,time,alpha=1){
@@ -142,13 +150,12 @@ function createPlaytestRenderer(session){
   const shake=failed<360?Math.sin(failed*.075)*(1-failed/360)*box.width*.075:elapsed<320?Math.sin(elapsed*.065)*(1-elapsed/320)*box.width*.025:0;
   if(failed>=360)session.failures?.delete(index);
   if(elapsed>=320)session.effects.delete(index);
-  c.save();rounded(c,box.x,box.y,box.width,box.height,box.width*state.cellRadius/100);c.clip();c.globalAlpha=alpha;
+  c.save();if(iconScale(item)<=1){rounded(c,box.x,box.y,box.width,box.height,box.width*state.cellRadius/100);c.clip();}c.globalAlpha=alpha;
   const flight=session.flights.get(index);let scale=1;
   if(flight){const t=(time-flight.start-45-flight.duration)/150;if(t<0){c.restore();return;}if(t>=1)session.flights.delete(index);else{const u=t-1;scale=1+2.1*u*u*u+1.1*u*u;}}
-  if(item.type==='ice'&&item.level===1)scale*=.5;
+  scale*=iconScale(item);
   const shadowSize=box.width*scale;
-  c.save();c.filter=`blur(${box.width*.008}px)`;
-  c.drawImage(itemShadow(item,img),box.x+(box.width-shadowSize)/2+shake,box.y+(box.height-shadowSize)/2,shadowSize,shadowSize);c.restore();
+  c.drawImage(itemShadow(item,img),box.x+(box.width-shadowSize)/2+shake,box.y+(box.height-shadowSize)/2,shadowSize,shadowSize);
   const size=box.width*.94*scale;c.drawImage(img,box.x+(box.width-size)/2+shake,box.y+(box.height-size)/2,size,size);c.restore();
  }
  function drawFlights(c,g,time){
@@ -162,7 +169,7 @@ function createPlaytestRenderer(session){
  }
  function drawDragged(c,g,time){
   if(!session.drag?.moved)return;const item=session.board.slots[session.drag.from],img=session.pictures[item.type+item.level],box=g.cells[session.drag.from];
-  const t=Math.min(1,(time-session.drag.lift)/130),lift=1-(1-t)**3,size=box.width*.94*(1+.1*lift)*(item.type==='ice'&&item.level===1?.5:1);
+  const t=Math.min(1,(time-session.drag.lift)/130),lift=1-(1-t)**3,size=box.width*.94*(1+.1*lift)*iconScale(item);
   c.save();c.translate(session.drag.p.x+session.drag.offset.x,session.drag.p.y+session.drag.offset.y-box.width*.09*lift);c.rotate(-.035*lift);
   c.shadowColor='rgba(22,65,68,.26)';c.shadowBlur=box.width*.13*lift;c.shadowOffsetX=box.width*.08*lift;c.shadowOffsetY=-box.width*.06*lift;
   c.drawImage(img,-size/2,-size/2,size,size);c.restore();
@@ -201,7 +208,7 @@ function createPlaytestRenderer(session){
   if(target!==selectionTarget){selectionTarget=target;selectionStart=time;}
   if(target>=0)drawSelection(c,g.cells[target],time);
   if(markers)for(let i=0;i<session.board.slots.length;i++){const item=session.board.slots[i];if(item&&markers.needed.has(orderItemKey(item))&&!session.flights.has(i)&&session.drag?.from!==i&&session.keyboardSource!==i)drawOrderCheck(c,g.cells[i],true);}
-  drawFlights(c,g,time);drawDragged(c,g,time);
+  drawItemInfo(c,g,session);drawFlights(c,g,time);drawDragged(c,g,time);
  }
 
  return {draw};

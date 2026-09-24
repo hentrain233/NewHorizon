@@ -6,12 +6,15 @@ class GameRuntime {
   this.energyRules={...content.energy};
   this.content=content;this.board=board;this.orders=orders;this.listeners=new Map();this.scheduleSave=()=>{};
   this.transactionDepth=0;this.pendingEvents=[];this.dirty=false;
-  this.state={progression:{level:1,xp:0},currencies:{coins:100,energy:this.energyRules.initial,gems:0},energy:{updatedAt:now()},inventory:{capacity:0,items:[]},unlocks:content.unlocks.filter(u=>u.initial).map(u=>u.id),discoveries:[],renovation:{completedTaskIds:[],rewardedAreaIds:[]},rewardQueue:[],recovery:[]};
-  orders.isEligible=id=>!id||this.isUnlocked(id);
+  this.state={progression:{level:1,xp:0},currencies:{coins:100,energy:this.energyRules.initial,gems:0},coinsEarned:0,energy:{updatedAt:now()},inventory:{capacity:0,items:[]},unlocks:content.unlocks.filter(u=>u.initial).map(u=>u.id),discoveries:[],renovation:{completedTaskIds:[],rewardedAreaIds:[]},rewardQueue:[],recovery:[]};
+  orders.isEligible=id=>!id||(this.isUnlocked(id)&&(!content.orders.chainIds.includes(id)||board.slots.some(item=>{
+   const producer=content.producers.find(p=>p.id===board.definition(item)?.producerId);
+   return producer&&board.isProducerAvailable(producer)&&producer.outputs.some(o=>content.items.find(d=>d.id===o.itemId)?.chainId===id);
+  })));
   board.isProducerAvailable=p=>!p.unlockId||this.isUnlocked(p.unlockId);
   board.spendGenerationEnergy=p=>this.spendEnergy(p.energyCost);
   board.onChange=(type,item)=>{this.discover(item);this.changed(type,{item});};
-  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
+  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;this.state.coinsEarned+=order.reward;if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
   // Nested rewards/unlocks publish only after the complete operation is committed.
   for(const name of ['addXP','unlock','storeItem','retrieveItem','enqueueRewards','claimReward','purchaseTask']){const method=this[name].bind(this);this[name]=(...args)=>{this.transactionDepth++;try{return method(...args);}finally{if(--this.transactionDepth===0){const events=this.pendingEvents.splice(0);for(const [type,payload]of events)this.emit(type,payload);if(this.dirty){this.dirty=false;this.scheduleSave();}}}};}
  }

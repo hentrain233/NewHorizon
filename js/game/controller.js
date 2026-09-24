@@ -8,10 +8,9 @@
  let saveService=null,resumePending=false;
  try{saveService=new GameSaveService(runtime,new GameSaveRepository(window.localStorage));resumePending=saveService.load();}catch(error){console.warn('游戏存档不可用，编辑器和测试仍可运行。',error);}
  runtime.scheduleSave=()=>saveService?.schedule();
- // Temporary renovation testing: a page load starts the restaurant from damaged.
- // Test refresh resets coins and restaurant purchases, but preserves energy and other progress.
- runtime.state.currencies.coins=100;
- runtime.recoverEnergy();
+ // Test builds forget coins, energy, and the board on every refresh. Orders and other progress still load.
+ function seedTestBoard(){board.slots.fill(null);const seen=new Set();for(const item of GameContent.items)if(item.tier===1&&item.producerId&&!seen.has(item.type)){seen.add(item.type);board.add(item.type,1);}}
+ runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;seedTestBoard();
  setInterval(()=>{if(!document.hidden)runtime.recoverEnergy();},1000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)runtime.recoverEnergy();});
  const restaurantTasks=new Set(GameContent.tasks.filter(t=>t.zoneId==='zone_restaurant').map(t=>t.id));
@@ -34,7 +33,7 @@
  function message(text){if(editor)editor.message(text);else if(active)notify(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
  function lockEditor(locked){document.body.classList.toggle('testing',locked);editor?.lock(locked);resizePreview();}
- function restart(){window.configureGameEnergy();runtime.resetEnergy();drag=null;keyboardSource=-1;effects.clear();flights.clear();selected=board.reset();resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
+ function restart(){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
  async function toggle(){
   if(window.renovationScreen?.active||window.renovationScreen?.transitioning)return;
   if(loading)return;if(active){active=false;drag=null;keyboardSource=-1;effects.clear();flights.clear();lockEditor(false);drawCanvas();return;}

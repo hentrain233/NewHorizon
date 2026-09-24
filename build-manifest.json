@@ -1,8 +1,8 @@
 [
   {
     "path": "index.html",
-    "bytes": 2566,
-    "sha256": "ed43f285f328d85a41ee9c7343d84787aa55c857964c3af3f8ca6b3c8c957f4f"
+    "bytes": 2617,
+    "sha256": "e19553cdb8f07d51c343c6bd4c4c3d2e2114edfaea097ee5fe23070762dd8d8c"
   },
   {
     "path": ".nojekyll",
@@ -21,8 +21,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 4435,
-    "sha256": "433752f8a32e53bd708871b360264158aeeda566a2c3bfc519e1ff03eb596fb1"
+    "bytes": 5444,
+    "sha256": "926d4198259e0f7821ddd86b7b234a52a78346735c948d217d75efdb8f368443"
   },
   {
     "path": "js/shared/state.js",
@@ -81,8 +81,8 @@
   },
   {
     "path": "js/game/content/catalog.js",
-    "bytes": 2956,
-    "sha256": "5b373a254f9b3c2ffe3e5b85d0d5206c0f6ccbe18e17c12b3d536da29f679737"
+    "bytes": 3442,
+    "sha256": "6ba659858af266bd8283fb3aaa0c1db5a0aec48bd02307be486563d5cea7db0d"
   },
   {
     "path": "js/game/content/validation.js",
@@ -91,8 +91,8 @@
   },
   {
     "path": "js/game/domain/runtime.js",
-    "bytes": 10678,
-    "sha256": "b177bdf0173c486f35672454100d37fae07b4b1ac892bcd8ed3b39ff214ce7f9"
+    "bytes": 11028,
+    "sha256": "6d47d0ed97896b86e57bad80023cc9d5e68e2f312f00d57065f235ab224a5975"
   },
   {
     "path": "js/game/persistence/save.js",
@@ -101,8 +101,8 @@
   },
   {
     "path": "js/game/order-queue.js",
-    "bytes": 3801,
-    "sha256": "6e1dce0018744149cba64b35f1add3e9dd4ea6f111b709d65afbc9f93ddc4667"
+    "bytes": 3929,
+    "sha256": "c643ec201473af57a974edd531e344454f8c2fa2013a63cbbf922756ef8452fa"
   },
   {
     "path": "js/game/order-check-asset.js",
@@ -126,8 +126,8 @@
   },
   {
     "path": "game-assets.js",
-    "bytes": 724121,
-    "sha256": "c7d8de534848d05d954ccf34d4828c28692d440240246d9a3731def37a85aa13"
+    "bytes": 1703661,
+    "sha256": "93707f82f090c6aa618c302e5f21a6591461491d3bce8b849c93d97bead81d13"
   },
   {
     "path": "merge-game.js",
@@ -145,9 +145,14 @@
     "sha256": "4b5bb8f7518dab197b54f61b42732f8a4b68ce03eca0228f36c2fc7138f9ba1c"
   },
   {
+    "path": "js/game/item-info.js",
+    "bytes": 4076,
+    "sha256": "ff27b867fbb6d1d9ae8c66cdae4e5d6707150ec8652926c6ee1962237a2ef9cc"
+  },
+  {
     "path": "js/game/animations.js",
-    "bytes": 14704,
-    "sha256": "dc33e5b6eba352955e567df2b385b42ee36302b8439dd12e74b7bc226ec1e56a"
+    "bytes": 15470,
+    "sha256": "e914c2ff395145abb88951efb1ebafa2db4d425d2ea0302f835e0702f51540f6"
   },
   {
     "path": "js/game/feedback.js",
@@ -156,8 +161,8 @@
   },
   {
     "path": "js/game/controller.js",
-    "bytes": 4963,
-    "sha256": "ebc47fd5b8c2bf24c802e101bfd39a1209069d283d68f2e73129013efb4ec9ce"
+    "bytes": 5209,
+    "sha256": "ecb47252b3187ef48a1b1dc27f759beb852b34efdecd7ed2ae22a3f4128e82db"
   },
   {
     "path": "js/game/renovation-motion.js",
@@ -181,8 +186,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 882,
-    "sha256": "9c8071453ca232f15be86ad494f08cee711fe6598bc87b64a828199466be7b73"
+    "bytes": 885,
+    "sha256": "a95edbf6befcb618200e7dacd64d468edcee875d7934c3d21ec77ce9c3134248"
   },
   {
     "path": "js/game/renovation-assets.js",

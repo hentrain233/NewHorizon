@@ -2,6 +2,13 @@
 const ORDER_ANIMAL_TYPES=Object.freeze({Squirrel:'飞鼠',Wolf:'狼',Otter:'獭獭',Rabbit:'兔兔',Bear:'熊'});
 const DEFAULT_STATE = Object.freeze({
   energyInitial:100,energyMax:999,energyRecoverySeconds:300,
+  fxInfoX:17,fxInfoBottom:2.2,fxInfoWidth:60,fxInfoHeight:180,fxInfoRadius:32,fxInfoCurve:4,fxInfoFill:'#FFEBD2',fxInfoBorder:'#A18166',fxInfoStroke:4,
+  fxInfoTabHeight:62,fxInfoTabPadding:24,fxInfoTabWidth:100,fxInfoTabRadius:14,fxInfoTabSlant:34,fxInfoTabX:0,fxInfoTabY:-32,fxInfoTabFill:'#8DD7EB',fxInfoTabBorder:'#548C9B',fxInfoTabStroke:0,
+  fxInfoTabBottom:'#50ACCD',fxInfoTabInnerColor:'#286E91',fxInfoTabInnerOpacity:24,fxInfoTabInnerHeight:18,
+  fxInfoTabShadeColor:'#25617E',fxInfoTabShadeOpacity:28,fxInfoTabShadeWidth:6,
+  fxInfoTabLightColor:'#FFFFFF',fxInfoTabLightOpacity:65,fxInfoTabLightWidth:4,
+  fxInfoTitleFont:'sans-serif',fxInfoTitleSize:36,fxInfoTitleColor:'#FFFFFF',fxInfoBodyFont:'sans-serif',fxInfoBodySize:32,fxInfoBodyColor:'#A5684B',fxInfoTextX:28,fxInfoTextY:72,
+  fxInfoIFont:'Fredoka',fxInfoISize:77,fxInfoIColor:'#FFFFFF',fxInfoIBorder:'#548C9B',fxInfoIStroke:4,fxInfoIX:0,fxInfoIY:-6,
   fxOrderAnimal:'Rabbit',
   ...Object.fromEntries(Object.keys(ORDER_ANIMAL_TYPES).flatMap(k=>[[`fxAnimal${k}Scale`,100],[`fxAnimal${k}X`,0],[`fxAnimal${k}Y`,0]])),
   fxAnimalRabbitScale:84,fxAnimalRabbitX:0,fxAnimalRabbitY:-105,
@@ -15,8 +22,9 @@ const DEFAULT_STATE = Object.freeze({
   fxOrderEnterDuration:.65,fxOrderEnterRise:70,
   fxBubbleWidth:32,fxBubbleHeight:50,fxBubbleRadius:78,fxBubbleX:0,fxBubbleGap:42,
   fxBubbleTailPosition:0,fxBubbleTailWidth:60,fxBubbleTailHeight:50,fxBubbleTailBend:150,
-  fxOrderItemScale:85,fxOrderCoinScale:100,
-  fxOrderCheckSize:34,fxOrderCheckX:0,fxOrderCheckY:0,
+  fxOrderItemScale:93.5,fxOrderCoinScale:100,
+  // Marker size is relative to the icon: compensate for its 10% enlargement.
+  fxOrderCheckSize:34*1.25/1.1,fxOrderCheckX:0,fxOrderCheckY:0,
   fxBoardCheckSize:44,fxBoardCheckX:0,fxBoardCheckY:0,
   fxBubbleTop:'#F1FEFF',fxBubbleMiddle:'#D8F7FF',fxBubbleBottom:'#BDE9F7',fxBubbleBorder:'#4FA2C3',fxBubbleStroke:5,
   fxBubbleShade:'#3889AF',fxBubbleShadeOpacity:16,fxBubbleShadeWidth:10,fxBubbleShadeBlur:4,fxBubbleHighlight:32,
