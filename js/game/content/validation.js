@@ -35,9 +35,7 @@ function validateGameContent(c){
  }
  if(!o.chainIds.length)fail(`${o.id}: eligible chains required`);
  if(!whole(o.capacity,1))fail(`${o.id}: capacity must be positive`);
- if(!whole(o.coinsPerTier))fail(`${o.id}: coinsPerTier must be a non-negative integer`);
- if(!whole(o.jitter)||!whole(o.xp))fail(`${o.id}: jitter and XP must be non-negative integers`);
- if(!Number.isFinite(o.multiMin)||!Number.isFinite(o.multiMax)||o.multiMin<=0||o.multiMax<o.multiMin)fail(`${o.id}: invalid reward multiplier range`);
+ if(!whole(o.xp))fail(`${o.id}: XP must be a non-negative integer`);
  for(const a of c.areas){if(!a.zoneIds.length)fail(`${a.id}: empty area`);if(a.phaseRule&&a.phaseRule!=='all-basic-before-premium')fail(`${a.id}: unsupported phase rule`);for(const id of a.requiredBasicZoneIds||a.zoneIds)if(!a.zoneIds.includes(id))fail(`${a.id}: foreign required zone`);for(const id of a.zoneIds){ref('zones',id,a.id);if(maps.zones.get(id)?.areaId!==a.id)fail(`${a.id}: foreign zone`);}rewards(a.rewards,a.id);}
  for(const z of c.zones){ref('areas',z.areaId,z.id);if(!z.basicTaskIds.length)fail(`${z.id}: basic tasks required`);if(!z.premiumTaskIds.length)fail(`${z.id}: premium tasks required`);for(const phase of ['basic','premium'])for(const id of z[phase+'TaskIds']){ref('tasks',id,z.id);if(maps.tasks.get(id)?.zoneId!==z.id||maps.tasks.get(id)?.phase!==phase)fail(`${z.id}: foreign task or phase`);}}
  for(const t of c.tasks){ref('zones',t.zoneId,t.id);amount(t.coinCost,t.id);if(!['basic','premium'].includes(t.phase))fail(`${t.id}: invalid phase`);if(!maps.zones.get(t.zoneId)?.[t.phase+'TaskIds']?.includes(t.id))fail(`${t.id}: task not listed in zone`);for(const id of t.prerequisiteIds)ref('tasks',id,t.id);for(const id of t.unlockIds||[])ref('unlocks',id,t.id);rewards(t.rewards,t.id);}

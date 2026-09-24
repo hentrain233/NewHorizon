@@ -10,7 +10,7 @@ const GameContent = (() => {
  const producers=items.filter(i=>i.producerId).map(item=>({id:item.producerId,outputs:producerChains[item.type].flatMap(type=>outputOdds[item.tier-1].map(([tier,weight])=>({itemId:`item_${type}_${String(tier).padStart(2,'0')}`,weight:weight/2}))),energyCost:1,cooldown:0,charges:null,unlockId:null}));
  const customers=[['rabbit','兔兔'],['bear','熊'],['otter','獭獭'],['squirrel','飞鼠'],['wolf','狼']].map(([key,name])=>({id:'customer_'+key,name,portraitPrefix:name,unlockId:'customer_'+key}));
  const unlocks=[...chains.map(c=>({id:c.id,initial:true})),...producers.map(p=>({id:p.id,initial:true})),...customers.map(c=>({id:c.id,initial:true}))];
- const orders={id:'orders_counter_test',chainIds:['chain_ice','chain_drink','chain_fish','chain_shell'],stages:[[0,1,2,1],[5,2,3,1],[15,2,4,2],[30,3,5,2],[50,4,6,2],[70,5,7,3],[90,6,9,3]],coinsPerTier:60,jitter:20,multiMin:1.05,multiMax:1.10,xp:0,capacity:3};
+ const orders={id:'orders_counter_test',chainIds:['chain_ice','chain_drink','chain_fish','chain_shell'],stages:[[0,1,2,1],[5,2,3,1],[15,2,4,2],[30,3,5,2],[50,4,6,2],[70,5,7,3],[90,6,9,3]],xp:0,capacity:3};
  const basicIds=['deck','awning','exterior','interior','floor'].map(k=>'restaurant_'+k);
  const tasks=basicIds.map((id,i)=>({id,name:['木板与苔藓','招牌与遮阳棚','外墙','内墙','地板'][i],zoneId:'zone_restaurant',phase:'basic',coinCost:50*(i+1),prerequisiteIds:i?[basicIds[i-1]]:[],rewards:[],unlockIds:[],effectType:'clean',mapAnchor:[[1980,2990],[1860,2650],[1030,2610],[1190,1900],[1370,2350]][i]}));
  // Reserved identity only, never purchasable: no premium renovation content/art yet.

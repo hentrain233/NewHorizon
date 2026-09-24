@@ -30,7 +30,7 @@
  const feedback=createPlaytestFeedback(session,label,message,center);
  bindPlaytestInput(session,feedback,message,busy,label,center);
  const editor=window.gameTools?.bind({session,toggle,restart,message,busy,label});
- function message(text){if(editor)editor.message(text);else if(active)notify(text);}
+ function message(text){if(editor)editor.message(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
  function lockEditor(locked){document.body.classList.toggle('testing',locked);editor?.lock(locked);resizePreview();}
  function restart(){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
