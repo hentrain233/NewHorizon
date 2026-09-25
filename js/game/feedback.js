@@ -3,7 +3,7 @@ function createPlaytestFeedback(session,label,message,center){
  function feedback(result){
   if(result.kind==='none'&&result.source>=0&&session.board.slots[result.source])session.failures.set(result.source,performance.now());
   if(result.kind==='full'||result.kind==='no-energy'){session.failures.set(result.source,performance.now());message(result.kind==='full'?'盘面已满，请先合成。':'体力不足，请等待倒计时恢复。');return;}
-  if(result.index>=0){session.selected=result.index;session.effects.set(result.index,performance.now());}
+  if(result.index>=0){if(result.kind!=='spawn')session.selected=result.index;session.effects.set(result.index,performance.now());}
   if(result.kind==='spawn'){
    const from=center(geometry.cells[result.source]),to=center(geometry.cells[result.index]);
    session.flights.set(result.index,{from,to,start:performance.now(),duration:Math.min(360,200+Math.hypot(to.x-from.x,to.y-from.y)*.12)});

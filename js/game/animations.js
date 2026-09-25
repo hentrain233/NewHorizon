@@ -144,6 +144,7 @@ function createPlaytestRenderer(session){
   c.globalCompositeOperation=state.fxSweepBlend;c.globalAlpha=opacity;
   c.drawImage(foilCanvas,dx,dy,size,size);c.restore();
  }
+ function drawProducerEnergy(c,box){const img=artwork.backgroundenergy;if(!img)return;const r=orderCheckRect(box,state.fxBoardCheckSize/100,state.fxBoardCheckX/100,state.fxBoardCheckY/100);c.drawImage(img,r.x,r.y,r.width,r.height);}
  function drawIcon(c,g,item,index,time,alpha=1){
   const box=g.cells[index],img=session.pictures[item.type+item.level];if(!img)return;const elapsed=time-(session.effects.get(index)??-1000);
   const failed=time-(session.failures?.get(index)??-1000);
@@ -157,6 +158,7 @@ function createPlaytestRenderer(session){
   const shadowSize=box.width*scale;
   c.drawImage(itemShadow(item,img),box.x+(box.width-shadowSize)/2+shake,box.y+(box.height-shadowSize)/2,shadowSize,shadowSize);
   const size=box.width*.94*scale;c.drawImage(img,box.x+(box.width-size)/2+shake,box.y+(box.height-size)/2,size,size);c.restore();
+  if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,{x:box.x+(box.width-size)/2+shake,y:box.y+(box.height-size)/2,width:size,height:size});
  }
  function drawFlights(c,g,time){
   for(const [index,f]of session.flights){
@@ -173,6 +175,7 @@ function createPlaytestRenderer(session){
   c.save();c.translate(session.drag.p.x+session.drag.offset.x,session.drag.p.y+session.drag.offset.y-box.width*.09*lift);c.rotate(-.035*lift);
   c.shadowColor='rgba(22,65,68,.26)';c.shadowBlur=box.width*.13*lift;c.shadowOffsetX=box.width*.08*lift;c.shadowOffsetY=-box.width*.06*lift;
   c.drawImage(img,-size/2,-size/2,size,size);c.restore();
+  if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,{x:session.drag.p.x+session.drag.offset.x-size/2,y:session.drag.p.y+session.drag.offset.y-box.width*.09*lift-size/2,width:size,height:size});
  }
  let selectionTarget=-1,selectionStart=0;
  function drawSelection(c,b,time){

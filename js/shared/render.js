@@ -125,6 +125,7 @@ function drawCanvas(target=canvas,includeHelpers=true){
  if(cached)c.drawImage(cached.front,0,0);else{drawBar(c,g);drawBarTopStroke(c,g);drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g);
  if(!state.boardOnly)drawCurrencyUI(c,g);
+ if(target===canvas&&includeHelpers&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);
  if(target===canvas&&includeHelpers)window.renovationScreen?.drawOverlay(c,g);
  return target;
 }

@@ -14,7 +14,7 @@ class GameRuntime {
   board.isProducerAvailable=p=>!p.unlockId||this.isUnlocked(p.unlockId);
   board.spendGenerationEnergy=p=>this.spendEnergy(p.energyCost);
   board.onChange=(type,item)=>{this.discover(item);this.changed(type,{item});};
-  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;this.state.coinsEarned+=order.reward;if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
+  orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;this.state.coinsEarned+=order.reward;for(const reward of order.rewards||[])if(reward.type==='currency'&&reward.currency==='energy')this.state.currencies.energy+=reward.amount;if(order.generator){const slot=this.board.empty()[0];if(slot!==undefined){const item={type:order.generator.type,level:1};this.board.slots[slot]=item;this.discover(item);}}else this.orders.generatorChance=Math.min(1,(this.orders.generatorChance??.01)+.03);if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
   // Nested rewards/unlocks publish only after the complete operation is committed.
   for(const name of ['addXP','unlock','storeItem','retrieveItem','enqueueRewards','claimReward','purchaseTask']){const method=this[name].bind(this);this[name]=(...args)=>{this.transactionDepth++;try{return method(...args);}finally{if(--this.transactionDepth===0){const events=this.pendingEvents.splice(0);for(const [type,payload]of events)this.emit(type,payload);if(this.dirty){this.dirty=false;this.scheduleSave();}}}};}
  }

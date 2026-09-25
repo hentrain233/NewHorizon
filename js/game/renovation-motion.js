@@ -9,10 +9,13 @@ const RenovationMotion={
   const t=Math.max(0,Math.min(1,age/170)),s=Math.sin(t*Math.PI*3)*(1-t);
   return {sx:1+s*.16,sy:1-s*.20,dy:0};
  },
- flight(t,index,source,target){
-  const q=t*t*(3-2*t),dx=target.x-source.x,dy=target.y-source.y,length=Math.hypot(dx,dy)||1;
-  const spread=(index-3.5)/3.5*Math.min(290,length*.27)*Math.sin(Math.PI*q);
+ flight(t,index,source,target,count=8){
+  const q=t*t*(3-2*t),dx=target.x-source.x,dy=target.y-source.y,length=Math.hypot(dx,dy)||1,mid=(count-1)/2;
+  const spread=(index-mid)/Math.max(mid,.001)*Math.min(290,length*.27)*Math.sin(Math.PI*q);
   return {x:source.x+dx*q+dy/length*spread,y:source.y+dy*q-dx/length*spread};
+ },
+ paintFlights(c,now,start,duration,count,source,target,drawIcon,scale=1){
+  for(let i=0;i<count;i++){const t=((now-start)/duration-i*.055)/.615;if(t<0||t>1)continue;const p=this.flight(t,i,source,target,count),step=.144*state.fxRepairTrailLength/100/24;c.save();c.lineCap='round';for(let j=0;j<24;j++){const a=this.flight(Math.max(0,t-(24-j)*step),i,source,target,count),z=this.flight(Math.max(0,t-(23-j)*step),i,source,target,count);c.globalAlpha=((j+1)/24)**1.5*.5*Math.min(1,t*8,(1-t)*12);c.strokeStyle=state.fxRepairTrailColor;c.lineWidth=(.3+18*(j/23)**1.5)*scale;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(z.x,z.y);c.stroke();}c.globalAlpha=Math.min(1,t*8,(1-t)*12);drawIcon(c,p.x,p.y,60*(1-.25*t)*scale);c.restore();}
  },
  createCloudMotion(random=Math.random){
   const clouds=new Map(),range=(a,b)=>a+(b-a)*random();

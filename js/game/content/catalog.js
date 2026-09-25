@@ -8,7 +8,7 @@ const GameContent = (() => {
  // Per generator tier: [output tier, probability], shared by all producer families.
  const outputOdds=[[[1,.8],[2,.2]],[[1,.1],[2,.7],[3,.2]],[[2,.1],[3,.65],[4,.25]],[[3,.1],[4,.62],[5,.25],[6,.03]],[[4,.1],[5,.62],[6,.25],[7,.03]]];
  const producers=items.filter(i=>i.producerId).map(item=>({id:item.producerId,outputs:producerChains[item.type].flatMap(type=>outputOdds[item.tier-1].map(([tier,weight])=>({itemId:`item_${type}_${String(tier).padStart(2,'0')}`,weight:weight/2}))),energyCost:1,cooldown:0,charges:null,unlockId:null}));
- const customers=[['rabbit','兔兔'],['bear','熊'],['otter','獭獭'],['squirrel','飞鼠'],['wolf','狼']].map(([key,name])=>({id:'customer_'+key,name,portraitPrefix:name,unlockId:'customer_'+key}));
+ const customers=[['rabbit','兔兔'],['bear','熊'],['otter','獭獭'],['squirrel','飞鼠'],['wolf','狼'],['seagull','海鸥'],['tiger','老虎'],['crocodile','鳄鱼'],['parrot','鹦鹉']].map(([key,name])=>({id:'customer_'+key,name,portraitPrefix:name,unlockId:'customer_'+key}));
  const unlocks=[...chains.map(c=>({id:c.id,initial:true})),...producers.map(p=>({id:p.id,initial:true})),...customers.map(c=>({id:c.id,initial:true}))];
  const orders={id:'orders_counter_test',chainIds:['chain_ice','chain_drink','chain_fish','chain_shell'],stages:[[0,1,2,1],[5,2,3,1],[15,2,4,2],[30,3,5,2],[50,4,6,2],[70,5,7,3],[90,6,9,3]],xp:0,capacity:3};
  const basicIds=['deck','awning','exterior','interior','floor'].map(k=>'restaurant_'+k);
