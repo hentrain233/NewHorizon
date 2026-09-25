@@ -21,8 +21,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 6168,
-    "sha256": "bc2b0d1919486ee33b2b68e489e320eac96ccbc1d1d57f36af13ca6fa1242ee1"
+    "bytes": 6236,
+    "sha256": "fd3f650a3137f16d78df52471a4fc29b7fdde12f7c28ba1b16ded595df8d0372"
   },
   {
     "path": "js/shared/state.js",
@@ -141,13 +141,13 @@
   },
   {
     "path": "js/game/order-preview.js",
-    "bytes": 2164,
-    "sha256": "4b5bb8f7518dab197b54f61b42732f8a4b68ce03eca0228f36c2fc7138f9ba1c"
+    "bytes": 2230,
+    "sha256": "6dc6c494526d0f60df0ed283a36d8551ca8ee319de0fe07e39ca1e9e70817313"
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 5155,
-    "sha256": "f14109706161efc2d25f62faa379d2e1bf2aacebbe80b25cfb18c2d244bdf66a"
+    "bytes": 5205,
+    "sha256": "de9cca35a2837db72df240d1a021506b0fabce730555e6db83f8c2417cef3e84"
   },
   {
     "path": "js/game/animations.js",

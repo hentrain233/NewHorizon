@@ -21,9 +21,8 @@ function orderBubblePath(){
  p.lineTo(r,h);p.bezierCurveTo(r*.4,h,0,h-r*.41,0,h-r);
  p.lineTo(0,r);p.bezierCurveTo(0,r*.43,r*.43,0,r,0);p.closePath();return p;
 }
-function paintOrderBubble(c){
- const path=orderBubblePath(),h=449*state.fxBubbleHeight/100;
- c.save();const fill=c.createLinearGradient(0,0,0,h);
+function paintBubbleFill(c,path,h){
+ const fill=c.createLinearGradient(0,0,0,h);
  fill.addColorStop(0,state.fxBubbleTop);fill.addColorStop(.5,state.fxBubbleMiddle);fill.addColorStop(1,state.fxBubbleBottom);
  c.fillStyle=fill;c.fill(path);c.save();c.clip(path);
  if(state.fxBubbleShadeWidth>0&&state.fxBubbleShadeOpacity>0){
@@ -32,6 +31,10 @@ function paintOrderBubble(c){
  }
  c.save();c.translate(3,7);c.lineWidth=15;c.strokeStyle='#FFFFFF';c.globalAlpha=state.fxBubbleHighlight/100;c.filter='blur(6px)';c.stroke(path);c.restore();
  c.restore();
+}
+function paintOrderBubble(c){
+ const path=orderBubblePath(),h=449*state.fxBubbleHeight/100;
+ c.save();paintBubbleFill(c,path,h);
  if(state.fxBubbleStroke>0){c.lineWidth=state.fxBubbleStroke;c.lineJoin='round';c.strokeStyle=state.fxBubbleBorder;c.stroke(path);}
  c.restore();
 }
