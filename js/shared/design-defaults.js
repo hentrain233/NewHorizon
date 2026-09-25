@@ -1,7 +1,7 @@
 'use strict';
 const ORDER_ANIMAL_TYPES=Object.freeze({Squirrel:'飞鼠',Wolf:'狼',Otter:'獭獭',Rabbit:'兔兔',Bear:'熊',Seagull:'海鸥',Tiger:'老虎',Crocodile:'鳄鱼',Parrot:'鹦鹉'});
 const DEFAULT_STATE = Object.freeze({
-  energyInitial:100,energyMax:999,energyRecoverySeconds:300,
+  energyInitial:200,energyMax:999,energyRecoverySeconds:300,
  fxNavBottom:2,
   fxInfoX:17,fxInfoBottom:2.2,fxInfoWidth:60,fxInfoHeight:180,fxInfoRadius:32,fxInfoCurve:4,fxInfoFill:'#FFEBD2',fxInfoBorder:'#A18166',fxInfoStroke:4,
   fxInfoTabHeight:62,fxInfoTabPadding:24,fxInfoTabWidth:100,fxInfoTabRadius:14,fxInfoTabSlant:34,fxInfoTabX:0,fxInfoTabY:-32,fxInfoTabFill:'#8DD7EB',fxInfoTabBorder:'#548C9B',fxInfoTabStroke:0,

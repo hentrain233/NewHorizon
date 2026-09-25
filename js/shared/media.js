@@ -8,19 +8,16 @@ const artworkReady=Promise.all([1,2,'coin','energy','premium'].map(n=>new Promis
 })));
 function artworkImage(n){
  const original=artwork['background'+n];if(!original)return null;
- const prefix=n===1?'imageWall':'imageBar';if(!state[prefix+'Tint'])return original;
- const color=state[prefix+'Color'],key=n+color;if(recolorCache.has(key))return recolorCache.get(key);
- // The color blend replaces hue/saturation but keeps the original wood lighting.
+ const prefix=n===1?'imageWall':'imageBar',tint=!!state[prefix+'Tint'],brightness=(state[prefix+'Brightness']??100)/100,saturation=(state[prefix+'Saturation']??100)/100;
+ if(!tint&&brightness===1&&saturation===1)return original;
+ const color=state[prefix+'Color'],key=n+'|'+tint+'|'+color+'|'+brightness+'|'+saturation;if(recolorCache.has(key))return recolorCache.get(key);
+ // Bake tint, brightness and saturation into pixels. Canvas filters are dropped on some browsers.
  const output=document.createElement('canvas');output.width=original.width;output.height=original.height;
- const c=output.getContext('2d');c.drawImage(original,0,0);
- const originalPixels=c.getImageData(0,0,output.width,output.height);
- c.globalCompositeOperation='color';c.fillStyle=color;c.fillRect(0,0,output.width,output.height);
- const tinted=c.getImageData(0,0,output.width,output.height);
- for(let i=3;i<tinted.data.length;i+=4)tinted.data[i]=originalPixels.data[i];
- c.putImageData(tinted,0,0);
+ const c=output.getContext('2d',{willReadFrequently:true});c.drawImage(original,0,0);
+ if(tint){const originalPixels=c.getImageData(0,0,output.width,output.height);c.globalCompositeOperation='color';c.fillStyle=color;c.fillRect(0,0,output.width,output.height);const tinted=c.getImageData(0,0,output.width,output.height);for(let i=3;i<tinted.data.length;i+=4)tinted.data[i]=originalPixels.data[i];c.putImageData(tinted,0,0);}
+ if(brightness!==1||saturation!==1){const pixels=c.getImageData(0,0,output.width,output.height),data=pixels.data;for(let i=0;i<data.length;i+=4){const l=.2126*data[i]+.7152*data[i+1]+.0722*data[i+2];for(let k=0;k<3;k++)data[i+k]=Math.max(0,Math.min(255,(l+(data[i+k]-l)*saturation)*brightness));}c.putImageData(pixels,0,0);}
  if(recolorCache.size>=4)recolorCache.delete(recolorCache.keys().next().value);recolorCache.set(key,output);return output;
 }
-function artworkFilter(prefix){return `brightness(${state[prefix+'Brightness']}%) saturate(${state[prefix+'Saturation']}%)`;}
 // Keep the last presented frame across loop seeks / decoder stalls. Never expose the white base.
 let videoFrameCache=null,videoFrameSource=null,videoFrameTime=-1,videoFrameRevision=0,videoFrameDrawAt=-Infinity;
 function getVideoFrame(){

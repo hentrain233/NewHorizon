@@ -44,5 +44,5 @@
  }
  session.showOrders=true;
  function submitOrderItem(id,index){if(!active||drag||busy(index)||!orderQueue.submit(id,board,index,performance.now()))return false;effects.delete(index);if(selected===index)selected=-1;keyboardSource=-1;message('订单已接收物品。');return true;}
- window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},draw,toggle,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
+ window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
 })();

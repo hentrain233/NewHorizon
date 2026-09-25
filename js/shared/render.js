@@ -21,7 +21,7 @@ function drawBoardArea(c,g){
  const areaTop=state.template==='cottage'?g.barBottom:state.topHeight;
  c.fillStyle=state.surroundColor;c.fillRect(0,areaTop,g.W,Math.max(0,end-areaTop));
  if(state.template==='cottage'&&state.planks){
-  const img=artworkImage(1);if(img){c.save();c.filter=artworkFilter('imageWall');c.drawImage(img,0,g.barBottom,g.W,Math.max(0,end-g.barBottom));c.restore();}return;
+  const img=artworkImage(1);if(img)c.drawImage(img,0,g.barBottom,g.W,Math.max(0,end-g.barBottom));return;
  }
  if(state.planks){
   c.save();c.beginPath();c.rect(0,state.topHeight,g.W,Math.max(0,end-state.topHeight));c.clip();
@@ -59,7 +59,7 @@ function drawBar(c,g){
   const img=artworkImage(2);if(!img)return;
   // Split the actual top/front/support pixels, keeping their texture and alpha.
   const x=-g.W*.012,w=g.W*1.024,topSource=70,bodySource=100;
-  c.save();c.filter=artworkFilter('imageBar');
+  c.save();
   c.drawImage(img,0,0,img.width,topSource,x,g.bar.y,w,g.bar.height-state.barThickness);
   c.drawImage(img,0,topSource,img.width,bodySource-topSource,x,g.barBottom-state.barThickness,w,state.barThickness);
   if(state.supports&&state.supportHeight>0){const end=state.boardOnly?g.board.y+g.board.height:g.H;c.beginPath();c.rect(0,g.barBottom,g.W,Math.max(0,end-g.barBottom));c.clip();c.drawImage(img,0,bodySource,img.width,img.height-bodySource,x,g.barBottom,w,state.supportHeight);}
