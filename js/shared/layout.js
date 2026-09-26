@@ -31,5 +31,30 @@ function calculateLayout(){
  const gw=7*size+6*state.cellGap,gh=9*size+8*state.cellGap;
  const grid={x:state.margin+(bw-gw)/2,y:state.boardY+(bh-gh)/2,width:gw,height:gh};
  const cells=Array.from({length:63},(_,i)=>({col:i%7,row:Math.floor(i/7),x:grid.x+(i%7)*(size+state.cellGap),y:grid.y+Math.floor(i/7)*(size+state.cellGap),width:size,height:size}));
- return {W,H,sx,sy,bar:{x:-W*.12,y:state.barY,width:W*1.24,height:state.barHeight},barBottom,board:{x:state.margin,y:state.boardY,width:bw,height:bh},grid,size,cells,bottom:H-state.boardY-bh,limited:autoHeight>avail+.01};
+ const g={W,H,sx,sy,bar:{x:-W*.12,y:state.barY,width:W*1.24,height:state.barHeight},barBottom,board:{x:state.margin,y:state.boardY,width:bw,height:bh},grid,size,cells,bottom:H-state.boardY-bh,limited:autoHeight>avail+.01};
+ if(typeof document!=='undefined'&&document.body.classList.contains('mobile-play')){
+  const viewport=document.getElementById('viewport');
+  if(viewport.clientWidth>0&&viewport.clientHeight>0){
+   // Change empty space, never cell/item/portrait dimensions. Very short screens fit uniformly.
+   const minTop=(state.fxCurrencyY+state.fxCurrencyHeight+state.fxOrderPortraitHeight+40)*sx;
+   const topSlack=Math.max(0,barBottom-minTop),footerSlack=Math.max(0,g.bottom-(state.fxInfoHeight+80)*sx);
+   g.H=Math.round(Math.max(H-topSlack-footerSlack,W*viewport.clientHeight/viewport.clientWidth));
+   const delta=g.H-H,shift=delta>=0?delta*.45:-Math.min(topSlack,-delta);
+   g.bar.y+=shift;g.barBottom+=shift;g.board.y+=shift;g.grid.y+=shift;
+   for(const cell of cells)cell.y+=shift;
+   g.bottom=g.H-g.board.y-bh;
+  }
+ }
+ return g;
+}
+// Both the local play shell and release use the same actual viewport dimensions.
+function resizeMobilePreview(){
+ if(!document.body.classList.contains('mobile-play'))return false;
+ const viewport=document.getElementById('viewport'),next=calculateLayout();
+ const changed=!geometry||geometry.W!==next.W||geometry.H!==next.H||geometry.board.y!==next.board.y;
+ geometry=next;
+ const scale=Math.min(viewport.clientWidth/next.W,viewport.clientHeight/next.H);
+ canvas.style.maxWidth=next.W*scale+'px';canvas.style.maxHeight=next.H*scale+'px';
+ if(changed)drawCanvas();
+ return true;
 }

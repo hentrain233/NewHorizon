@@ -13,7 +13,7 @@ function drawCurrencyText(c,text,x,y,spacing,method='fillText',maxWidth){
 function drawCurrencyUI(c,g){
  const s=g.W/1170;
  c.save();c.scale(s,s);
- const y=state.fxCurrencyY,h=state.fxCurrencyHeight,gap=state.fxCurrencyGap,left=state.fxCurrencyX,slot=state.fxCurrencyWidth+37;
+ const y=state.fxCurrencyY*g.H/state.height,h=state.fxCurrencyHeight,gap=state.fxCurrencyGap,left=state.fxCurrencyX,slot=state.fxCurrencyWidth+37;
  const radius=Math.min(state.fxCurrencyRadius,h/2,state.fxCurrencyWidth/2);
  CURRENCY_PREVIEW.forEach((entry,i)=>{
   const x=left+i*(slot+gap),pillX=x+37,pillW=state.fxCurrencyWidth;

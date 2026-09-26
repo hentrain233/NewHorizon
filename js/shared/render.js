@@ -12,25 +12,25 @@ function drawMedia(c,media,box,opt){
 }
 function drawTopBackground(c,g){
  if(state.transparentTop||state.boardOnly)return;
- c.fillStyle=state.topColor;c.fillRect(0,0,g.W,state.template==='cottage'?g.barBottom:state.topHeight);
+ c.fillStyle=state.topColor;c.fillRect(0,0,g.W,state.template==='cottage'?g.barBottom:g.bar.y);
  const media=state.backgroundType==='image'?assets.image:state.backgroundType==='video'?getVideoFrame():null;
- if(media)drawMedia(c,media,{x:0,y:0,width:g.W,height:state.topHeight},{fit:state.fit,scale:state.mediaScale,x:state.positionX,y:state.positionY,opacity:state.mediaOpacity,blur:state.mediaBlur,brightness:state.mediaBrightness,saturation:state.mediaSaturation});
+ if(media)drawMedia(c,media,{x:0,y:0,width:g.W,height:g.bar.y},{fit:state.fit,scale:state.mediaScale,x:state.positionX,y:state.positionY,opacity:state.mediaOpacity,blur:state.mediaBlur,brightness:state.mediaBrightness,saturation:state.mediaSaturation});
 }
 function drawBoardArea(c,g){
  const end=state.boardOnly?g.board.y+g.board.height:g.H;
- const areaTop=state.template==='cottage'?g.barBottom:state.topHeight;
+ const areaTop=state.template==='cottage'?g.barBottom:g.bar.y;
  c.fillStyle=state.surroundColor;c.fillRect(0,areaTop,g.W,Math.max(0,end-areaTop));
  if(state.template==='cottage'&&state.planks){
   const img=artworkImage(1);if(img)c.drawImage(img,0,g.barBottom,g.W,Math.max(0,end-g.barBottom));return;
  }
  if(state.planks){
-  c.save();c.beginPath();c.rect(0,state.topHeight,g.W,Math.max(0,end-state.topHeight));c.clip();
+  c.save();c.beginPath();c.rect(0,g.bar.y,g.W,Math.max(0,end-g.bar.y));c.clip();
   const width=state.plankWidth,a=state.plankOpacity/100;
   for(let x=-width*.18,i=0;x<g.W;x+=width,i++){
    const gradient=c.createLinearGradient(x,0,x+width,0);
    gradient.addColorStop(0,rgba('#355C60',a*.5));gradient.addColorStop(.05,rgba('#FFFFFF',a*.6));gradient.addColorStop(.6,rgba('#FFFFFF',a*.1));gradient.addColorStop(1,rgba('#355C60',a*.18));
-   c.fillStyle=gradient;c.fillRect(x,state.topHeight,width,end-state.topHeight);
-   c.fillStyle=rgba('#3E737A',a);c.fillRect(x,state.topHeight,2*g.sx,end-state.topHeight);
+   c.fillStyle=gradient;c.fillRect(x,g.bar.y,width,end-g.bar.y);
+   c.fillStyle=rgba('#3E737A',a);c.fillRect(x,g.bar.y,2*g.sx,end-g.bar.y);
   }c.restore();
  }
 }
@@ -105,7 +105,7 @@ function drawGrid(c,g){
 let playSceneCache=null;
 function playSceneLayers(g,includeHelpers){
  // Two layers retain the customer-behind-counter ordering. Videos never enter the cache.
- const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers;
+ const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers+':'+[g.W,g.H,g.bar.y,g.board.y].join(',');
  const refs=[assets.image,assets.texture,artwork.background1,artwork.background2];
  if(playSceneCache?.key===key&&refs.every((r,i)=>r===playSceneCache.refs[i]))return playSceneCache;
  const make=()=>{const layer=document.createElement('canvas');layer.width=g.W;layer.height=g.H;return layer;};

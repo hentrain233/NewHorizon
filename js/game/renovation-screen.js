@@ -2,7 +2,7 @@
 // Presentation only: purchases and persistence belong to GameRuntime/GameSaveService.
 (()=>{
  const runtime=window.gameRuntime,tasks=runtime.content.tasks.filter(t=>t.zoneId==='zone_restaurant'&&t.phase==='basic');
- const W=1170,H=2532,world={width:6344,height:3968};
+ const W=1170,world={width:6344,height:3968};let H=2532;
  const cloudMotion=RenovationMotion.createCloudMotion();
  const camera={x:1573,y:2354,zoom:.75}; // World-space center; zoom is deliberately transient.
  let active=false,loading=false,transition=null,animation=null,pan=null,pinch=null,ready=null,background=null,building=null,stage=-1,cameraTween=null;
@@ -95,11 +95,11 @@
  function drawDust(c,now){if(!animation)return;const age=now-animation.start-animation.timing.fill;if(age<0||age>1100)return;const t=age/1100,p=screen(...animation.task.mapAnchor),alpha=Math.min(t*6,(1-t)*5,1);
   c.save();c.globalAlpha=alpha;for(let i=0;i<15;i++){const angle=i*2.399+Math.sin(t*14+i)*.16,rx=150+(i%4)*57,ry=75+(i%3)*48;const x=p.x+Math.cos(angle)*rx,y=p.y-30+Math.sin(angle)*ry;const r=(64+i%3*20)*(1+.1*Math.sin(t*24+i));c.fillStyle=i%3?'#FFFCF0':'#E5F1EE';c.strokeStyle='#CDDED6';c.lineWidth=3;c.beginPath();c.ellipse(x,y,r,r*.8,0,0,Math.PI*2);c.fill();c.stroke();}c.restore();
  }
- function drawFlights(c,now){if(!animation)return;const b=bubble(),source={x:state.fxCurrencyX+state.fxCurrencyWidth+37+state.fxCurrencyGap+49+state.fxCurrencyCoinX,y:state.fxCurrencyY+state.fxCurrencyHeight/2+state.fxCurrencyCoinY},target={x:b.anchor.x,y:b.y+73};RenovationMotion.paintFlights(c,now,animation.start,animation.timing.fill,8,source,target,(c,x,y,size)=>coin(c,x,y,size));}
+ function drawFlights(c,now){if(!animation)return;const b=bubble(),source={x:state.fxCurrencyX+state.fxCurrencyWidth+37+state.fxCurrencyGap+49+state.fxCurrencyCoinX,y:state.fxCurrencyY*H*geometry.W/W/state.height+state.fxCurrencyHeight/2+state.fxCurrencyCoinY},target={x:b.anchor.x,y:b.y+73};RenovationMotion.paintFlights(c,now,animation.start,animation.timing.fill,8,source,target,(c,x,y,size)=>coin(c,x,y,size));}
  function update(now){if(cameraTween){const t=limit((now-cameraTween.start)/500,0,1);camera.x=cameraTween.from.x+(cameraTween.to.x-cameraTween.from.x)*ease(t);camera.y=cameraTween.from.y+(cameraTween.to.y-cameraTween.from.y)*ease(t);clampCamera();if(t===1){cameraTween=null;saveCamera();}}
   if(animation&&now-animation.start>=animation.duration){stage=completed();animation=null;focusTask();}
  }
- function draw(c,g){const now=performance.now();update(now);c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);c.fillStyle='#54BFD5';c.fillRect(camera.x-W/2/camera.zoom,camera.y-H/2/camera.zoom,W/camera.zoom,H/camera.zoom);c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;const img=images.get(visible)||images.get(stage);if(img)c.drawImage(img,building.x,building.y,building.width,building.height);drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
+ function draw(c,g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera();}const now=performance.now();update(now);c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);c.fillStyle='#54BFD5';c.fillRect(camera.x-W/2/camera.zoom,camera.y-H/2/camera.zoom,W/camera.zoom,H/camera.zoom);c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;const img=images.get(visible)||images.get(stage);if(img)c.drawImage(img,building.x,building.y,building.width,building.height);drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
   drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
  }
  function drawOverlay(c,g){

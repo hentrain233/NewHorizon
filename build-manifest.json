@@ -36,18 +36,18 @@
   },
   {
     "path": "js/shared/layout.js",
-    "bytes": 2483,
-    "sha256": "1320180ad69b33d18fb530b7bb735db5ba33595eb8fc6ad2fd58eab88b162a02"
+    "bytes": 3890,
+    "sha256": "c6b53c105cfe2931215d7e1b1c77299836c9d5e20fad355b0ada7d8cef80080b"
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 11789,
-    "sha256": "0ed889cdda289c35e673aee3b8ed814257ed8001f07d3f824f441dae7aa9bb33"
+    "bytes": 11759,
+    "sha256": "9c49482e01d4811689ab3ad6aa990454560dad1525b4919b185875351780286b"
   },
   {
     "path": "js/shared/currency-ui.js",
-    "bytes": 3666,
-    "sha256": "67237bf5f771c0e0503a44b6d90125398d70be2e27162c3fc5c5c168ae719543"
+    "bytes": 3683,
+    "sha256": "4d65d7f7a3fd2a542ab486b3a67701764a98e22a4f1295cc133c823ccb7b7f0d"
   },
   {
     "path": "js/shared/media.js",
@@ -71,8 +71,8 @@
   },
   {
     "path": "js/player-main.js",
-    "bytes": 899,
-    "sha256": "cd89d5a7c139b5bfb1058cdbb4ad058a348a08d751299f43b9a552127c2e01c6"
+    "bytes": 932,
+    "sha256": "364b795eddab1544c36872caf439671d89e82695e1f61c634b32cafb1d21e106"
   },
   {
     "path": "js/game/order-assets.js",
@@ -171,13 +171,13 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 18764,
-    "sha256": "208a3b3d3dbe31668cad1b71b0a0cf65cfcefb5f0fc87e12c2ecbac8ce1c1717"
+    "bytes": 18858,
+    "sha256": "4fd98ca109ebe2f9080272ef312dd2e511c260705deb16c54de0cdd6d5429311"
   },
   {
     "path": "js/mobile-play.js",
-    "bytes": 2703,
-    "sha256": "72db273e2d1328232c4e015d7dcb0953af75578fc2553e0da7c4dc912791b572"
+    "bytes": 2790,
+    "sha256": "43246fabd445a892ec09eb7aafbb7c142559077c980a00b39921604e868e1711"
   },
   {
     "path": "player.css",
