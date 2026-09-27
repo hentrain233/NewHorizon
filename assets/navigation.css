@@ -5,3 +5,7 @@
 .renovation-nav .nav-return{position:absolute;bottom:3%;left:0;right:0;color:#81583c;font-size:clamp(9px,1.2vw,13px);font-weight:bold;pointer-events:none}
 .renovation-nav[data-scene="map"] img{width:74%;height:74%;margin:3% 13% 23%}
 .renovation-nav:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.mobile-play main{position:relative;z-index:1}
+.mobile-play .workspace{background:transparent!important}
+.mobile-play #preview{background:none}
+.player-restart{bottom:max(12px,env(safe-area-inset-bottom))}

@@ -103,26 +103,49 @@ function drawGrid(c,g){
  }
 }
 let playSceneCache=null;
+let bleedDisplay=null,bleedBack=null,bleedFront=null;
+function paintFullBleed(g){
+ const b=g.bleed;if(!b)return null;
+ if(!bleedDisplay){
+  bleedDisplay=document.createElement('canvas');bleedDisplay.id='game-backdrop';bleedDisplay.setAttribute('aria-hidden','true');
+  bleedDisplay.style.cssText='position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;pointer-events:none;z-index:0;box-shadow:none;background:none';
+  document.body.prepend(bleedDisplay);bleedBack=document.createElement('canvas');bleedFront=document.createElement('canvas');
+ }
+ for(const layer of [bleedDisplay,bleedBack,bleedFront]){if(layer.width!==b.W)layer.width=b.W;if(layer.height!==b.H)layer.height=b.H;}
+ const back=bleedBack.getContext('2d'),front=bleedFront.getContext('2d'),display=bleedDisplay.getContext('2d');
+ back.clearRect(0,0,b.W,b.H);front.clearRect(0,0,b.W,b.H);
+ if(window.renovationScreen?.active){window.renovationScreen.drawBackdrop(back,g);}
+ else{
+  const expanded={...g,W:b.W,H:b.H,bar:{...g.bar,x:-b.W*.12,width:b.W*1.24,y:g.bar.y+b.y},barBottom:g.barBottom+b.y};
+  drawTopBackground(back,expanded);drawBoardArea(back,expanded);drawShadow(back,expanded);
+  drawBar(front,expanded);drawBarTopStroke(front,expanded);
+ }
+ display.clearRect(0,0,b.W,b.H);display.drawImage(bleedBack,0,0);display.drawImage(bleedFront,0,0);
+ return b;
+}
 function playSceneLayers(g,includeHelpers){
  // Two layers retain the customer-behind-counter ordering. Videos never enter the cache.
- const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers+':'+[g.W,g.H,g.bar.y,g.board.y].join(',');
+ const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers+':'+[g.W,g.H,g.bar.y,g.board.y,!!g.bleed].join(',');
  const refs=[assets.image,assets.texture,artwork.background1,artwork.background2];
  if(playSceneCache?.key===key&&refs.every((r,i)=>r===playSceneCache.refs[i]))return playSceneCache;
  const make=()=>{const layer=document.createElement('canvas');layer.width=g.W;layer.height=g.H;return layer;};
  const back=make(),front=make(),b=back.getContext('2d'),f=front.getContext('2d');
  for(const c of [b,f]){c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';}
  if(state.backgroundType!=='video')drawTopBackground(b,g);drawBoardArea(b,g);drawSupports(b,g);drawShadow(b,g);
- drawBar(f,g);drawBarTopStroke(f,g);drawBoard(f,g);drawGrid(f,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(f,g);
+ if(!g.bleed){drawBar(f,g);drawBarTopStroke(f,g);}drawBoard(f,g);drawGrid(f,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(f,g);
  return playSceneCache={key,refs,back,front};
 }
 function drawCanvas(target=canvas,includeHelpers=true){
  const g=geometry||calculateLayout();if(target.width!==g.W)target.width=g.W;if(target.height!==g.H)target.height=g.H;
  const c=target===canvas?ctx:target.getContext('2d',{alpha:true,colorSpace:'srgb'});c.clearRect(0,0,g.W,g.H);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+ const bleed=target===canvas?paintFullBleed(g):null;
  if(target===canvas&&window.renovationScreen?.active){window.renovationScreen.draw(c,g);return target;}
  const cached=target===canvas&&window.mergePlayTest?.active&&g.W*g.H<=8000000?playSceneLayers(g,includeHelpers):null;
- if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
+ if(bleed)c.drawImage(bleedBack,-bleed.x,-bleed.y);
+ else if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
  if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function')drawOrderCustomers(c,g);
- if(cached)c.drawImage(cached.front,0,0);else{drawBar(c,g);drawBarTopStroke(c,g);drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
+ if(bleed)c.drawImage(bleedFront,-bleed.x,-bleed.y);
+ if(cached)c.drawImage(cached.front,0,0);else{if(!bleed){drawBar(c,g);drawBarTopStroke(c,g);}drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g);
  if(!state.boardOnly)drawCurrencyUI(c,g);
  if(target===canvas&&includeHelpers&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);

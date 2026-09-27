@@ -54,7 +54,10 @@ function resizeMobilePreview(){
  const changed=!geometry||geometry.W!==next.W||geometry.H!==next.H||geometry.board.y!==next.board.y;
  geometry=next;
  const scale=Math.min(viewport.clientWidth/next.W,viewport.clientHeight/next.H);
+ if(canvas.width!==next.W)canvas.width=next.W;if(canvas.height!==next.H)canvas.height=next.H;
  canvas.style.maxWidth=next.W*scale+'px';canvas.style.maxHeight=next.H*scale+'px';
+ const rect=canvas.getBoundingClientRect();
+ geometry.bleed={W:Math.round(innerWidth/scale),H:Math.round(innerHeight/scale),x:rect.left/scale,y:rect.top/scale};
  if(changed)drawCanvas();
  return true;
 }

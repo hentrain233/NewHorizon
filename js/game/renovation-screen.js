@@ -102,6 +102,13 @@
  function draw(c,g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera();}const now=performance.now();update(now);c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);c.fillStyle='#54BFD5';c.fillRect(camera.x-W/2/camera.zoom,camera.y-H/2/camera.zoom,W/camera.zoom,H/camera.zoom);c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;const img=images.get(visible)||images.get(stage);if(img)c.drawImage(img,building.x,building.y,building.width,building.height);drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
   drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
  }
+ function drawBackdrop(c,g){
+  if(!background)return;const b=g.bleed,s=g.W/W,now=performance.now();
+  c.save();c.fillStyle='#54BFD5';c.fillRect(0,0,b.W,b.H);c.translate(b.x+g.W/2,b.y+g.H/2);c.scale(s*camera.zoom,s*camera.zoom);c.translate(-camera.x,-camera.y);
+  c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);
+  const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage,img=images.get(visible)||images.get(stage);
+  if(img)c.drawImage(img,building.x,building.y,building.width,building.height);c.restore();
+ }
  function drawOverlay(c,g){
   const bottom=state.fxNavBottom+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
   if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}c.save();c.globalAlpha=1-Math.abs(2*t-1);c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();if(t===1){transition=null;nav.disabled=false;}}
@@ -112,5 +119,5 @@
  canvas.addEventListener('pointerup',end,true);canvas.addEventListener('pointercancel',end,true);canvas.addEventListener('lostpointercapture',e=>{if(active){pointers.delete(e.pointerId);pan=null;pinch=null;}},true);
  canvas.addEventListener('wheel',e=>{if(active){stop(e);setZoom(camera.zoom+(e.deltaY<0?.025:-.025),point(e));}},{capture:true,passive:false});
  canvas.addEventListener('keydown',e=>{if(!active)return;stop(e);if(e.key==='Escape')void navigate();if(e.key==='+'||e.key==='=')setZoom(camera.zoom+.05);if(e.key==='-')setZoom(camera.zoom-.05);if(e.key==='Enter')void buy();if(!animation&&!transition&&e.key.startsWith('Arrow')){camera.x+=({ArrowLeft:-100,ArrowRight:100}[e.key]||0)/camera.zoom;camera.y+=({ArrowUp:-100,ArrowDown:100}[e.key]||0)/camera.zoom;clampCamera();saveCamera();}},true);
- window.renovationScreen={get active(){return active;},get busy(){return loading||!!transition;},get transitioning(){return !!transition;},draw,drawOverlay,displayCoins,navigate,getSnapshot:()=>({active,stage,camera:{...camera},animating:!!animation,effect:animation?RenovationMotion.reveal(performance.now()-animation.start,animation.timing).phase:null,revealed:!!animation&&performance.now()-animation.start>=animation.timing.revealStart,bubble:bubble()})};
+ window.renovationScreen={get active(){return active;},get busy(){return loading||!!transition;},get transitioning(){return !!transition;},draw,drawBackdrop,drawOverlay,displayCoins,navigate,getSnapshot:()=>({active,stage,camera:{...camera},animating:!!animation,effect:animation?RenovationMotion.reveal(performance.now()-animation.start,animation.timing).phase:null,revealed:!!animation&&performance.now()-animation.start>=animation.timing.revealStart,bubble:bubble()})};
 })();
