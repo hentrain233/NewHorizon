@@ -41,8 +41,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 13310,
-    "sha256": "bae31d9dcf28432afc61b72dc715ff77496616af4fd29155cf14b74909a42ae6"
+    "bytes": 13670,
+    "sha256": "7a52c13f7afc8a61ba9160c739d025f3b9e1e125c59bd5b5cec32c7c941be7ef"
   },
   {
     "path": "js/shared/currency-ui.js",

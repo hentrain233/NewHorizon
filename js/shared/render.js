@@ -1,6 +1,12 @@
 'use strict';
 function rounded(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,Math.max(0,Math.min(r,w/2,h/2)));}
 function fillRound(c,box,color,r){c.fillStyle=color;rounded(c,box.x,box.y,box.width,box.height,r);c.fill();}
+// Cover a destination with an undistorted source region; crop excess, never stretch.
+function drawArtworkCover(c,img,sx,sy,sw,sh,x,y,w,h){
+ if(w<=0||h<=0)return;
+ const scale=Math.max(w/sw,h/sh),cw=w/scale,ch=h/scale;
+ c.drawImage(img,sx+(sw-cw)/2,sy+(sh-ch)/2,cw,ch,x,y,w,h);
+}
 
 function drawMedia(c,media,box,opt){
  const iw=media.videoWidth||media.naturalWidth||media.width,ih=media.videoHeight||media.naturalHeight||media.height;if(!iw||!ih)return;
@@ -14,14 +20,14 @@ function drawTopBackground(c,g){
  if(state.transparentTop||state.boardOnly)return;
  c.fillStyle=state.topColor;c.fillRect(0,0,g.W,state.template==='cottage'?g.barBottom:g.bar.y);
  const media=state.backgroundType==='image'?assets.image:state.backgroundType==='video'?getVideoFrame():null;
- if(media)drawMedia(c,media,{x:0,y:0,width:g.W,height:g.bar.y},{fit:state.fit,scale:state.mediaScale,x:state.positionX,y:state.positionY,opacity:state.mediaOpacity,blur:state.mediaBlur,brightness:state.mediaBrightness,saturation:state.mediaSaturation});
+ if(media)drawMedia(c,media,{x:0,y:0,width:g.W,height:g.bar.y},{fit:g.bleed&&state.fit==='stretch'?'cover':state.fit,scale:state.mediaScale,x:state.positionX,y:state.positionY,opacity:state.mediaOpacity,blur:state.mediaBlur,brightness:state.mediaBrightness,saturation:state.mediaSaturation});
 }
 function drawBoardArea(c,g){
  const end=state.boardOnly?g.board.y+g.board.height:g.H;
  const areaTop=state.template==='cottage'?g.barBottom:g.bar.y;
  c.fillStyle=state.surroundColor;c.fillRect(0,areaTop,g.W,Math.max(0,end-areaTop));
  if(state.template==='cottage'&&state.planks){
-  const img=artworkImage(1);if(img)c.drawImage(img,0,g.barBottom,g.W,Math.max(0,end-g.barBottom));return;
+  const img=artworkImage(1);if(img)drawArtworkCover(c,img,0,0,img.width,img.height,0,g.barBottom,g.W,end-g.barBottom);return;
  }
  if(state.planks){
   c.save();c.beginPath();c.rect(0,g.bar.y,g.W,Math.max(0,end-g.bar.y));c.clip();
@@ -60,9 +66,9 @@ function drawBar(c,g){
   // Split the actual top/front/support pixels, keeping their texture and alpha.
   const x=-g.W*.012,w=g.W*1.024,topSource=70,bodySource=100;
   c.save();
-  c.drawImage(img,0,0,img.width,topSource,x,g.bar.y,w,g.bar.height-state.barThickness);
-  c.drawImage(img,0,topSource,img.width,bodySource-topSource,x,g.barBottom-state.barThickness,w,state.barThickness);
-  if(state.supports&&state.supportHeight>0){const end=state.boardOnly?g.board.y+g.board.height:g.H;c.beginPath();c.rect(0,g.barBottom,g.W,Math.max(0,end-g.barBottom));c.clip();c.drawImage(img,0,bodySource,img.width,img.height-bodySource,x,g.barBottom,w,state.supportHeight);}
+  drawArtworkCover(c,img,0,0,img.width,topSource,x,g.bar.y,w,g.bar.height-state.barThickness);
+  drawArtworkCover(c,img,0,topSource,img.width,bodySource-topSource,x,g.barBottom-state.barThickness,w,state.barThickness);
+  if(state.supports&&state.supportHeight>0){const end=state.boardOnly?g.board.y+g.board.height:g.H;c.beginPath();c.rect(0,g.barBottom,g.W,Math.max(0,end-g.barBottom));c.clip();drawArtworkCover(c,img,0,bodySource,img.width,img.height-bodySource,x,g.barBottom,w,state.supportHeight);}
   c.restore();return;
  }
  const b=g.bar,frontY=b.y+b.height-state.barThickness,topH=frontY-b.y;
