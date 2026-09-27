@@ -141,8 +141,8 @@
   },
   {
     "path": "js/game/order-preview.js",
-    "bytes": 2230,
-    "sha256": "6dc6c494526d0f60df0ed283a36d8551ca8ee319de0fe07e39ca1e9e70817313"
+    "bytes": 2413,
+    "sha256": "4ddcc3ed534836f89a81ee42396e59358058e21b59cf4a6c05089115b5015211"
   },
   {
     "path": "js/game/item-info.js",

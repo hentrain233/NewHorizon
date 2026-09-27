@@ -25,11 +25,16 @@ function paintBubbleFill(c,path,h){
  const fill=c.createLinearGradient(0,0,0,h);
  fill.addColorStop(0,state.fxBubbleTop);fill.addColorStop(.5,state.fxBubbleMiddle);fill.addColorStop(1,state.fxBubbleBottom);
  c.fillStyle=fill;c.fill(path);c.save();c.clip(path);
- if(state.fxBubbleShadeWidth>0&&state.fxBubbleShadeOpacity>0){
-  c.save();c.translate(-5,-7);c.lineWidth=state.fxBubbleShadeWidth;c.strokeStyle=state.fxBubbleShade;
-  c.globalAlpha=state.fxBubbleShadeOpacity/100;c.filter=`blur(${state.fxBubbleShadeBlur}px)`;c.stroke(path);c.restore();
- }
- c.save();c.translate(3,7);c.lineWidth=15;c.strokeStyle='#FFFFFF';c.globalAlpha=state.fxBubbleHighlight/100;c.filter='blur(6px)';c.stroke(path);c.restore();
+ // Feather in pixels. Canvas filter blur is ignored on some phones and leaves a hard stroke on the clip.
+ const rim=(x,y,width,color,opacity,blur)=>{
+  if(width<=0||opacity<=0)return;
+  c.save();c.translate(x,y);c.strokeStyle=color;c.lineJoin='round';c.lineCap='round';
+  const passes=blur>0?8:1,alpha=opacity/100;
+  for(let i=passes;i>=1;i--){c.lineWidth=width+blur*2*i/passes;c.globalAlpha=alpha*(passes-i+1)/(passes*(passes+1)/2);c.stroke(path);}
+  c.restore();
+ };
+ rim(-5,-7,state.fxBubbleShadeWidth,state.fxBubbleShade,state.fxBubbleShadeOpacity,state.fxBubbleShadeBlur);
+ rim(3,7,15,'#FFFFFF',state.fxBubbleHighlight,6);
  c.restore();
 }
 function paintOrderBubble(c){
