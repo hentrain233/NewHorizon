@@ -14,7 +14,7 @@
  function placeOverlay(){overlay.style.left=canvas.offsetLeft+'px';overlay.style.top=canvas.offsetTop+'px';overlay.style.width=canvas.clientWidth+'px';overlay.style.height=canvas.clientHeight+'px';}
  new ResizeObserver(placeOverlay).observe(wrap);new ResizeObserver(placeOverlay).observe(canvas);placeOverlay();
  const nav=document.createElement('button');nav.id='renovation-nav';nav.setAttribute('aria-label','翻新餐厅');nav.className='renovation-nav';overlay.appendChild(nav);
- nav.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 C82 3 94 12 97 46 C99 80 89 94 55 97 C20 99 6 90 3 56 C0 21 12 4 50 3Z" fill="#FFEBD2" stroke="#A18166" stroke-width="2"/></svg><img src="assets/map-icon.png" alt=""><span class="nav-return"></span>';
+ nav.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 C82 3 94 12 97 46 C99 80 89 94 55 97 C20 99 6 90 3 56 C0 21 12 4 50 3Z" fill="#FFEBD2" stroke="#A18166" stroke-width="2"/></svg><img src="assets/map-icon.png" alt="">';
  nav.addEventListener('pointerdown',()=>{if(!nav.disabled)nav.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
  const controls=document.createElement('div');controls.className='renovation-map-controls';controls.hidden=true;
  controls.innerHTML='<button aria-label="缩小地图">−</button><span>75%</span><button aria-label="放大地图">＋</button><button class="locate" aria-label="定位当前清理任务">定位任务</button>';overlay.appendChild(controls);
@@ -34,7 +34,7 @@
  minus.onclick=()=>setZoom(camera.zoom-.05);plus.onclick=()=>setZoom(camera.zoom+.05);
  function focusTask(smooth=true){const t=task();if(!t)return;const target={x:t.mapAnchor[0],y:t.mapAnchor[1]-H*.17/camera.zoom};if(smooth)cameraTween={from:{...camera},to:target,start:performance.now()};else{Object.assign(camera,target);clampCamera();saveCamera();}}
  locate.onclick=()=>{if(!animation&&!transition)focusTask();};
- function setActive(value){active=value;nav.setAttribute('aria-label',value?'返回合成':'翻新餐厅');nav.dataset.scene=value?'map':'board';nav.querySelector('.nav-return').textContent=value?'返回合成':'';controls.hidden=!value;for(const el of document.querySelectorAll('#test-toolbar button,#playtest'))el.disabled=value;canvas.setAttribute('aria-label',value?'餐厅翻新地图。拖动查看，滚轮或双指缩放，点击金币气泡清理。':'合成测试盘');}
+ function setActive(value){active=value;nav.setAttribute('aria-label',value?'返回合成':'翻新餐厅');nav.dataset.scene=value?'map':'board';nav.querySelector('img').src=value?'assets/stall-icon.png':'assets/map-icon.png';controls.hidden=!value||window.MERGE_PLAYER_BUILD===true||document.body.classList.contains('mobile-play');for(const el of document.querySelectorAll('#test-toolbar button,#playtest'))el.disabled=value;canvas.setAttribute('aria-label',value?'餐厅翻新地图。拖动查看，滚轮或双指缩放，点击金币气泡清理。':'合成测试盘');}
  // The white transition is an isolated hook; replace its draw/timing without changing scenes.
  function beginTransition(toMap){transition={start:performance.now(),duration:600,toMap,switched:false};nav.disabled=true;redraw();}
  async function navigate(){if(loading||transition)return;if(active){saveCamera();window.flushGameSave();animation=null;cameraTween=null;beginTransition(false);return;}

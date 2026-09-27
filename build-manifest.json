@@ -171,8 +171,8 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 19449,
-    "sha256": "c11610dd48f4f3a41fff73e80f21d94fa388843f3ceb44e675e8a9947d823fdb"
+    "bytes": 19512,
+    "sha256": "488769a0862626d634dbb60a9e65848e72f005139d53b99b4b99e227f8a7e9cb"
   },
   {
     "path": "js/mobile-play.js",
@@ -186,8 +186,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 1091,
-    "sha256": "ce38e807f9eaf2d44942f1f7ee8b598fb4dc316246e2256aee13bbd2847ef2ef"
+    "bytes": 858,
+    "sha256": "a270d0eaa661890d1fa137f1e30b7ac64a97d788c96813471a3e8374c6553562"
   },
   {
     "path": "js/game/renovation-assets.js",
@@ -223,5 +223,10 @@
     "path": "assets/fonts/zcoolkuaile/OFL.txt",
     "bytes": 4398,
     "sha256": "538078469839b4a2e7ad22bef4ebe41681a4e53749bb2a072144024f1d6d703d"
+  },
+  {
+    "path": "assets/stall-icon.png",
+    "bytes": 26806,
+    "sha256": "0816b7bb8525c8f2f19bbd09e454634dfa1365acdddeba0141c593be0dd5d8b0"
   }
 ]
