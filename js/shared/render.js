@@ -59,8 +59,19 @@ function drawShadow(c,g){
  else c.fillStyle=rgba(state.shadowColor,state.shadowOpacity/100);
  c.fillRect(-g.W*.1,y,g.W*1.2,state.shadowHeight);c.restore();
 }
+function bakedBar(){
+ if(state.template!=='cottage'||typeof BAR_BAKES==='undefined')return null;
+ return BAR_BAKES.find(b=>(state.barArt===b.id||Object.entries(b.settings).every(([k,v])=>state[k]===v))&&artwork['background'+b.id]);
+}
 function drawBar(c,g){
  if(!state.showBar)return;
+ const baked=bakedBar();
+ if(baked){
+  const img=artwork['background'+baked.id],h=baked.settings.barHeight;
+  drawArtworkCover(c,img,0,0,baked.width,h,0,g.bar.y,g.W,g.bar.height);
+  if(state.supports&&state.supportHeight>0){c.save();c.beginPath();c.rect(0,g.barBottom,g.W,Math.max(0,(state.boardOnly?g.board.y+g.board.height:g.H)-g.barBottom));c.clip();drawArtworkCover(c,img,0,h,baked.width,baked.height-h,0,g.barBottom,g.W,state.supportHeight);c.restore();}
+  return;
+ }
  if(state.template==='cottage'){
   const img=artworkImage(2);if(!img)return;
   // Split the actual top/front/support pixels, keeping their texture and alpha.
@@ -86,6 +97,7 @@ function drawBar(c,g){
  c.strokeStyle=rgba('#FFFFFF',state.barHighlight/100);c.lineWidth=2*g.sy;c.beginPath();c.moveTo(b.x,frontY);c.lineTo(b.x+b.width,frontY);c.stroke();c.restore();
 }
 function drawBarTopStroke(c,g){
+ if(bakedBar())return;
  if(!state.showBar||!state.barTopStroke||!state.barTopStrokeWidth)return;
  c.save();c.beginPath();c.rect(0,g.bar.y,g.W,g.bar.height);c.clip();
  c.strokeStyle=rgba(state.barTopStrokeColor,state.barTopStrokeOpacity/100);

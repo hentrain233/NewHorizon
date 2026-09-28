@@ -1,8 +1,8 @@
 [
   {
     "path": "index.html",
-    "bytes": 2754,
-    "sha256": "6a0b370c1a90c2916fca5b89ac636f6f81285d7be14360fa0563be0884b45b84"
+    "bytes": 2807,
+    "sha256": "08c2f65220d6e7c950f1996fac38966d4bc7bb4c86fd85d60072d95bb62881e3"
   },
   {
     "path": ".nojekyll",
@@ -13,6 +13,11 @@
     "path": "background-assets.js",
     "bytes": 2354860,
     "sha256": "161c50bd60086c09676d0ed58b16fa60f4c52e8704c29d799afa639d063d77bb"
+  },
+  {
+    "path": "js/shared/bar-bakes.js",
+    "bytes": 562,
+    "sha256": "4f7d83dfe55468a04bcac7eecb4f7bc81f45a600591559c24229740e237943ac"
   },
   {
     "path": "js/shared/currency-assets.js",
@@ -41,8 +46,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 13802,
-    "sha256": "31f5c75a8bb78a61e554bc090f1b6583ccdabe29dd34ff898cb096bbdc48339d"
+    "bytes": 14532,
+    "sha256": "8567c45ed9951fc061d0fc8affcbf661b51c5c237a2fca60af204b1d56e238fb"
   },
   {
     "path": "js/shared/currency-ui.js",
@@ -51,8 +56,8 @@
   },
   {
     "path": "js/shared/media.js",
-    "bytes": 5764,
-    "sha256": "d98b8b281960e1b97f3254a34cc9eb7b4b2a04e23d3e7183bf0e865c34a3bc70"
+    "bytes": 5862,
+    "sha256": "9999ea196505559e3212e71e5e548398792500b69d8168ac7a3493bb3cb4a9ee"
   },
   {
     "path": "js/shared/font-assets.js",
@@ -141,8 +146,8 @@
   },
   {
     "path": "js/game/order-preview.js",
-    "bytes": 2550,
-    "sha256": "0e80c2da022b1de67a1a3af8858e78044723fda25626c088b69c6c2432b990ab"
+    "bytes": 2413,
+    "sha256": "4ddcc3ed534836f89a81ee42396e59358058e21b59cf4a6c05089115b5015211"
   },
   {
     "path": "js/game/item-info.js",
@@ -208,6 +213,16 @@
     "path": "assets/stall-icon.png",
     "bytes": 25213,
     "sha256": "6b1722883120150cd216956005f2c96a1843d006a6641a9b23ad6f8a47bb3fde"
+  },
+  {
+    "path": "assets/baked-bars/bar-original.png",
+    "bytes": 133036,
+    "sha256": "5439ba805a1173594dfd209e18706bff25f2850566382ad152d98432bdb3ff16"
+  },
+  {
+    "path": "assets/baked-bars/bar-dark.png",
+    "bytes": 122209,
+    "sha256": "c005230d081ad2a5b6af004c5dae761ab0fb92cc6be32ca9f6403b5b6b66c9ff"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

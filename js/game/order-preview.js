@@ -26,16 +26,15 @@ function paintBubbleFill(c,path,h){
  fill.addColorStop(0,state.fxBubbleTop);fill.addColorStop(.5,state.fxBubbleMiddle);fill.addColorStop(1,state.fxBubbleBottom);
  c.fillStyle=fill;c.fill(path);c.save();c.clip(path);
  // Feather in pixels. Canvas filter blur is ignored on some phones and leaves a hard stroke on the clip.
- // full: stroke is centered on the outline, so double it and the clip keeps one full width inside.
- const rim=(x,y,width,color,opacity,blur,full)=>{
+ const rim=(x,y,width,color,opacity,blur)=>{
   if(width<=0||opacity<=0)return;
   c.save();c.translate(x,y);c.strokeStyle=color;c.lineJoin='round';c.lineCap='round';
-  const passes=blur>0?8:1,alpha=opacity/100,cover=full?2:1;
-  for(let i=passes;i>=1;i--){c.lineWidth=(width+blur*2*i/passes)*cover;c.globalAlpha=alpha*(passes-i+1)/(passes*(passes+1)/2);c.stroke(path);}
+  const passes=blur>0?8:1,alpha=opacity/100;
+  for(let i=passes;i>=1;i--){c.lineWidth=width+blur*2*i/passes;c.globalAlpha=alpha*(passes-i+1)/(passes*(passes+1)/2);c.stroke(path);}
   c.restore();
  };
- rim(3,7,15,'#FFFFFF',state.fxBubbleHighlight,6,false);
- rim(0,0,state.fxBubbleShadeWidth,state.fxBubbleShade,state.fxBubbleShadeOpacity,state.fxBubbleShadeBlur,true);
+ rim(-5,-7,state.fxBubbleShadeWidth,state.fxBubbleShade,state.fxBubbleShadeOpacity,state.fxBubbleShadeBlur);
+ rim(3,7,15,'#FFFFFF',state.fxBubbleHighlight,6);
  c.restore();
 }
 function paintOrderBubble(c){
