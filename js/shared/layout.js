@@ -37,9 +37,12 @@ function calculateLayout(){
   if(viewport.clientWidth>0&&viewport.clientHeight>0){
    // Change empty space, never cell/item/portrait dimensions. Very short screens fit uniformly.
    const minTop=(state.fxCurrencyY+state.fxCurrencyHeight+state.fxOrderPortraitHeight+40)*sx;
-   const topSlack=Math.max(0,barBottom-minTop),footerSlack=Math.max(0,g.bottom-(state.fxInfoHeight+80)*sx);
-   g.H=Math.round(Math.max(H-topSlack-footerSlack,W*viewport.clientHeight/viewport.clientWidth));
-   const delta=g.H-H,shift=delta>=0?delta*.45:-Math.min(topSlack,-delta);
+   const topSlack=Math.max(0,barBottom-minTop),tabGap=32*sx;
+   const footer=(state.fxInfoHeight-state.fxInfoTabY)*sx+tabGap;
+   const minHeight=(g.board.y-topSlack+bh+footer)/(1-state.fxInfoBottom/100);
+   g.H=Math.ceil(Math.max(minHeight,W*viewport.clientHeight/viewport.clientWidth));
+   // Anchor the board to the tab top, including its negative offset above the info body.
+   const shift=g.H*(1-state.fxInfoBottom/100)-footer-bh-g.board.y;
    g.bar.y+=shift;g.barBottom+=shift;g.board.y+=shift;g.grid.y+=shift;
    for(const cell of cells)cell.y+=shift;
    g.bottom=g.H-g.board.y-bh;

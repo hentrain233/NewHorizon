@@ -2,7 +2,7 @@
 const ORDER_ANIMAL_TYPES=Object.freeze({Squirrel:'飞鼠',Wolf:'狼',Otter:'獭獭',Rabbit:'兔兔',Bear:'熊',Seagull:'海鸥',Tiger:'老虎',Crocodile:'鳄鱼',Parrot:'鹦鹉'});
 const DEFAULT_STATE = Object.freeze({
   energyInitial:200,energyMax:999,energyRecoverySeconds:300,
- fxNavBottom:2,
+ fxNavBottom:2,fxNavStallScale:100,
   fxInfoX:18.6,fxInfoBottom:2.2,fxInfoWidth:60,fxInfoHeight:180,fxInfoRadius:32,fxInfoCurve:4,fxInfoFill:'#FFEBD2',fxInfoBorder:'#A18166',fxInfoStroke:4,
   fxInfoTabHeight:62,fxInfoTabPadding:24,fxInfoTabWidth:100,fxInfoTabRadius:14,fxInfoTabSlant:34,fxInfoTabX:0,fxInfoTabY:-32,fxInfoTabFill:'#74D0EC',fxInfoTabMiddle:'#6FCFEC',fxInfoTabBottom:'#35BBE3',fxInfoTabBorder:'#548C9B',fxInfoTabStroke:0,
   fxInfoTabShadeColor:'#0F4B66',fxInfoTabShadeOpacity:0,fxInfoTabShadeWidth:1,fxInfoTabShadeBlur:4,fxInfoTabShadeX:-3,fxInfoTabShadeY:-2,fxInfoTabInnerOpacity:40,
@@ -16,6 +16,7 @@ const DEFAULT_STATE = Object.freeze({
   fxRewardCoinSize:56,fxRewardTextStroke:4,fxRewardTextBorder:'#694635',
   fxRewardEnergyColor:'#B9EDFF',fxRewardEnergyBorder:'#245A91',fxRewardPremiumColor:'#E8CCFF',fxRewardPremiumBorder:'#63358A',
   fxRewardTextX:-8,fxRewardTextY:0,fxRewardLetterSpacing:0,fxRewardIconX:0,fxRewardIconY:0,fxRewardGeneratorSize:148,fxRewardGeneratorY:-14,
+  fxRewardPopScale:3,fxRewardPopDuration:300,fxRewardFlightDuration:800,fxRewardCoinGap:80,fxRewardFlightScale:3,
   ...Object.fromEntries(Object.keys(ORDER_ANIMAL_TYPES).flatMap(k=>[[`fxAnimal${k}Scale`,100],[`fxAnimal${k}X`,0],[`fxAnimal${k}Y`,0]])),
   fxAnimalRabbitScale:80,fxAnimalRabbitY:-60,
   fxCurrencyGap:18,fxCurrencyX:180,fxCurrencyY:116,fxCurrencyWidth:198,fxCurrencyHeight:78,fxCurrencyRadius:32,
@@ -54,7 +55,7 @@ const DEFAULT_STATE = Object.freeze({
   boardAmbientShadow:true,boardAmbientOpacity:28,boardAmbientBlur:38,boardAmbientColor:'#244F53',
   transparentTop:false,boardOnly:false,guides:false,
   template:'mint',planks:false,plankWidth:96,plankOpacity:16,supports:false,supportWidth:38,supportInset:96,cellBevel:0,frameHighlight:0,
-  imageBarTint:false,imageBarColor:'#EACDA4',imageBarBrightness:100,imageBarSaturation:100,supportHeight:128,
+  imageBarTint:false,imageBarColor:'#EACDA4',imageBarBrightness:100,imageBarSaturation:100,supportHeight:128,barArt:'current',
   imageWallTint:false,imageWallColor:'#9CD6DA',imageWallBrightness:100,imageWallSaturation:100,
   barTopStroke:true,barTopStrokeWidth:3,barTopStrokeColor:'#A88B68',barTopStrokeOpacity:28,barTopStrokeBlur:1
 });

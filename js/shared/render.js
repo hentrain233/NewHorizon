@@ -64,7 +64,7 @@ function drawBar(c,g){
  if(state.template==='cottage'){
   const img=artworkImage(2);if(!img)return;
   // Split the actual top/front/support pixels, keeping their texture and alpha.
-  const x=-g.W*.012,w=g.W*1.024,topSource=70,bodySource=100;
+  const x=-g.W*.012,w=g.W*1.024,topSource=state.barArt==='a'?80:state.barArt==='b'?82:70,bodySource=state.barArt==='a'?115:state.barArt==='b'?117:100;
   c.save();
   drawArtworkCover(c,img,0,0,img.width,topSource,x,g.bar.y,w,g.bar.height-state.barThickness);
   drawArtworkCover(c,img,0,topSource,img.width,bodySource-topSource,x,g.barBottom-state.barThickness,w,state.barThickness);
@@ -132,7 +132,7 @@ function paintFullBleed(g){
 function playSceneLayers(g,includeHelpers){
  // Two layers retain the customer-behind-counter ordering. Videos never enter the cache.
  const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers+':'+[g.W,g.H,g.bar.y,g.board.y,!!g.bleed].join(',');
- const refs=[assets.image,assets.texture,artwork.background1,artwork.background2];
+ const refs=[assets.image,assets.texture,artwork.background1,artwork.background2,artwork.background2a,artwork.background2b];
  if(playSceneCache?.key===key&&refs.every((r,i)=>r===playSceneCache.refs[i]))return playSceneCache;
  const make=()=>{const layer=document.createElement('canvas');layer.width=g.W;layer.height=g.H;return layer;};
  const back=make(),front=make(),b=back.getContext('2d'),f=front.getContext('2d');

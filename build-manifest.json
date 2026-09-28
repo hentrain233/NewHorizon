@@ -11,8 +11,8 @@
   },
   {
     "path": "background-assets.js",
-    "bytes": 2081776,
-    "sha256": "841755a6b5ed47344c7f3339f330503003ac193cb2d48e8646e15d52b076bdd3"
+    "bytes": 2354860,
+    "sha256": "161c50bd60086c09676d0ed58b16fa60f4c52e8704c29d799afa639d063d77bb"
   },
   {
     "path": "js/shared/currency-assets.js",
@@ -21,8 +21,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 6235,
-    "sha256": "3b2ed440dc34f88403a2d7b53fef9087eca7bba8b367964aa0b88022e9be9187"
+    "bytes": 6386,
+    "sha256": "0f3dbf1c14e9431a11b96de53870fd4336990c768d77abf47a9ffefb543bac43"
   },
   {
     "path": "js/shared/state.js",
@@ -36,13 +36,13 @@
   },
   {
     "path": "js/shared/layout.js",
-    "bytes": 4145,
-    "sha256": "81450bf7c97186f2e83dc508dfc019d69791af074e86d4343c16ff20b66f8af7"
+    "bytes": 4310,
+    "sha256": "6d5b673b5debe31611be50e1d5465bd248559738c49712624ff8459680735939"
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 13670,
-    "sha256": "7a52c13f7afc8a61ba9160c739d025f3b9e1e125c59bd5b5cec32c7c941be7ef"
+    "bytes": 13802,
+    "sha256": "31f5c75a8bb78a61e554bc090f1b6583ccdabe29dd34ff898cb096bbdc48339d"
   },
   {
     "path": "js/shared/currency-ui.js",
@@ -51,8 +51,8 @@
   },
   {
     "path": "js/shared/media.js",
-    "bytes": 5608,
-    "sha256": "ddc904769308b0271a6ebb4bf543306fdc3b06d893c1959e62874f3434fd6a66"
+    "bytes": 5764,
+    "sha256": "d98b8b281960e1b97f3254a34cc9eb7b4b2a04e23d3e7183bf0e865c34a3bc70"
   },
   {
     "path": "js/shared/font-assets.js",
@@ -116,8 +116,8 @@
   },
   {
     "path": "js/game/order-customers.js",
-    "bytes": 12129,
-    "sha256": "3dd627749de77b3a6feec7ccd697d806654f7ecd169b88799e185732dba420b2"
+    "bytes": 12449,
+    "sha256": "e14fd4f8f4d0fd13a7e7873ad1d2fdaff835c12211c98f1e0b8e4df2d785ebc5"
   },
   {
     "path": "js/game/order-feedback.js",
@@ -141,8 +141,8 @@
   },
   {
     "path": "js/game/order-preview.js",
-    "bytes": 2413,
-    "sha256": "4ddcc3ed534836f89a81ee42396e59358058e21b59cf4a6c05089115b5015211"
+    "bytes": 2550,
+    "sha256": "0e80c2da022b1de67a1a3af8858e78044723fda25626c088b69c6c2432b990ab"
   },
   {
     "path": "js/game/item-info.js",
@@ -151,8 +151,8 @@
   },
   {
     "path": "js/game/animations.js",
-    "bytes": 16075,
-    "sha256": "8e6eacf084ef1eaaeab938b31909dca88e9234cb21bb873448a8581e4bef01f8"
+    "bytes": 16043,
+    "sha256": "e02d3c94ed8f0e5839bc18e8222ed0b29e6ae465d709a11b5a2b7784308295eb"
   },
   {
     "path": "js/game/feedback.js",
@@ -166,13 +166,13 @@
   },
   {
     "path": "js/game/renovation-motion.js",
-    "bytes": 2744,
-    "sha256": "aaf0665b9a83a72d23845393d76bd994d855c8959bfbde832a56d1adcf6da0bd"
+    "bytes": 3592,
+    "sha256": "f5c95d0d68feaa7b4057702e8850d8b2db0508fd185559b3966e501a2970fb48"
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 19512,
-    "sha256": "488769a0862626d634dbb60a9e65848e72f005139d53b99b4b99e227f8a7e9cb"
+    "bytes": 19693,
+    "sha256": "3e3bbf487c2c6fd63500f99416358d0b6248e6b06828f5a91b620654f08e9421"
   },
   {
     "path": "js/mobile-play.js",
@@ -186,8 +186,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 858,
-    "sha256": "a270d0eaa661890d1fa137f1e30b7ac64a97d788c96813471a3e8374c6553562"
+    "bytes": 964,
+    "sha256": "a5afe282b3b02142c18f0ba431970ee5e214398003b90c7b4da9637aabbfce08"
   },
   {
     "path": "js/game/renovation-assets.js",
@@ -203,6 +203,11 @@
     "path": "assets/map-icon.png",
     "bytes": 942582,
     "sha256": "a3a3825e8416a6a27f9867953a020659ac7239da0c0d571c3df6c810b9c7ac3a"
+  },
+  {
+    "path": "assets/stall-icon.png",
+    "bytes": 25213,
+    "sha256": "6b1722883120150cd216956005f2c96a1843d006a6641a9b23ad6f8a47bb3fde"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",
@@ -223,10 +228,5 @@
     "path": "assets/fonts/zcoolkuaile/OFL.txt",
     "bytes": 4398,
     "sha256": "538078469839b4a2e7ad22bef4ebe41681a4e53749bb2a072144024f1d6d703d"
-  },
-  {
-    "path": "assets/stall-icon.png",
-    "bytes": 26806,
-    "sha256": "0816b7bb8525c8f2f19bbd09e454634dfa1365acdddeba0141c593be0dd5d8b0"
   }
 ]

@@ -144,7 +144,17 @@ function createPlaytestRenderer(session){
   c.globalCompositeOperation=state.fxSweepBlend;c.globalAlpha=opacity;
   c.drawImage(foilCanvas,dx,dy,size,size);c.restore();
  }
- function drawProducerEnergy(c,box){const img=artwork.backgroundenergy;if(!img)return;const r=orderCheckRect(box,state.fxBoardCheckSize/100,state.fxBoardCheckX/100,state.fxBoardCheckY/100);c.drawImage(img,r.x,r.y,r.width,r.height);}
+ function drawProducerEnergy(c,box){const img=artwork?.backgroundenergy;if(!img)return;const r=orderCheckRect(box,state.fxBoardCheckSize/100,state.fxBoardCheckX/100,state.fxBoardCheckY/100);c.drawImage(img,r.x,r.y,r.width,r.height);}
+ // 格子角标只画在已放上合成盘的格子上。右下角：体力、订单绿勾。左下角以后加最高级标识。
+ function drawCellBadges(c,g,markers){
+  for(let i=0;i<session.board.slots.length;i++){
+   const item=session.board.slots[i];
+   if(!item||session.flights.has(i)||session.drag?.from===i||session.keyboardSource===i)continue;
+   const box=g.cells[i];
+   if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,box);
+   if(markers?.needed.has(orderItemKey(item)))drawOrderCheck(c,box,true);
+  }
+ }
  function drawIcon(c,g,item,index,time,alpha=1){
   const box=g.cells[index],img=session.pictures[item.type+item.level];if(!img)return;const elapsed=time-(session.effects.get(index)??-1000);
   const failed=time-(session.failures?.get(index)??-1000);
@@ -158,7 +168,6 @@ function createPlaytestRenderer(session){
   const shadowSize=box.width*scale;
   c.drawImage(itemShadow(item,img),box.x+(box.width-shadowSize)/2+shake,box.y+(box.height-shadowSize)/2,shadowSize,shadowSize);
   const size=box.width*.94*scale;c.drawImage(img,box.x+(box.width-size)/2+shake,box.y+(box.height-size)/2,size,size);c.restore();
-  if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,{x:box.x+(box.width-size)/2+shake,y:box.y+(box.height-size)/2,width:size,height:size});
  }
  function drawFlights(c,g,time){
   for(const [index,f]of session.flights){
@@ -175,7 +184,6 @@ function createPlaytestRenderer(session){
   c.save();c.translate(session.drag.p.x+session.drag.offset.x,session.drag.p.y+session.drag.offset.y-box.width*.09*lift);c.rotate(-.035*lift);
   c.shadowColor='rgba(22,65,68,.26)';c.shadowBlur=box.width*.13*lift;c.shadowOffsetX=box.width*.08*lift;c.shadowOffsetY=-box.width*.06*lift;
   c.drawImage(img,-size/2,-size/2,size,size);c.restore();
-  if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,{x:session.drag.p.x+session.drag.offset.x-size/2,y:session.drag.p.y+session.drag.offset.y-box.width*.09*lift-size/2,width:size,height:size});
  }
  let selectionTarget=-1,selectionStart=0;
  function drawSelection(c,b,time){
@@ -207,10 +215,10 @@ function createPlaytestRenderer(session){
   for(let i=0;i<63;i++)if(session.board.slots[i])drawIcon(c,g,session.board.slots[i],i,time,session.drag?.moved&&session.drag.from===i?0.2:1);
   for(let i=0;i<63;i++)if(session.board.slots[i])drawPrismaticSweep(c,g,session.board.slots[i],i,time);
   for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time);
-  const target=session.drag?.moved?session.drag.target:session.selected;
+  const target=!session.drag?.moved&&session.board.slots[session.selected]?session.selected:-1;
   if(target!==selectionTarget){selectionTarget=target;selectionStart=time;}
   if(target>=0)drawSelection(c,g.cells[target],time);
-  if(markers)for(let i=0;i<session.board.slots.length;i++){const item=session.board.slots[i];if(item&&markers.needed.has(orderItemKey(item))&&!session.flights.has(i)&&session.drag?.from!==i&&session.keyboardSource!==i)drawOrderCheck(c,g.cells[i],true);}
+  drawCellBadges(c,g,markers);
   drawItemInfo(c,g,session);drawFlights(c,g,time);drawDragged(c,g,time);
  }
 

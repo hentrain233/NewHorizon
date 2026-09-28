@@ -1,16 +1,17 @@
 'use strict';
 const artwork={};
 const recolorCache=new Map();
-const artworkReady=Promise.all([1,2,'coin','energy','premium'].map(n=>new Promise(resolve=>{
+const artworkReady=Promise.all([1,2,'2a','2b','coin','energy','premium'].map(n=>new Promise(resolve=>{
  const img=new Image();img.onload=()=>{artwork['background'+n]=img;resolve();if(geometry)updatePreview();};
  img.onerror=()=>{notify('内置图片加载失败，请保留背景及货币资源文件。');resolve();};
- img.src=typeof n==='number'?window.MERGE_BACKGROUND_ASSETS?.['background'+n]||'':window.MERGE_CURRENCY_ASSETS?.[n]||'';
+ img.src=window.MERGE_BACKGROUND_ASSETS?.['background'+n]||window.MERGE_CURRENCY_ASSETS?.[n]||'';
 })));
 function artworkImage(n){
- const original=artwork['background'+n];if(!original)return null;
+ let name=n===2&&state.barArt==='a'?'background2a':n===2&&state.barArt==='b'?'background2b':'background'+n;
+ let original=artwork[name];if(!original&&n===2){name='background2';original=artwork.background2;}if(!original)return null;
  const prefix=n===1?'imageWall':'imageBar',tint=!!state[prefix+'Tint'],brightness=(state[prefix+'Brightness']??100)/100,saturation=(state[prefix+'Saturation']??100)/100;
  if(!tint&&brightness===1&&saturation===1)return original;
- const color=state[prefix+'Color'],key=n+'|'+tint+'|'+color+'|'+brightness+'|'+saturation;if(recolorCache.has(key))return recolorCache.get(key);
+ const color=state[prefix+'Color'],key=name+'|'+tint+'|'+color+'|'+brightness+'|'+saturation;if(recolorCache.has(key))return recolorCache.get(key);
  // Bake tint, brightness and saturation into pixels. Canvas filters are dropped on some browsers.
  const output=document.createElement('canvas');output.width=original.width;output.height=original.height;
  const c=output.getContext('2d',{willReadFrequently:true});c.drawImage(original,0,0);

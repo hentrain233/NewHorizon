@@ -2,6 +2,7 @@
 .renovation-nav,.renovation-nav:hover,.mobile-play .renovation-nav{width:17.25%;height:auto;aspect-ratio:1;min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;touch-action:manipulation;overflow:visible}
 .renovation-nav svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 1px #334d5260);pointer-events:none}
 .renovation-nav img{position:relative;display:block;width:88%;height:88%;margin:6%;object-fit:contain;pointer-events:none}
+.renovation-nav[data-scene="map"] img{transform:scale(var(--stall-icon-scale,1));transform-origin:center}
 .renovation-nav:focus-visible{outline:2px solid #fff;outline-offset:4px}
 .mobile-play main{position:relative;z-index:1}
 .mobile-play .workspace{background:transparent!important}
