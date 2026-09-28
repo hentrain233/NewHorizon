@@ -121,7 +121,13 @@ function drawGrid(c,g){
  }
 }
 let playSceneCache=null;
-let bleedDisplay=null,bleedBack=null,bleedFront=null;
+let bleedDisplay=null,bleedBack=null,bleedFront=null,orderLayer=null;
+function drawOrderOverflow(g,draw){
+ const b=g.bleed;if(!b||!bleedDisplay)return;
+ const c=bleedDisplay.getContext('2d');c.save();c.beginPath();
+ c.rect(0,b.y,b.x,g.barBottom);c.rect(b.x+g.W,b.y,Math.max(0,b.W-b.x-g.W),g.barBottom);c.clip();
+ c.translate(b.x,b.y);draw(c);c.restore();
+}
 function paintFullBleed(g){
  const b=g.bleed;if(!b)return null;
  if(!bleedDisplay){
@@ -161,7 +167,15 @@ function drawCanvas(target=canvas,includeHelpers=true){
  const cached=target===canvas&&window.mergePlayTest?.active&&g.W*g.H<=8000000?playSceneLayers(g,includeHelpers):null;
  if(bleed)c.drawImage(bleedBack,-bleed.x,-bleed.y);
  else if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
- if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function')drawOrderCustomers(c,g);
+ if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function'){
+  if(bleed){
+   if(!orderLayer)orderLayer=document.createElement('canvas');
+   const h=Math.ceil(bleed.y+g.barBottom);if(orderLayer.width!==bleed.W)orderLayer.width=bleed.W;if(orderLayer.height!==h)orderLayer.height=h;
+   const d=orderLayer.getContext('2d');d.clearRect(0,0,orderLayer.width,h);d.save();d.translate(bleed.x,bleed.y);drawOrderCustomers(d,g);d.restore();
+   c.drawImage(orderLayer,-bleed.x,-bleed.y);
+   drawOrderOverflow(g,d=>{d.drawImage(orderLayer,-bleed.x,-bleed.y);d.drawImage(bleedFront,-bleed.x,-bleed.y);});
+  }else drawOrderCustomers(c,g);
+ }
  if(bleed)c.drawImage(bleedFront,-bleed.x,-bleed.y);
  if(cached)c.drawImage(cached.front,0,0);else{if(!bleed){drawBar(c,g);drawBarTopStroke(c,g);}drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g);

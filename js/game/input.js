@@ -20,12 +20,19 @@ function bindPlaytestInput(session,feedback,message,busy,label,center){
  function at(p){return geometry.cells.findIndex(c=>p.x>=c.x&&p.x<c.x+c.width&&p.y>=c.y&&p.y<c.y+c.height);}
  function point(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};}
  function cancel(){stopHold();const id=orderPan?.id??session.drag?.id;orderPan=null;session.drag=null;session.keyboardSource=-1;if(id!==undefined&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);if(session.active)drawCanvas();}
- canvas.addEventListener('pointerdown',e=>{
+ function pointerDown(e){
   if(!session.active||e.button!==0||e.isPrimary===false||session.drag||orderPan)return;const p=point(e);
   if(session.keyboardSource<0&&hitOrderCustomer(p,geometry)){e.preventDefault();orderPan={id:e.pointerId,x:p.x,scroll:orderScroll};canvas.setPointerCapture(e.pointerId);return;}
   const i=at(p);if(i<0||busy(i))return;e.preventDefault();session.selected=i;session.keyboardSource=-1;
   if(session.board.slots[i]){const origin=center(geometry.cells[i]);session.drag={from:i,target:i,startX:e.clientX,startY:e.clientY,p,offset:{x:origin.x-p.x,y:origin.y-p.y},lift:performance.now(),moved:false,id:e.pointerId};canvas.setPointerCapture(e.pointerId);startHold(session.drag);}
   message(label(session.board.slots[i])||'空格');drawCanvas();
+ }
+ canvas.addEventListener('pointerdown',pointerDown);
+ // The full-width order strip extends beyond the centered board canvas on short screens.
+ document.addEventListener('pointerdown',e=>{
+  if(!geometry?.bleed||e.target===canvas||e.target.closest?.('button,input,select,aside')||window.renovationScreen?.active||window.renovationScreen?.busy)return;
+  const r=canvas.getBoundingClientRect(),p=point(e);
+  if((e.clientX<r.left||e.clientX>r.right)&&p.y>=0&&p.y<geometry.barBottom&&hitOrderCustomer(p,geometry))pointerDown(e);
  });
  canvas.addEventListener('pointermove',e=>{if(!session.active)return;if(orderPan?.id===e.pointerId){e.preventDefault();setOrderScroll(orderPan.scroll+(orderPan.x-point(e).x)*1170/geometry.W,geometry);return;}if(!session.drag||session.drag.id!==e.pointerId)return;e.preventDefault();if(!session.drag.moved&&Math.hypot(e.clientX-session.drag.startX,e.clientY-session.drag.startY)>(e.pointerType==='touch'?8:5)){stopHold();session.drag.moved=true;session.drag.lift=performance.now();}session.drag.p=point(e);session.drag.target=at(session.drag.p);});
  canvas.addEventListener('pointerup',e=>{

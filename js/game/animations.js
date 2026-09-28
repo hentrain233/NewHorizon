@@ -182,7 +182,7 @@ function createPlaytestRenderer(session){
   if(!session.drag?.moved)return;const item=session.board.slots[session.drag.from],img=session.pictures[item.type+item.level],box=g.cells[session.drag.from];
   const t=Math.min(1,(time-session.drag.lift)/130),lift=1-(1-t)**3,size=box.width*.94*(1+.1*lift)*iconScale(item);
   c.save();c.translate(session.drag.p.x+session.drag.offset.x,session.drag.p.y+session.drag.offset.y-box.width*.09*lift);c.rotate(-.035*lift);
-  c.shadowColor='rgba(22,65,68,.26)';c.shadowBlur=box.width*.13*lift;c.shadowOffsetX=box.width*.08*lift;c.shadowOffsetY=-box.width*.06*lift;
+  c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetX=0;c.shadowOffsetY=0;
   c.drawImage(img,-size/2,-size/2,size,size);c.restore();
  }
  let selectionTarget=-1,selectionStart=0;

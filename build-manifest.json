@@ -46,8 +46,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 14532,
-    "sha256": "8567c45ed9951fc061d0fc8affcbf661b51c5c237a2fca60af204b1d56e238fb"
+    "bytes": 15378,
+    "sha256": "de0e74132498ad1637c70d21facb697f8f91c8462e752223dad2814c9b0cd62c"
   },
   {
     "path": "js/shared/currency-ui.js",
@@ -121,8 +121,8 @@
   },
   {
     "path": "js/game/order-customers.js",
-    "bytes": 12763,
-    "sha256": "7aa94faff6c0a8d40d345e1bac86f91b5690ec9aa8a6f6983ced7beae428bdb7"
+    "bytes": 12626,
+    "sha256": "afa787655cb036c07fe17731261182badb06b7d36ef3fabc8cfd7293271a832c"
   },
   {
     "path": "js/game/order-feedback.js",
@@ -141,8 +141,8 @@
   },
   {
     "path": "js/game/input.js",
-    "bytes": 5117,
-    "sha256": "d12b4fc438a6d4660d12838d8d3fea3bf02243cefed24c2e711320adaab000d3"
+    "bytes": 5627,
+    "sha256": "f02dc1618a6334ca58b35bc2a7574d2bb1ab16436cc2e5c038f94576063fcc11"
   },
   {
     "path": "js/game/order-preview.js",
@@ -156,8 +156,8 @@
   },
   {
     "path": "js/game/animations.js",
-    "bytes": 16043,
-    "sha256": "e02d3c94ed8f0e5839bc18e8222ed0b29e6ae465d709a11b5a2b7784308295eb"
+    "bytes": 15984,
+    "sha256": "345a893636e32640958ce15eedf900792eae0b69b742f5de33504837f5271096"
   },
   {
     "path": "js/game/feedback.js",
@@ -191,8 +191,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 964,
-    "sha256": "a5afe282b3b02142c18f0ba431970ee5e214398003b90c7b4da9637aabbfce08"
+    "bytes": 1009,
+    "sha256": "4dccf467c0bae61c13f6c446397bdf36ca1afeb85386805b4755dce2e54eef48"
   },
   {
     "path": "js/game/renovation-assets.js",

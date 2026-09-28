@@ -8,13 +8,7 @@ const orderPortraitsReady=Promise.all(Object.entries(window.ORDER_PORTRAITS||{})
 orderPortraitsReady.catch(()=>{});
 function orderPose(e,g,scroll=orderScroll){
  const s=g.W/1170,key=Object.keys(ORDER_ANIMAL_TYPES).find(k=>ORDER_ANIMAL_TYPES[k]===e.type),prefix='fxAnimal'+key;
- let start=state.fxOrderStartX,step=state.fxOrderStep;
- if(g.bleed){
-  const half=orderBubbleWidth()*.82/1510*1170/2;
-  const left=Math.max(half-state.fxBubbleX,0)+16,right=Math.max(half+state.fxBubbleX,(state.fxOrderPortraitX??0)+state.fxRewardX+state.fxRewardWidth)+16;
-  start=left;step=Math.min(step,Math.max(1,(1170-left-right)/2));
- }
- return {x:(start+e.slot*step+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
+ return {x:(state.fxOrderStartX+e.slot*state.fxOrderStep+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
 }
 // Keep the original default bubble baseline, independent of every portrait Y adjustment.
 function orderBubbleBottom(g){return g.barBottom+(-6-state.fxBubbleGap)*g.W/1170;}
@@ -22,14 +16,15 @@ function orderPortraitShift(g){return (state.fxOrderPortraitX??0)*g.W/1170;}
 // Bounds use settled queue slots, so arrival animation cannot stretch the scroll range.
 function orderScrollMax(g){
  const s=g.W/1170,halfBubble=orderBubbleWidth()*g.W*.82/1510/2;
- let right=g.W;
+ const visibleRight=g.bleed?g.bleed.W-g.bleed.x:g.W;
+ let right=visibleRight;
  orderQueue.entries.forEach((e,i)=>{
   const p=orderPose({...e,slot:i},g,0);
   let halfPortrait=0;
   for(const suffix of ['', '1']){const img=orderImages[e.type+e.variant+suffix];if(img)halfPortrait=Math.max(halfPortrait,p.height*img.width/img.height/2);}
   right=Math.max(right,p.x+orderPortraitShift(g)+halfPortrait+12*s,p.x+state.fxBubbleX*s+halfBubble+12*s,p.x+orderPortraitShift(g)+(state.fxRewardX+state.fxRewardWidth+12)*s);
  });
- return Math.max(0,(right-g.W)/s);
+ return Math.max(0,(right-visibleRight)/s);
 }
 function setOrderScroll(value,g){orderScroll=Math.max(0,Math.min(orderScrollMax(g),value));}
 function formatOrderReward(value){
@@ -119,7 +114,7 @@ function drawOrderCustomers(c,g){
  orderQueue.update(now,hold,state.fxOrderFade*1000);
  orderQueue.refillWhenSettled(now);
  setOrderScroll(orderScroll,g);
- c.save();c.beginPath();c.rect(0,0,g.W,g.barBottom);c.clip();
+ c.save();c.beginPath();c.rect(-(g.bleed?.x||0),0,g.bleed?.W||g.W,g.barBottom);c.clip();
  orderQueue.entries.forEach((e,i)=>{
   if(e.arrivedAt===undefined){e.arrivedAt=now;e.arrivalSlot=e.slot;}
   const entrance=orderEntrance(now-e.arrivedAt,state.fxOrderEnterDuration*1000,state.fxOrderEnterRise);e.entering=!entrance.done;
@@ -138,6 +133,7 @@ function drawOrderCustomers(c,g){
 }
 function drawCustomerBubbles(c,g,markers){
  if(!ordersVisible)return;
+ if(g.bleed&&c===ctx)drawOrderOverflow(g,d=>drawCustomerBubbles(d,g,markers));
  orderQueue.entries.forEach(e=>{const p=orderPose(e,g),scale=g.W*.82/1510,h=449*state.fxBubbleHeight/100,w=orderBubbleWidth(),s=g.W/1170;
   c.save();c.globalAlpha=e.alpha??1;c.translate(p.x-w*scale/2+state.fxBubbleX*s,orderBubbleBottom(g)-h*scale);c.scale(scale,scale);paintOrderBubble(c);
   c.fillStyle='#A36F48';c.textAlign='center';c.textBaseline='middle';
