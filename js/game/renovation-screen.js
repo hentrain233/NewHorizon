@@ -11,6 +11,7 @@
  const sweepContext=sweepCanvas.getContext('2d');
  const wrap=document.getElementById('canvas-wrap');wrap.style.position='relative';
  const overlay=document.createElement('div');overlay.style.cssText='position:absolute;pointer-events:none;z-index:3';wrap.appendChild(overlay);
+ const transitionVeil=document.createElement('div');transitionVeil.id='scene-transition';transitionVeil.hidden=true;transitionVeil.setAttribute('aria-hidden','true');transitionVeil.style.cssText='position:fixed;inset:0;background:#fff;pointer-events:none;z-index:30';document.body.appendChild(transitionVeil);
  function placeOverlay(){overlay.style.left=canvas.offsetLeft+'px';overlay.style.top=canvas.offsetTop+'px';overlay.style.width=canvas.clientWidth+'px';overlay.style.height=canvas.clientHeight+'px';}
  new ResizeObserver(placeOverlay).observe(wrap);new ResizeObserver(placeOverlay).observe(canvas);placeOverlay();
  const nav=document.createElement('button');nav.id='renovation-nav';nav.setAttribute('aria-label','翻新餐厅');nav.className='renovation-nav';overlay.appendChild(nav);
@@ -110,9 +111,9 @@
   if(img)c.drawImage(img,building.x,building.y,building.width,building.height);c.restore();
  }
  function drawOverlay(c,g){
-  const bottom=state.fxNavBottom+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
+  const bottom=(g?.navBottom??state.fxNavBottom)+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
   const stallScale=String((state.fxNavStallScale??100)/100);if(nav.style.getPropertyValue('--stall-icon-scale')!==stallScale)nav.style.setProperty('--stall-icon-scale',stallScale);
-  if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}c.save();c.globalAlpha=1-Math.abs(2*t-1);c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();if(t===1){transition=null;nav.disabled=false;}}
+  if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}const alpha=1-Math.abs(2*t-1);if(g.bleed){transitionVeil.hidden=t===1;transitionVeil.style.opacity=alpha;}else{c.save();c.globalAlpha=alpha;c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();}if(t===1){transition=null;nav.disabled=false;}}
  function stop(e){e.preventDefault();e.stopImmediatePropagation();}
  canvas.addEventListener('pointerdown',e=>{if(!active&&!transition)return;stop(e);if(!active||transition||e.button!==0)return;const p=point(e);pointers.set(e.pointerId,p);canvas.setPointerCapture(e.pointerId);if(animation)return;cameraTween=null;pan={id:e.pointerId,start:p,from:{...camera},moved:false};if(pointers.size===2){const a=[...pointers.values()];pinch={distance:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),zoom:camera.zoom};pan=null;}},true);
  canvas.addEventListener('pointermove',e=>{if(!active)return;stop(e);if(!pointers.has(e.pointerId))return;const p=point(e);pointers.set(e.pointerId,p);if(animation||transition)return;if(pinch&&pointers.size===2){const a=[...pointers.values()];setZoom(pinch.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/Math.max(1,pinch.distance),{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2});return;}if(pan?.id!==e.pointerId)return;if(Math.hypot(p.x-pan.start.x,p.y-pan.start.y)>14)pan.moved=true;if(pan.moved){camera.x=pan.from.x-(p.x-pan.start.x)/camera.zoom;camera.y=pan.from.y-(p.y-pan.start.y)/camera.zoom;clampCamera();redraw();}},true);

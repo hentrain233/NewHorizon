@@ -36,13 +36,16 @@ function calculateLayout(){
   const viewport=document.getElementById('viewport');
   if(viewport.clientWidth>0&&viewport.clientHeight>0){
    // Change empty space, never cell/item/portrait dimensions. Very short screens fit uniformly.
-   const minTop=(state.fxCurrencyY+state.fxCurrencyHeight+state.fxOrderPortraitHeight+40)*sx;
+   const minTop=(state.fxCurrencyY+state.fxCurrencyHeight+state.fxOrderPortraitHeight+90)*sx;
    const topSlack=Math.max(0,barBottom-minTop),tabGap=32*sx;
    const footer=(state.fxInfoHeight-state.fxInfoTabY)*sx+tabGap;
-   const minHeight=(g.board.y-topSlack+bh+footer)/(1-state.fxInfoBottom/100);
+   const bottomInset=18*sx;
+   const minHeight=g.board.y-topSlack+bh+footer+bottomInset;
    g.H=Math.ceil(Math.max(minHeight,W*viewport.clientHeight/viewport.clientWidth));
+   g.infoY=g.H-Math.min(g.H*state.fxInfoBottom/100,bottomInset)-state.fxInfoHeight*sx;
+   g.navBottom=Math.min(state.fxNavBottom,100*bottomInset/g.H);
    // Anchor the board to the tab top, including its negative offset above the info body.
-   const shift=g.H*(1-state.fxInfoBottom/100)-footer-bh-g.board.y;
+   const shift=g.infoY+state.fxInfoTabY*sx-tabGap-bh-g.board.y;
    g.bar.y+=shift;g.barBottom+=shift;g.board.y+=shift;g.grid.y+=shift;
    for(const cell of cells)cell.y+=shift;
    g.bottom=g.H-g.board.y-bh;

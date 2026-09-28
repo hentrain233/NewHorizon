@@ -41,8 +41,8 @@
   },
   {
     "path": "js/shared/layout.js",
-    "bytes": 4310,
-    "sha256": "6d5b673b5debe31611be50e1d5465bd248559738c49712624ff8459680735939"
+    "bytes": 4469,
+    "sha256": "88729e28b4e6e1bebb748a1507076c024e29156ed7674124f6c51af4125a76fb"
   },
   {
     "path": "js/shared/render.js",
@@ -121,8 +121,8 @@
   },
   {
     "path": "js/game/order-customers.js",
-    "bytes": 12449,
-    "sha256": "e14fd4f8f4d0fd13a7e7873ad1d2fdaff835c12211c98f1e0b8e4df2d785ebc5"
+    "bytes": 12763,
+    "sha256": "7aa94faff6c0a8d40d345e1bac86f91b5690ec9aa8a6f6983ced7beae428bdb7"
   },
   {
     "path": "js/game/order-feedback.js",
@@ -151,8 +151,8 @@
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 5205,
-    "sha256": "de9cca35a2837db72df240d1a021506b0fabce730555e6db83f8c2417cef3e84"
+    "bytes": 5216,
+    "sha256": "bb04b9b74a8bc7fb24f5e6d976b1c1c5854adddd8f75e26d81ac03e55e6ebed2"
   },
   {
     "path": "js/game/animations.js",
@@ -176,8 +176,8 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 19693,
-    "sha256": "3e3bbf487c2c6fd63500f99416358d0b6248e6b06828f5a91b620654f08e9421"
+    "bytes": 20119,
+    "sha256": "8251cb5ba65c4fd59179fde07e47b6fdd735912b737be078b14fe07f827982b8"
   },
   {
     "path": "js/mobile-play.js",

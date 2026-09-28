@@ -8,7 +8,13 @@ const orderPortraitsReady=Promise.all(Object.entries(window.ORDER_PORTRAITS||{})
 orderPortraitsReady.catch(()=>{});
 function orderPose(e,g,scroll=orderScroll){
  const s=g.W/1170,key=Object.keys(ORDER_ANIMAL_TYPES).find(k=>ORDER_ANIMAL_TYPES[k]===e.type),prefix='fxAnimal'+key;
- return {x:(state.fxOrderStartX+e.slot*state.fxOrderStep+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
+ let start=state.fxOrderStartX,step=state.fxOrderStep;
+ if(g.bleed){
+  const half=orderBubbleWidth()*.82/1510*1170/2;
+  const left=Math.max(half-state.fxBubbleX,0)+16,right=Math.max(half+state.fxBubbleX,(state.fxOrderPortraitX??0)+state.fxRewardX+state.fxRewardWidth)+16;
+  start=left;step=Math.min(step,Math.max(1,(1170-left-right)/2));
+ }
+ return {x:(start+e.slot*step+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
 }
 // Keep the original default bubble baseline, independent of every portrait Y adjustment.
 function orderBubbleBottom(g){return g.barBottom+(-6-state.fxBubbleGap)*g.W/1170;}

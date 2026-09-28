@@ -2,7 +2,7 @@
 // Presentation only: selection and item definitions remain owned by the game.
 function drawItemInfo(c,g,session){
  const s=state,unit=g.W/1170,w=g.W*s.fxInfoWidth/100/unit,h=s.fxInfoHeight;
- const x=g.W*s.fxInfoX/100,y=g.H*(1-s.fxInfoBottom/100)-h*unit;
+ const x=g.W*s.fxInfoX/100,y=g.infoY??(g.H*(1-s.fxInfoBottom/100)-h*unit);
  const item=session.board.slots[session.selected],definition=session.board.definition(item);
  c.save();c.translate(x,y);c.scale(unit,unit);c.lineJoin='round';
  const radius=Math.min(s.fxInfoRadius,w/2,h/2),bow=Math.min(s.fxInfoCurve,Math.max(0,Math.min(w-2*radius,h-2*radius))/8);
