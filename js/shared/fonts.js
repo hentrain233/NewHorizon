@@ -3,9 +3,11 @@
 // Title face is fonts/FZCuYuan-Web.woff2, family "FZCuYuan" in CSS.
 let FZCuYuanLoaded=false;
 const titleFontReady=(async()=>{
- try{await document.fonts.load('64px "FZCuYuan"');}catch(error){console.error(error);}
- await document.fonts.ready;
- FZCuYuanLoaded=[...document.fonts].some(font=>font.family==='FZCuYuan'&&font.status==='loaded');
+ try{
+  const faces=await document.fonts.load('64px "FZCuYuan"');
+  // FontFace.family serialization may retain quotes; use the faces returned by load.
+  FZCuYuanLoaded=faces.some(font=>font.status==='loaded');
+ }catch(error){console.error(error);}
 })();
 const bundledFontsReady=Promise.all([...(window.MERGE_FONT_ASSETS||[]).map(async spec=>{
  const face=new FontFace(spec.family,`url("${spec.source}")`,{style:spec.style,weight:spec.weight});

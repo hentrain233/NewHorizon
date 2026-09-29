@@ -58,10 +58,9 @@ function itemTitleLayout(name){
 function drawCloudTitle(c,name){
  // 悬浮UI2「贝壳风铃」：方正粗圆简体 64，字心 (661, 490.5)。双行用悬浮UI的 56，行心距 80。
  // 描边外部 4。投影：正常、#19709F、100%、角度 90、距离 4、扩展 100%、大小 3。
- if(!FZCuYuanLoaded)return;
  const laid=itemTitleLayout(name),two=laid.lines.length>1,size=two?56:64,x=661,ink='#19709F';
  const ys=two?[441.7,521.7]:[490.5];
- c.save();c.font=`400 ${size}px "FZCuYuan"`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.miterLimit=2;
+ c.save();c.font=`400 ${size}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.miterLimit=2;
  laid.lines.forEach((line,i)=>{
   const y=ys[i];
   c.strokeStyle=ink;c.fillStyle=ink;c.lineWidth=6;c.strokeText(line,x,y+4);c.fillText(line,x,y+4);

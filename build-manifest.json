@@ -76,8 +76,8 @@
   },
   {
     "path": "js/shared/fonts.js",
-    "bytes": 1305,
-    "sha256": "5aedeb664f5eaa89dffdc46403d308528822f11efa03a67d15043d715597527a"
+    "bytes": 1340,
+    "sha256": "0c07a6604519bd629b6c0ab7e05837a34bb5ebf9741d2f7b9dd467fff094f52a"
   },
   {
     "path": "js/shared/startup-design.js",
@@ -161,8 +161,8 @@
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 6883,
-    "sha256": "d0e98106fe8905e565dcb28763c65cc7066b6ab64c3198fddb08f8c49bcdb528"
+    "bytes": 6901,
+    "sha256": "d2112bee8c4a3fa3d6fc5cfe503bcea1ab6a5f930227d49d6b39d8c5cc691188"
   },
   {
     "path": "js/game/item-detail-assets.js",
@@ -196,8 +196,8 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 20396,
-    "sha256": "7c7c1221972e0796c0e031630e22355d7f076ee55cb208159b46be83c7cdd32b"
+    "bytes": 22800,
+    "sha256": "96e6c80ef6f955b4b3b098a531a953ec505261015883f12a2d5f243ec12eb974"
   },
   {
     "path": "js/mobile-play.js",
@@ -256,8 +256,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 2035,
-    "sha256": "c0326e45c107a34265403912564a041c5b272f05e57139964256389e5b368ceb"
+    "bytes": 2754,
+    "sha256": "db12a4c7822b19c573b85ebd9cf2381238fc23eee71e853891ce1197f89bb06a"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

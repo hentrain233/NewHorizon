@@ -6,7 +6,7 @@
  const cloudMotion=RenovationMotion.createCloudMotion();
  const camera={x:1573,y:2354,zoom:.75}; // World-space center; zoom is deliberately transient.
  let active=false,loading=false,transition=null,animation=null,pan=null,pinch=null,ready=null,background=null,building=null,stage=-1,cameraTween=null;
- const images=new Map(),pointers=new Map();let cloudSprite=null,repairPoints=[];
+ const images=new Map(),pointers=new Map();let cloudSprite=null,repairPoints=[],mapLayer=null,mapKey='',bubbleBake=null,cloudBase=0,cloudEpoch=0,cloudHold=null;
  const sweepCanvas=document.createElement('canvas');sweepCanvas.width=640;sweepCanvas.height=457;
  const sweepContext=sweepCanvas.getContext('2d');
  const wrap=document.getElementById('canvas-wrap');wrap.style.position='relative';
@@ -24,14 +24,16 @@
  const completed=()=>{let n=0;while(n<tasks.length&&runtime.state.renovation.completedTaskIds.includes(tasks[n].id))n++;return n;};
  const task=()=>tasks[stage];
  const redraw=()=>drawCanvas();
- function clampCamera(){const bound=(v,size,view)=>view>=size?size/2:limit(v,view/2,size-view/2);camera.x=bound(camera.x,world.width,W/camera.zoom);camera.y=bound(camera.y,world.height,H/camera.zoom);}
+ function viewMargins(g){const geo=g||(typeof geometry==='undefined'?null:geometry);if(!geo?.bleed)return {left:W/2,right:W/2,top:H/2,bottom:H/2};const s=geo.W/W,b=geo.bleed;return {left:(b.x+geo.W/2)/s,right:(b.W-b.x-geo.W/2)/s,top:(b.y+geo.H/2)/s,bottom:(b.H-b.y-geo.H/2)/s};}
+ function fitZoom(g){const m=viewMargins(g);return Math.max(.65,(m.left+m.right)/world.width,(m.top+m.bottom)/world.height);}
+ function clampCamera(g){const m=viewMargins(g),minZ=fitZoom(g);if(camera.zoom<minZ){camera.zoom=minZ;zoomText.textContent=Math.round(minZ*100)+'%';}const z=camera.zoom,place=(v,lo,hi)=>lo>hi?(lo+hi)/2:limit(v,lo,hi);camera.x=place(camera.x,m.left/z,world.width-m.right/z);camera.y=place(camera.y,m.top/z,world.height-m.bottom/z);}
  function saveCamera(){runtime.state.renovation.camera={x:camera.x,y:camera.y};runtime.changed('RENOVATION_CAMERA_CHANGED');}
  const screen=(x,y)=>({x:(x-camera.x)*camera.zoom+W/2,y:(y-camera.y)*camera.zoom+H/2});
  const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};};
  function loadImage(url){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('餐厅图片加载失败，请检查素材文件。'));image.src=url;});}
  function loadAssets(){return ready||(ready=new Promise((resolve,reject)=>{if(window.RENOVATION_ASSETS)return resolve();const script=document.createElement('script');script.src='js/game/renovation-assets.js';script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('餐厅素材加载失败'));};document.head.appendChild(script);}).then(async()=>{background=await loadImage(window.RENOVATION_ASSETS.background);cloudSprite=await loadImage(window.RENOVATION_ASSETS.cloudSprite);building=window.RENOVATION_ASSETS.building;}).catch(e=>{ready=null;throw e;}));}
  async function loadStage(n){if(!images.has(n))images.set(n,await loadImage(window.RENOVATION_ASSETS.stages[n]));for(const key of images.keys())if(Math.abs(key-n)>1)images.delete(key);return images.get(n);}
- function setZoom(z,p={x:W/2,y:H/2}){if(animation||transition)return;const x=camera.x+(p.x-W/2)/camera.zoom,y=camera.y+(p.y-H/2)/camera.zoom;camera.zoom=limit(z,.65,1.2);camera.x=x-(p.x-W/2)/camera.zoom;camera.y=y-(p.y-H/2)/camera.zoom;clampCamera();zoomText.textContent=Math.round(camera.zoom*100)+'%';saveCamera();redraw();}
+ function setZoom(z,p={x:W/2,y:H/2}){if(animation||transition)return;const x=camera.x+(p.x-W/2)/camera.zoom,y=camera.y+(p.y-H/2)/camera.zoom;camera.zoom=limit(z,fitZoom(),1.2);camera.x=x-(p.x-W/2)/camera.zoom;camera.y=y-(p.y-H/2)/camera.zoom;clampCamera();zoomText.textContent=Math.round(camera.zoom*100)+'%';saveCamera();redraw();}
  minus.onclick=()=>setZoom(camera.zoom-.05);plus.onclick=()=>setZoom(camera.zoom+.05);
  function focusTask(smooth=true){const t=task();if(!t)return;const target={x:t.mapAnchor[0],y:t.mapAnchor[1]-H*.17/camera.zoom};if(smooth)cameraTween={from:{...camera},to:target,start:performance.now()};else{Object.assign(camera,target);clampCamera();saveCamera();}}
  locate.onclick=()=>{if(!animation&&!transition)focusTask();};
@@ -65,6 +67,9 @@
  }
  function drawRepairStars(c,now){if(!animation||!createPlaytestRenderer.starSprite)return;const age=now-animation.start-animation.timing.revealStart;if(age<0)return;const sprite=createPlaytestRenderer.starSprite('#FFFBE0',.08,'#AD813E');c.save();for(let i=0;i<repairPoints.length;i++){const t=(age-i*22)/620;if(t<0||t>1)continue;const pulse=Math.sin(t*Math.PI)**2,size=state.fxRepairStarSize*(.65+.35*pulse),p=repairPoints[i];c.globalAlpha=pulse;c.drawImage(sprite,p.x-size/2,p.y-size/2,size,size);}c.restore();}
  function coin(c,x,y,size){const img=artwork.backgroundcoin;if(img)c.drawImage(img,x-size/2,y-size/2,size,size);else{c.fillStyle='#FFC83D';c.beginPath();c.arc(x,y,size*.4,0,Math.PI*2);c.fill();}}
+ function cloudTime(now){const hold=pointers.size>0||!!pan||!!pinch||!!cameraTween;if(hold){if(cloudHold==null)cloudHold=cloudBase+(cloudEpoch?now-cloudEpoch:0);return cloudHold;}if(cloudHold!=null){cloudBase=cloudHold;cloudEpoch=now;cloudHold=null;}if(!cloudEpoch)cloudEpoch=now;return cloudBase+now-cloudEpoch;}
+ function visibleStage(now){return animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;}
+ function ensureMap(g,now){if(!background)return null;const b=g.bleed,w=b?b.W:g.W,h=b?b.H:g.H,shown=visibleStage(now),key=[camera.x,camera.y,camera.zoom,w,h,b?b.x:0,b?b.y:0,shown].join(',');if(!mapLayer)mapLayer=document.createElement('canvas');if(mapLayer.width!==w)mapLayer.width=w;if(mapLayer.height!==h)mapLayer.height=h;if(mapKey===key)return mapLayer;const wctx=mapLayer.getContext('2d');wctx.setTransform(1,0,0,1,0,0);wctx.imageSmoothingEnabled=true;wctx.imageSmoothingQuality='high';wctx.fillStyle='#54BFD5';wctx.fillRect(0,0,w,h);const s=g.W/W;wctx.translate(b?b.x+g.W/2:g.W/2,b?b.y+g.H/2:g.H/2);wctx.scale(s*camera.zoom,s*camera.zoom);wctx.translate(-camera.x,-camera.y);wctx.drawImage(background,-2,-2,world.width+4,world.height+4);const img=images.get(shown)||images.get(stage);if(img)wctx.drawImage(img,building.x,building.y,building.width,building.height);mapKey=key;return mapLayer;}
  function drawClouds(c,now){
   if(!cloudSprite)return;
   const left=camera.x-W/2/camera.zoom,right=camera.x+W/2/camera.zoom,top=camera.y-H/2/camera.zoom,bottom=camera.y+H/2/camera.zoom;
@@ -86,7 +91,9 @@
   c.save();c.globalCompositeOperation=state.fxRepairBlend;c.globalAlpha=state.fxRepairOpacity/100;c.drawImage(sweepCanvas,building.x,building.y,building.width,building.height);c.restore();
  }
  function bubblePath(c,b){const {x,y,width:w,height:h}=b,r=45,mid=x+w/2;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(mid+18,y+h);c.lineTo(mid,y+h+25);c.lineTo(mid-18,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+ function bubbleSprite(cost){const coinReady=!!(typeof artwork!=='undefined'&&artwork.backgroundcoin);if(bubbleBake?.cost===cost&&bubbleBake.coin===coinReady)return bubbleBake;const pad=32,w=200,h=210,tail=25,cnv=document.createElement('canvas');cnv.width=w+pad*2;cnv.height=h+tail+pad*2;const bc=cnv.getContext('2d'),box={x:pad,y:pad,width:w,height:h};bc.shadowColor='rgba(64,87,76,.23)';bc.shadowBlur=12;bc.shadowOffsetY=8;bubblePath(bc,box);bc.fillStyle='#FFFBEC';bc.fill();bc.shadowColor='transparent';bc.strokeStyle='#A8875A';bc.lineWidth=5;bubblePath(bc,box);bc.stroke();coin(bc,box.x+w/2,box.y+73,92);bc.textAlign='center';bc.textBaseline='middle';bc.font='bold 43px sans-serif';bc.fillStyle='#77543C';bc.fillText(String(cost),box.x+w/2,box.y+155);return bubbleBake={canvas:cnv,pad,cost,coin:coinReady};}
  function drawBubble(c,now){const b=bubble();if(!b)return;const age=animation?now-animation.start:0;if(animation&&age>animation.timing.fill+100)return;
+  if(!animation){const spr=bubbleSprite(task().coinCost);c.drawImage(spr.canvas,b.x-spr.pad,b.y-spr.pad+RenovationMotion.bubble(now).dy);return;}
   const motion=RenovationMotion.bubble(now,animation?age:null),cx=b.x+b.width/2,cy=b.y+b.height/2;
   c.save();c.translate(cx,cy+motion.dy);c.scale(motion.sx,motion.sy);c.translate(-cx,-cy);
   c.shadowColor='rgba(64,87,76,.23)';c.shadowBlur=12;c.shadowOffsetY=8;bubblePath(c,b);c.fillStyle='#FFFBEC';c.fill();c.shadowColor='transparent';
@@ -100,20 +107,19 @@
  function update(now){if(cameraTween){const t=limit((now-cameraTween.start)/500,0,1);camera.x=cameraTween.from.x+(cameraTween.to.x-cameraTween.from.x)*ease(t);camera.y=cameraTween.from.y+(cameraTween.to.y-cameraTween.from.y)*ease(t);clampCamera();if(t===1){cameraTween=null;saveCamera();}}
   if(animation&&now-animation.start>=animation.duration){stage=completed();animation=null;focusTask();}
  }
- function draw(c,g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera();}const now=performance.now();update(now);
-  if(g.bleed)c.drawImage(bleedBack,-g.bleed.x,-g.bleed.y);
+ let frameNow=0;
+ function syncView(g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera(g);}frameNow=performance.now();update(frameNow);return frameNow;}
+ function draw(c,g){const now=g.bleed?frameNow||syncView(g):syncView(g);
+  if(g.bleed)c.drawImage(bleedBack,-g.bleed.x,-g.bleed.y);else{const layer=ensureMap(g,now);if(layer)c.drawImage(layer,0,0);}
   c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);
-  if(!g.bleed){c.fillStyle='#54BFD5';c.fillRect(camera.x-W/2/camera.zoom,camera.y-H/2/camera.zoom,W/camera.zoom,H/camera.zoom);c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;const img=images.get(visible)||images.get(stage);if(img)c.drawImage(img,building.x,building.y,building.width,building.height);}
+  if(!g.bleed)drawClouds(c,cloudTime(now));
   drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
   drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
  }
  function drawBackdrop(c,g){
-  if(!background)return;const b=g.bleed,s=g.W/W,now=performance.now();
-  const height=g.H*W/g.W;if(H!==height){H=height;clampCamera();}update(now);
-  c.save();c.fillStyle='#54BFD5';c.fillRect(0,0,b.W,b.H);c.translate(b.x+g.W/2,b.y+g.H/2);c.scale(s*camera.zoom,s*camera.zoom);c.translate(-camera.x,-camera.y);
-  c.drawImage(background,0,0,world.width,world.height);drawClouds(c,now);
-  const visible=animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage,img=images.get(visible)||images.get(stage);
-  if(img)c.drawImage(img,building.x,building.y,building.width,building.height);c.restore();
+  if(!background)return;const b=g.bleed,s=g.W/W,now=syncView(g);
+  const layer=ensureMap(g,now);c.setTransform(1,0,0,1,0,0);if(layer)c.drawImage(layer,0,0);
+  c.save();c.translate(b.x+g.W/2,b.y+g.H/2);c.scale(s*camera.zoom,s*camera.zoom);c.translate(-camera.x,-camera.y);drawClouds(c,cloudTime(now));c.restore();
  }
  function drawOverlay(c,g){
   const bottom=(g?.navBottom??state.fxNavBottom)+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
