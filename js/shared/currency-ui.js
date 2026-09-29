@@ -17,6 +17,8 @@ function drawCurrencyUI(c,g,only){
  const radius=Math.min(state.fxCurrencyRadius,h/2,state.fxCurrencyWidth/2);
  CURRENCY_PREVIEW.forEach((entry,i)=>{if(only&&entry.icon!==only)return;
   const x=left+i*(slot+gap),pillX=x+37,pillW=state.fxCurrencyWidth;
+  const paintFrame=c=>{
+  const pillX=0,y=0;
   c.save();c.shadowColor=rgba(state.fxCurrencyShadowColor,state.fxCurrencyShadowOpacity/100);c.shadowBlur=state.fxCurrencyShadowBlur*s;c.shadowOffsetX=state.fxCurrencyShadowX*s;c.shadowOffsetY=state.fxCurrencyShadowY*s;
   const fill=c.createLinearGradient(0,y,0,y+h);
   fill.addColorStop(0,'#FFFAF1');fill.addColorStop(.5,'#FFF3E0');fill.addColorStop(1,'#F5E4CC');
@@ -25,6 +27,10 @@ function drawCurrencyUI(c,g,only){
   const bevel=c.createLinearGradient(0,y,0,y+h);bevel.addColorStop(0,'rgba(255,255,255,.45)');bevel.addColorStop(.14,'rgba(255,255,255,0)');bevel.addColorStop(.88,'rgba(153,96,51,0)');bevel.addColorStop(1,'rgba(153,96,51,.10)');
   c.fillStyle=bevel;c.fillRect(pillX,y,pillW,h);c.restore();
   rounded(c,pillX,y,pillW,h,radius);c.lineWidth=1.5;c.strokeStyle='#BFA98F';c.stroke();
+  };
+  c.save();c.translate(pillX,y);
+  if(typeof paintCachedUI==='function')paintCachedUI(c,'currency',[pillW,h,radius,s],{x:-80,y:-80,width:pillW+160,height:h+160},paintFrame);else paintFrame(c);
+  c.restore();
   c.font=currencyFont();c.textAlign='right';c.textBaseline='middle';
   // Anchor to the capsule's right edge, independent of digit count and spacing.
   const live=icon=>typeof orderPayoutBalance==='function'?orderPayoutBalance(icon,gameRuntime.state.currencies[icon==='coin'?'coins':'energy']):gameRuntime.state.currencies[icon==='coin'?'coins':'energy'];

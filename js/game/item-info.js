@@ -6,6 +6,7 @@ function drawItemInfo(c,g,session){
  const x=g.W*s.fxInfoX/100,y=g.infoY??(g.H*(1-s.fxInfoBottom/100)-h*unit);
  const item=session.board.slots[session.selected],definition=session.board.definition(item);
  c.save();c.translate(x,y);c.scale(unit,unit);c.lineJoin='round';
+ const frame=c=>{
  const radius=Math.min(s.fxInfoRadius,w/2,h/2),bow=Math.min(s.fxInfoCurve,Math.max(0,Math.min(w-2*radius,h-2*radius))/8);
  // Horizontal edges stay straight; corners match the gently bowed side tangents.
  const vertical=Math.atan2(2*bow,(h-2*radius)/2),handle=radius*.55228475;
@@ -19,6 +20,8 @@ function drawItemInfo(c,g,session){
  c.save();c.shadowColor='#334d5260';c.shadowOffsetX=0;c.shadowOffsetY=6*unit;c.shadowBlur=3*unit;
  c.fillStyle=s.fxInfoFill;c.fill();c.restore();
  if(s.fxInfoStroke>0){c.lineWidth=s.fxInfoStroke;c.strokeStyle=s.fxInfoBorder;c.stroke();}
+ };
+ if(typeof paintCachedUI==='function')paintCachedUI(c,'info',[w,h,unit],{x:-40,y:-40,width:w+80,height:h+80},frame);else frame(c);
  if(definition){
   const title=definition.name+'（等级'+definition.tier+'）';
   const size=s.fxInfoTitleSize;
@@ -31,8 +34,8 @@ function drawItemInfo(c,g,session){
   tab.moveTo(r,0);tab.lineTo(tw-slant-r,0);tab.quadraticCurveTo(tw-slant,0,tw-slant+r/2,r);
   tab.lineTo(tw-r/2,th-r);tab.quadraticCurveTo(tw,th,tw-r,th);tab.lineTo(r,th);
   tab.quadraticCurveTo(0,th,0,th-r);tab.lineTo(0,r);tab.quadraticCurveTo(0,0,r,0);tab.closePath();
-  paintInfoTab(c,tab,th,s);
-  if(s.fxInfoTabStroke>0){c.strokeStyle=s.fxInfoTabBorder;c.lineWidth=s.fxInfoTabStroke;c.stroke(tab);}
+  const paintTab=c=>{paintInfoTab(c,tab,th,s);if(s.fxInfoTabStroke>0){c.strokeStyle=s.fxInfoTabBorder;c.lineWidth=s.fxInfoTabStroke;c.stroke(tab);}};
+  if(typeof paintCachedUI==='function')paintCachedUI(c,'tab',[tw,th],{x:-20,y:-20,width:tw+40,height:th+40},paintTab);else paintTab(c);
   c.textAlign='left';c.textBaseline='middle';c.fillStyle=s.fxInfoTitleColor;
   const maxW=Math.max(1,tw-pad*2-iconSpace);
   if(s.fxInfoTitleStroke>0){c.strokeStyle=s.fxInfoTitleBorder;c.lineWidth=s.fxInfoTitleStroke;c.strokeText(title,pad,th/2,maxW);}

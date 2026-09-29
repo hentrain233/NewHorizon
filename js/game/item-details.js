@@ -14,7 +14,7 @@ function createItemDetails(session,renderer,runtime){
   question:{dx:71,dy:55,w:32,h:58},
   // Yellow corners sit on the green selected cell. Offsets keep the current picture.
   corners:{dx:-10,dy:-8,w:186,h:185,scale:.92},
-  output:{x:615,y:1356},bed:{x:195,y:1417},
+  output:{x:660,y:1356},bed:{x:195,y:1417},
   producer:{frame:{x:576,y:1527,w:170,h:170},item:{x:578,y:1529,width:166,height:166}},
   info:{paint:{x:722,y:1488,w:60,h:67},hit:{x:710,y:1476,w:84,h:91}}
  };
@@ -40,12 +40,11 @@ function createItemDetails(session,renderer,runtime){
   const v=window.visualViewport,left=(v?.offsetLeft||0)+(parseFloat(main.paddingLeft)||0),top=(v?.offsetTop||0)+(parseFloat(main.paddingTop)||0)+8;
   const width=Math.max(1,(v?.width||innerWidth)-(parseFloat(main.paddingLeft)||0)-(parseFloat(main.paddingRight)||0));
   const height=Math.max(1,(v?.height||innerHeight)-(parseFloat(main.paddingTop)||0)-(parseFloat(main.paddingBottom)||0)-16);
-  // Keep the PSD proportions; on landscape phones use the available height, not the narrow board width.
-  const preferred=width>height&&document.body.classList.contains('mobile-play')?width:r.width;
-  const scale=Math.min(preferred/sheet.width,width/sheet.width,height/sheet.height);
+  // Fixed iPhone 14 reference size (390×844 CSS px); only shrink when the available screen cannot fit it.
+  const scale=Math.min(390/sheet.width,width/sheet.width,height/sheet.height);
   stage.style.width=sheet.width*scale+'px';stage.style.height=sheet.height*scale+'px';
   stage.style.left=Math.max(left,Math.min(left+width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2))+'px';
-  stage.style.top=Math.max(top,Math.min(top+height-sheet.height*scale,r.top+r.height*sheet.top/sheet.screen))+'px';
+  stage.style.top=Math.max(top,Math.min(top+height-sheet.height*scale,r.top+844*sheet.top/sheet.screen))+'px';
  }
  function button(label,box,action){
   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
@@ -96,7 +95,7 @@ function createItemDetails(session,renderer,runtime){
    if(isSelected){const k=sheet.corners,w=k.w*k.scale,h=k.h*k.scale;renderer.drawSelection(c,{x:box.x+k.dx+(k.w-w)/2,y:box.y+k.dy+(k.h-h)/2,width:w,height:h},time);}
   });
   if(!session.board.definition(selected).producerId){
-   paint('output-label',sheet.output.x,sheet.output.y);paint('producer-bed',sheet.bed.x,sheet.bed.y);
+   paint('output-label',sheet.output.x-pictures['output-label'].width/2,sheet.output.y);paint('producer-bed',sheet.bed.x,sheet.bed.y);
    if(producer){
     paint('producer',sheet.producer.frame.x,sheet.producer.frame.y,sheet.producer.frame.w,sheet.producer.frame.h);
     renderer.drawDetailsItem(c,sheet.producer.item,producer,120,time,pictures['icon-'+producer.type+producer.level]);

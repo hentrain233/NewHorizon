@@ -34,7 +34,7 @@
  function message(text){if(editor)editor.message(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
  function lockEditor(locked){document.body.classList.toggle('testing',locked);editor?.lock(locked);resizePreview();}
- function restart(){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
+ function restart(){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;runtime.state.discoveries=[];drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
  async function toggle(){
   if(window.renovationScreen?.active||window.renovationScreen?.transitioning)return;
   if(loading)return;if(active){active=false;drag=null;keyboardSource=-1;effects.clear();flights.clear();lockEditor(false);drawCanvas();return;}
@@ -45,5 +45,13 @@
  }
  session.showOrders=true;
  function submitOrderItem(id,index){if(!active||drag||busy(index)||!orderQueue.submit(id,board,index,performance.now()))return false;effects.delete(index);if(selected===index)selected=-1;keyboardSource=-1;message('订单已接收物品。');return true;}
- window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
+ let frozenAt=null;
+ function freeze(value){
+  if(value){if(frozenAt===null)frozenAt=performance.now();return;}
+  if(frozenAt===null)return;const elapsed=performance.now()-frozenAt;frozenAt=null;renderer.resume(elapsed);
+  for(const entry of orderQueue.entries)for(const key of ['arrivedAt','completedAt'])if(entry[key]!=null)entry[key]+=elapsed;
+  for(const payout of orderPayouts)payout.start+=elapsed;
+  if(orderQueue.refillReadyAt!=null)orderQueue.refillReadyAt+=elapsed;orderFrame=performance.now();
+ }
+ window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},get moving(){return !!drag||flights.size>0||effects.size>0||session.failures.size>0||orderPayouts.length>0||orderQueue.entries.some(e=>e.entering||e.phase==='complete');},freeze,draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
 })();

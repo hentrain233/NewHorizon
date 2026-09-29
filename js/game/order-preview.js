@@ -38,8 +38,11 @@ function paintBubbleFill(c,path,h){
  c.restore();
 }
 function paintOrderBubble(c){
+ const paint=c=>{
  const path=orderBubblePath(),h=449*state.fxBubbleHeight/100;
  c.save();paintBubbleFill(c,path,h);
  if(state.fxBubbleStroke>0){c.lineWidth=state.fxBubbleStroke;c.lineJoin='round';c.strokeStyle=state.fxBubbleBorder;c.stroke(path);}
  c.restore();
+ };
+ if(typeof paintCachedUI==='function')paintCachedUI(c,'order','default',{x:-80,y:-200,width:orderBubbleWidth()+160,height:449*state.fxBubbleHeight/100+300},paint);else paint(c);
 }

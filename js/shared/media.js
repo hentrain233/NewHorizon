@@ -39,6 +39,7 @@ function getVideoFrame(){
 // Linear sliding windows avoid a costly per-pixel radius loop or full-resolution readback.
 const mediaFilterCache=new WeakMap();
 function filteredMedia(media,opt,drawWidth){
+ if(media===videoFrameCache&&assets.video?.dataset.baked==='true')return media;
  const width=media.naturalWidth||media.width,height=media.naturalHeight||media.height;
  const w=Math.min(640,width),h=Math.max(1,Math.round(height*w/width));
  const radius=opt.blur>0?Math.max(1,Math.round(opt.blur*w/drawWidth*.7)):0;
@@ -60,5 +61,30 @@ function filteredMedia(media,opt,drawWidth){
  if(brightness!==1||saturation!==1)for(let i=0;i<data.length;i+=4){const l=.2126*data[i]+.7152*data[i+1]+.0722*data[i+2];for(let k=0;k<3;k++)data[i+k]=(l+(data[i+k]-l)*saturation)*brightness;}
  c.putImageData(pixels,0,0);entry.key=key;return entry.canvas;
 }
-function updatePlayback(){if(!assets.video)return;if(state.backgroundType==='video')assets.video.play().catch(()=>notify('浏览器暂停了自动播放，请点击预览继续。'));else assets.video.pause();}
-function animate(){if(!document.hidden){if(window.itemDetails?.active){window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawCanvas();}requestAnimationFrame(animate);}
+function useDefaultVideo(){
+ const video=document.createElement('video');video.muted=true;video.loop=true;video.playsInline=true;video.preload='auto';video.dataset.defaultBackground='true';
+ video.addEventListener('loadeddata',()=>{videoFrameCache=null;videoFrameTime=-1;updatePreview();});
+ video.addEventListener('error',()=>notify('背景视频暂未加载，请检查内置视频文件。'));
+ assets.video?.pause();assets.video=video;
+ if(location.protocol==='file:'&&!window.LOCAL_BACKGROUND_VIDEOS){
+  const script=document.createElement('script');script.src='assets/local-background-videos.js';script.onload=()=>updatePlayback();script.onerror=()=>notify('本地视频预览资源缺失，请重新烘焙视频。');document.head.appendChild(script);
+ }
+ updatePlayback();return video;
+}
+function updatePlayback(){
+ const video=assets.video;if(!video)return;
+ if(video.dataset.defaultBackground){
+  const baked=window.MERGE_PLAYER_BUILD===true||(state.mediaBlur===8&&state.mediaBrightness===105&&state.mediaSaturation===80);
+  const source=location.protocol==='file:'?window.LOCAL_BACKGROUND_VIDEOS?.[baked?'baked':'raw']:'assets/play-background'+(baked?'-baked':'')+'.mp4';
+  if(!source)return;
+  if(video.getAttribute('src')!==source){video.dataset.baked=String(baked);video.src=source;videoFrameCache=null;videoFrameTime=-1;}
+ }
+ if(state.backgroundType==='video'&&!document.hidden&&!window.renovationScreen?.active)video.play().catch(()=>{});else video.pause();
+}
+function animate(){
+ const start=performance.now();
+ if(!document.hidden){if(window.itemDetails?.active){window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawCanvas();}
+ const moving=window.renovationScreen?.active?window.renovationScreen?.moving:window.mergePlayTest?.moving;
+ const interval=document.hidden?250:moving||window.renovationScreen?.busy?1000/60:1000/20;
+ setTimeout(()=>requestAnimationFrame(animate),Math.max(0,interval-(performance.now()-start)-5));
+}
