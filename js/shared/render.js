@@ -137,6 +137,9 @@ function paintFullBleed(g){
   document.body.prepend(bleedDisplay);bleedBack=document.createElement('canvas');bleedFront=document.createElement('canvas');
  }
  for(const layer of [bleedDisplay,bleedBack,bleedFront]){if(layer.width!==b.W)layer.width=b.W;if(layer.height!==b.H)layer.height=b.H;}
+ const frame=window.playFrame;
+ if(frame){bleedDisplay.style.left=frame.left+'px';bleedDisplay.style.top=frame.top+'px';bleedDisplay.style.right='auto';bleedDisplay.style.bottom='auto';bleedDisplay.style.width=frame.width+'px';bleedDisplay.style.height=frame.height+'px';}
+ else if(bleedDisplay.style.left){bleedDisplay.style.left='0';bleedDisplay.style.top='0';bleedDisplay.style.right='0';bleedDisplay.style.bottom='0';bleedDisplay.style.width='100vw';bleedDisplay.style.height='100dvh';}
  const back=bleedBack.getContext('2d'),front=bleedFront.getContext('2d'),display=bleedDisplay.getContext('2d');
  let changed=false;
  if(window.renovationScreen?.active){

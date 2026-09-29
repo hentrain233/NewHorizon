@@ -53,17 +53,32 @@ function calculateLayout(){
  }
  return g;
 }
+// iPhone 16 Pro Max logical size. Desktop windows wider than this ratio stay in a centered column.
+const PLAY_FRAME_RATIO=440/956;
+function syncPlayFrame(viewport){
+ const desktop=typeof matchMedia==='function'&&matchMedia('(pointer: fine) and (min-width: 901px)').matches;
+ const cap=desktop&&innerWidth>innerHeight*PLAY_FRAME_RATIO;
+ viewport.style.maxWidth=cap?Math.floor(innerHeight*PLAY_FRAME_RATIO)+'px':'';
+ viewport.style.marginInline=cap?'auto':'';
+ const box=cap?viewport.getBoundingClientRect():null;
+ const frame=box?{left:box.left,top:box.top,width:box.width,height:box.height}:null;
+ const prev=window.playFrame,moved=!prev!==!frame||!!frame&&(prev.left!==frame.left||prev.top!==frame.top||prev.width!==frame.width||prev.height!==frame.height);
+ window.playFrame=frame;
+ const restart=document.querySelector('.player-restart');
+ if(restart)restart.style.left=(frame?frame.left+12:12)+'px';
+ return moved;
+}
 // Both the local play shell and release use the same actual viewport dimensions.
 function resizeMobilePreview(){
  if(!document.body.classList.contains('mobile-play'))return false;
- const viewport=document.getElementById('viewport'),next=calculateLayout();
+ const viewport=document.getElementById('viewport'),frameMoved=syncPlayFrame(viewport),next=calculateLayout();
  const changed=!geometry||geometry.W!==next.W||geometry.H!==next.H||geometry.board.y!==next.board.y;
  geometry=next;
  const scale=Math.min(viewport.clientWidth/next.W,viewport.clientHeight/next.H);
  if(canvas.width!==next.W)canvas.width=next.W;if(canvas.height!==next.H)canvas.height=next.H;
  canvas.style.maxWidth=next.W*scale+'px';canvas.style.maxHeight=next.H*scale+'px';
- const rect=canvas.getBoundingClientRect();
- geometry.bleed={W:Math.round(innerWidth/scale),H:Math.round(innerHeight/scale),x:rect.left/scale,y:rect.top/scale};
- if(changed)drawCanvas();
+ const rect=canvas.getBoundingClientRect(),origin=window.playFrame;
+ geometry.bleed={W:Math.round((origin?origin.width:innerWidth)/scale),H:Math.round((origin?origin.height:innerHeight)/scale),x:(rect.left-(origin?origin.left:0))/scale,y:(rect.top-(origin?origin.top:0))/scale};
+ if(changed||frameMoved)drawCanvas();
  return true;
 }

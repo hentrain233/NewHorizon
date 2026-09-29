@@ -41,13 +41,13 @@
   },
   {
     "path": "js/shared/layout.js",
-    "bytes": 4469,
-    "sha256": "88729e28b4e6e1bebb748a1507076c024e29156ed7674124f6c51af4125a76fb"
+    "bytes": 5556,
+    "sha256": "4d03002a2927fc002639fee440850a81ec68158e3a7f491b6e30e647a10a32fe"
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 16775,
-    "sha256": "469b83f1b05a1ca1ba4ec2dac34639cf15593077c0cf6f24622e1977526047df"
+    "bytes": 17266,
+    "sha256": "e6d80dc3c6e7d38cdba59ad2fb6bbfda0ab4b464f2762f64562b19ca5da3eb45"
   },
   {
     "path": "js/shared/ui-bake-assets.js",
@@ -256,8 +256,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 2754,
-    "sha256": "db12a4c7822b19c573b85ebd9cf2381238fc23eee71e853891ce1197f89bb06a"
+    "bytes": 3132,
+    "sha256": "6c402d9229044926bcab36563c025f8a1a0bf64d86f51401ee282584948f3519"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",
