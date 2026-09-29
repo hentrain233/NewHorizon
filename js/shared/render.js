@@ -121,9 +121,10 @@ function drawGrid(c,g){
  }
 }
 let playSceneCache=null;
-let bleedDisplay=null,bleedBack=null,bleedFront=null,orderLayer=null;
+let bleedDisplay=null,bleedBack=null,bleedFront=null,orderLayer=null,bleedSceneCache=null;
+function hasOrderOverflow(g){return g.bleed&&(g.bleed.x>.5||g.bleed.W-g.bleed.x-g.W>.5);}
 function drawOrderOverflow(g,draw){
- const b=g.bleed;if(!b||!bleedDisplay)return;
+ const b=g.bleed;if(!hasOrderOverflow(g)||!bleedDisplay)return;
  const c=bleedDisplay.getContext('2d');c.save();c.beginPath();
  c.rect(0,b.y,b.x,g.barBottom);c.rect(b.x+g.W,b.y,Math.max(0,b.W-b.x-g.W),g.barBottom);c.clip();
  c.translate(b.x,b.y);draw(c);c.restore();
@@ -137,14 +138,32 @@ function paintFullBleed(g){
  }
  for(const layer of [bleedDisplay,bleedBack,bleedFront]){if(layer.width!==b.W)layer.width=b.W;if(layer.height!==b.H)layer.height=b.H;}
  const back=bleedBack.getContext('2d'),front=bleedFront.getContext('2d'),display=bleedDisplay.getContext('2d');
- back.clearRect(0,0,b.W,b.H);front.clearRect(0,0,b.W,b.H);
- if(window.renovationScreen?.active){window.renovationScreen.drawBackdrop(back,g);}
+ let changed=false;
+ if(window.renovationScreen?.active){
+  back.clearRect(0,0,b.W,b.H);front.clearRect(0,0,b.W,b.H);
+  window.renovationScreen.drawBackdrop(back,g);bleedSceneCache=null;changed=true;
+ }
  else{
   const expanded={...g,W:b.W,H:b.H,bar:{...g.bar,x:-b.W*.12,width:b.W*1.24,y:g.bar.y+b.y},barBottom:g.barBottom+b.y};
-  drawTopBackground(back,expanded);drawBoardArea(back,expanded);drawShadow(back,expanded);
-  drawBar(front,expanded);drawBarTopStroke(front,expanded);
+  const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+JSON.stringify([b,g.bar,g.board]);
+  const refs=[assets.image,assets.texture,assets.video,...Object.values(artwork)];
+  if(state.backgroundType==='video')getVideoFrame();
+  if(bleedSceneCache?.key!==key||refs.length!==bleedSceneCache.refs.length||refs.some((r,i)=>r!==bleedSceneCache.refs[i])){
+   back.clearRect(0,0,b.W,b.H);front.clearRect(0,0,b.W,b.H);
+   drawTopBackground(back,expanded);drawBoardArea(back,expanded);drawShadow(back,expanded);
+   drawBar(front,expanded);drawBarTopStroke(front,expanded);
+   bleedSceneCache={key,refs,videoRevision:videoFrameRevision};changed=true;
+  }else if(state.backgroundType==='video'&&bleedSceneCache.videoRevision!==videoFrameRevision){
+   back.save();back.beginPath();back.rect(0,0,b.W,expanded.bar.y);back.clip();
+   back.clearRect(0,0,b.W,expanded.bar.y);drawTopBackground(back,expanded);back.restore();
+   bleedSceneCache.videoRevision=videoFrameRevision;changed=true;
+  }
  }
- display.clearRect(0,0,b.W,b.H);display.drawImage(bleedBack,0,0);display.drawImage(bleedFront,0,0);
+ if(changed){display.clearRect(0,0,b.W,b.H);display.drawImage(bleedBack,0,0);display.drawImage(bleedFront,0,0);}
+ else drawOrderOverflow(g,c=>{
+  // Erase last frame's customers only in the exposed side strips.
+  c.clearRect(-b.x,-b.y,b.W,b.H);c.drawImage(bleedBack,-b.x,-b.y);c.drawImage(bleedFront,-b.x,-b.y);
+ });
  return b;
 }
 function playSceneLayers(g,includeHelpers){
@@ -160,6 +179,7 @@ function playSceneLayers(g,includeHelpers){
  return playSceneCache={key,refs,back,front};
 }
 function drawCanvas(target=canvas,includeHelpers=true){
+ if(target===canvas&&window.itemDetails?.active)return window.itemDetails.drawFrozen(target);
  const g=geometry||calculateLayout();if(target.width!==g.W)target.width=g.W;if(target.height!==g.H)target.height=g.H;
  const c=target===canvas?ctx:target.getContext('2d',{alpha:true,colorSpace:'srgb'});c.clearRect(0,0,g.W,g.H);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
  const bleed=target===canvas?paintFullBleed(g):null;
@@ -168,7 +188,7 @@ function drawCanvas(target=canvas,includeHelpers=true){
  if(bleed)c.drawImage(bleedBack,-bleed.x,-bleed.y);
  else if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
  if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function'){
-  if(bleed){
+  if(hasOrderOverflow(g)&&bleed){
    if(!orderLayer)orderLayer=document.createElement('canvas');
    const h=Math.ceil(bleed.y+g.barBottom);if(orderLayer.width!==bleed.W)orderLayer.width=bleed.W;if(orderLayer.height!==h)orderLayer.height=h;
    const d=orderLayer.getContext('2d');d.clearRect(0,0,orderLayer.width,h);d.save();d.translate(bleed.x,bleed.y);drawOrderCustomers(d,g);d.restore();

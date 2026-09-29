@@ -88,14 +88,14 @@ function createPlaytestRenderer(session){
  createPlaytestRenderer.starSprite=starSprite;
  let foilCanvas,bandCanvas,sweepSpectrum;
  const sweepFrames=new Map();let sweepSignature="";
- function drawPrismaticSweep(c,g,item,index,time){
+ function drawPrismaticSweep(c,g,item,index,time,iconBox=null,sourceImage=null){
   if(state.fxSweepOpacity<=0||state.fxSweepWidth<=0||session.board.getEffectTier(item)!=='max'||session.flights.has(index)||session.drag?.from===index||session.keyboardSource===index)return;
   const duration=state.fxSweepDuration*1000,cycle=duration+state.fxSweepCooldown*1000;
   const elapsed=(time+index*.137*cycle)%cycle;if(elapsed>=duration)return;
   const frameCount=Math.max(1,Math.ceil(duration*.06)),frame=Math.round(elapsed/duration*frameCount),phase=frame/frameCount*.3;
   const signature=[frameCount,state.fxSweepWidth,state.fxSweepTaper,state.fxSweepCurve,state.fxSweepAngle,state.fxSweepSaturation,state.fxSweepBrightness].join(":");
   if(signature!==sweepSignature){sweepSignature=signature;sweepFrames.clear();}
-  const img=session.pictures[item.type+item.level];if(!img)return;
+  const img=sourceImage||session.pictures[item.type+item.level];if(!img)return;
   foilCanvas??=document.createElement('canvas');
   const n=256;if(foilCanvas.width!==n){foilCanvas.width=n;foilCanvas.height=n;}
   const f=foilCanvas.getContext('2d');f.clearRect(0,0,n,n);
@@ -136,10 +136,10 @@ function createPlaytestRenderer(session){
   }
   f.drawImage(sweepFrames.get(frame),0,0);
   f.globalCompositeOperation='source-over';
-  const b=g.cells[index],size=b.width*.94*iconScale(item);
+  const b=g.cells[index],size=iconBox?.width??b.width*.94*iconScale(item);
   c.save();if(iconScale(item)<=1){rounded(c,b.x,b.y,b.width,b.height,b.width*state.cellRadius/100);c.clip();}
   const opacity=state.fxSweepOpacity/100*(.57+.22*slow)/.79*Math.min(1,t/.08,(1-t)/.08);
-  const dx=b.x+(b.width-size)/2,dy=b.y+(b.height-size)/2;
+  const dx=iconBox?.x??b.x+(b.width-size)/2,dy=iconBox?.y??b.y+(b.height-size)/2;
   // One selected blend operation, with no hidden second pass altering the chosen result.
   c.globalCompositeOperation=state.fxSweepBlend;c.globalAlpha=opacity;
   c.drawImage(foilCanvas,dx,dy,size,size);c.restore();
@@ -149,7 +149,7 @@ function createPlaytestRenderer(session){
  function drawCellBadges(c,g,markers){
   for(let i=0;i<session.board.slots.length;i++){
    const item=session.board.slots[i];
-   if(!item||session.flights.has(i)||session.drag?.from===i||session.keyboardSource===i)continue;
+   if(!item||session.flights.has(i)||(session.drag?.moved&&session.drag.from===i)||session.keyboardSource===i)continue;
    const box=g.cells[i];
    if(session.board.definition?.(item)?.producerId)drawProducerEnergy(c,box);
    if(markers?.needed.has(orderItemKey(item)))drawOrderCheck(c,box,true);
@@ -185,7 +185,7 @@ function createPlaytestRenderer(session){
   c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetX=0;c.shadowOffsetY=0;
   c.drawImage(img,-size/2,-size/2,size,size);c.restore();
  }
- let selectionTarget=-1,selectionStart=0;
+ let selectionTarget=-1,selectionStart=0,visualPause=0;
  function drawSelection(c,b,time){
   const size=b.width,thickness=size*state.fxSelectionThickness/100,rim=thickness*(.086/.06);
   // 50% retains the former edge position; higher values expand beyond the cell.
@@ -211,10 +211,10 @@ function createPlaytestRenderer(session){
   if(!session.active)return;const time=performance.now();
   const markers=session.showOrders?orderMarkerState(orderQueue.entries,session.board.slots):null;
   if(session.showOrders){drawCustomerBubbles(c,g,markers);refreshOrderButtons();}
-  for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time,true);
+  for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time-visualPause,true);
   for(let i=0;i<63;i++)if(session.board.slots[i])drawIcon(c,g,session.board.slots[i],i,time,session.drag?.moved&&session.drag.from===i?0.2:1);
-  for(let i=0;i<63;i++)if(session.board.slots[i])drawPrismaticSweep(c,g,session.board.slots[i],i,time);
-  for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time);
+  for(let i=0;i<63;i++)if(session.board.slots[i])drawPrismaticSweep(c,g,session.board.slots[i],i,time-visualPause);
+  for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time-visualPause);
   const target=!session.drag?.moved&&session.board.slots[session.selected]?session.selected:-1;
   if(target!==selectionTarget){selectionTarget=target;selectionStart=time;}
   if(target>=0)drawSelection(c,g.cells[target],time);
@@ -222,5 +222,18 @@ function createPlaytestRenderer(session){
   drawItemInfo(c,g,session);drawFlights(c,g,time);drawDragged(c,g,time);
  }
 
- return {draw};
+ function resume(elapsed){
+  selectionStart+=elapsed;visualPause+=elapsed;
+  for(const entries of [session.effects,session.failures])for(const [i,t]of entries)entries.set(i,t+elapsed);
+  for(const flight of session.flights.values())flight.start+=elapsed;
+ }
+ function drawDetailsItem(c,box,item,index,time,authoredImage=null){
+  const img=authoredImage||session.pictures[item.type+item.level];if(!img)return;
+  const size=authoredImage?166:128,g={cells:{[index]:box}},icon={x:box.x+(box.width-size)/2,y:box.y+(box.height-size)/2,width:size};
+  drawMaxLevelSparkles(c,g,item,index,time,true);
+  c.drawImage(img,icon.x,icon.y,size,size);drawPrismaticSweep(c,g,item,index,time,icon,img);
+  drawMaxLevelSparkles(c,g,item,index,time);
+ }
+ // The details window reuses these same sprite caches and bounded sweep-frame cache.
+ return {draw,drawSelection,drawDetailsItem,resume};
 }

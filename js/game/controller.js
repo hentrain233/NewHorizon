@@ -25,10 +25,11 @@
  const center=b=>({x:b.x+b.width/2,y:b.y+b.height/2});
  const busy=i=>flights.has(i);
  const session={failures:new Map(),get active(){return active;},set active(v){active=v;},get drag(){return drag;},set drag(v){drag=v;},get selected(){return selected;},set selected(v){selected=v;},get keyboardSource(){return keyboardSource;},set keyboardSource(v){keyboardSource=v;},get board(){return board;},get flights(){return flights;},get effects(){return effects;},set effects(v){effects=v;},get pictures(){return pictures;}};
- const {draw}=createPlaytestRenderer(session);
+ const renderer=createPlaytestRenderer(session),{draw}=renderer;
  const label=item=>item?`${board.definition(item)?.name||item.type} · ${item.level} 级`:'';
  const feedback=createPlaytestFeedback(session,label,message,center);
  bindPlaytestInput(session,feedback,message,busy,label,center);
+ window.itemDetails=createItemDetails(session,renderer,runtime);
  const editor=window.gameTools?.bind({session,toggle,restart,message,busy,label});
  function message(text){if(editor)editor.message(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}

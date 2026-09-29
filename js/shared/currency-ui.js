@@ -10,12 +10,12 @@ function drawCurrencyText(c,text,x,y,spacing,method='fillText',maxWidth){
  c.translate(x,y);c.scale(maxWidth===undefined?1:Math.min(1,maxWidth/Math.max(1,width)),1);
  chars.forEach((ch,i)=>{c[method](ch,cursor,0);cursor+=widths[i]+spacing;});c.restore();
 }
-function drawCurrencyUI(c,g){
+function drawCurrencyUI(c,g,only){
  const s=g.W/1170;
  c.save();c.scale(s,s);
  const y=state.fxCurrencyY*g.H/state.height,h=state.fxCurrencyHeight,gap=state.fxCurrencyGap,left=state.fxCurrencyX,slot=state.fxCurrencyWidth+37;
  const radius=Math.min(state.fxCurrencyRadius,h/2,state.fxCurrencyWidth/2);
- CURRENCY_PREVIEW.forEach((entry,i)=>{
+ CURRENCY_PREVIEW.forEach((entry,i)=>{if(only&&entry.icon!==only)return;
   const x=left+i*(slot+gap),pillX=x+37,pillW=state.fxCurrencyWidth;
   c.save();c.shadowColor=rgba(state.fxCurrencyShadowColor,state.fxCurrencyShadowOpacity/100);c.shadowBlur=state.fxCurrencyShadowBlur*s;c.shadowOffsetX=state.fxCurrencyShadowX*s;c.shadowOffsetY=state.fxCurrencyShadowY*s;
   const fill=c.createLinearGradient(0,y,0,y+h);

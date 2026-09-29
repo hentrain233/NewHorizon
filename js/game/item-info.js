@@ -1,6 +1,7 @@
 'use strict';
 // Presentation only: selection and item definitions remain owned by the game.
 function drawItemInfo(c,g,session){
+ session.infoHit=null;
  const s=state,unit=g.W/1170,w=g.W*s.fxInfoWidth/100/unit,h=s.fxInfoHeight;
  const x=g.W*s.fxInfoX/100,y=g.infoY??(g.H*(1-s.fxInfoBottom/100)-h*unit);
  const item=session.board.slots[session.selected],definition=session.board.definition(item);
@@ -19,10 +20,12 @@ function drawItemInfo(c,g,session){
  c.fillStyle=s.fxInfoFill;c.fill();c.restore();
  if(s.fxInfoStroke>0){c.lineWidth=s.fxInfoStroke;c.strokeStyle=s.fxInfoBorder;c.stroke();}
  if(definition){
-  const title=`${definition.name}（等级${definition.tier}）`;
-  c.font=`bold ${s.fxInfoTitleSize}px "${s.fxInfoTitleFont}", sans-serif`;
+  const title=definition.name+'（等级'+definition.tier+'）';
+  const size=s.fxInfoTitleSize;
+  c.font=`bold ${size}px "${s.fxInfoTitleFont}", sans-serif`;
   const th=s.fxInfoTabHeight,pad=s.fxInfoTabPadding,iconSpace=s.fxInfoISize*.65;
-  const tw=Math.min(w,Math.max(th,(c.measureText(title).width+pad*2+iconSpace)*s.fxInfoTabWidth/100));
+  const textW=c.measureText(title).width;
+  const tw=Math.min(w,Math.max(th,(textW+pad*2+iconSpace)*s.fxInfoTabWidth/100));
   const slant=Math.min(s.fxInfoTabSlant,tw/3),r=Math.min(s.fxInfoTabRadius,th/2,(tw-slant)/4);
   c.save();c.translate(s.fxInfoTabX,s.fxInfoTabY);const tab=new Path2D();
   tab.moveTo(r,0);tab.lineTo(tw-slant-r,0);tab.quadraticCurveTo(tw-slant,0,tw-slant+r/2,r);
@@ -31,13 +34,36 @@ function drawItemInfo(c,g,session){
   paintInfoTab(c,tab,th,s);
   if(s.fxInfoTabStroke>0){c.strokeStyle=s.fxInfoTabBorder;c.lineWidth=s.fxInfoTabStroke;c.stroke(tab);}
   c.textAlign='left';c.textBaseline='middle';c.fillStyle=s.fxInfoTitleColor;
-  if(s.fxInfoTitleStroke>0){c.strokeStyle=s.fxInfoTitleBorder;c.lineWidth=s.fxInfoTitleStroke;c.strokeText(title,pad,th/2,Math.max(1,tw-pad*2-iconSpace));}
-  c.fillText(title,pad,th/2,Math.max(1,tw-pad*2-iconSpace));
+  const maxW=Math.max(1,tw-pad*2-iconSpace);
+  if(s.fxInfoTitleStroke>0){c.strokeStyle=s.fxInfoTitleBorder;c.lineWidth=s.fxInfoTitleStroke;c.strokeText(title,pad,th/2,maxW);}
+  c.fillText(title,pad,th/2,maxW);
   const ix=tw-iconSpace/2-pad/2+s.fxInfoIX,iy=th/2+s.fxInfoIY;
+  session.infoHit={x:x+s.fxInfoTabX*unit,y:y+(s.fxInfoTabY+Math.min(0,iy-s.fxInfoISize/2))*unit,width:Math.max(tw,ix+s.fxInfoISize/3)*unit,height:Math.max(th,iy+s.fxInfoISize/2,th-Math.min(0,iy-s.fxInfoISize/2))*unit};
   drawInfoI(c,ix,iy,s.fxInfoISize,s.fxInfoIStroke,s.fxInfoIBorder,s.fxInfoIColor);c.restore();
   c.font=`bold ${s.fxInfoBodySize}px "${s.fxInfoBodyFont}", sans-serif`;c.textAlign='left';c.textBaseline='middle';c.fillStyle=s.fxInfoBodyColor;
   c.fillText(definition.description||'合成相同的物品进行升级。',s.fxInfoTextX,s.fxInfoTextY,Math.max(1,w-s.fxInfoTextX-20));
  }
+ c.restore();
+}
+// Cloud popup titles only; the bottom info tab always uses one expanding line.
+function itemTitleLayout(name){
+ const chars=[...name];
+ if(chars.length<=5)return {lines:[name]};
+ const tail=chars.length>=8?5:4;
+ return {lines:[chars.slice(0,-tail).join(''),chars.slice(-tail).join('')]};
+}
+function drawCloudTitle(c,name){
+ // 悬浮UI2「贝壳风铃」：方正粗圆简体 64，字心 (661, 490.5)。双行用悬浮UI的 56，行心距 80。
+ // 描边外部 4。投影：正常、#19709F、100%、角度 90、距离 4、扩展 100%、大小 3。
+ if(!FZCuYuanLoaded)return;
+ const laid=itemTitleLayout(name),two=laid.lines.length>1,size=two?56:64,x=661,ink='#19709F';
+ const ys=two?[441.7,521.7]:[490.5];
+ c.save();c.font=`400 ${size}px "FZCuYuan"`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.miterLimit=2;
+ laid.lines.forEach((line,i)=>{
+  const y=ys[i];
+  c.strokeStyle=ink;c.fillStyle=ink;c.lineWidth=6;c.strokeText(line,x,y+4);c.fillText(line,x,y+4);
+  c.lineWidth=8;c.strokeText(line,x,y);c.fillStyle='#FFFFFF';c.fillText(line,x,y);
+ });
  c.restore();
 }
 function paintInfoTab(c,path,h,s){

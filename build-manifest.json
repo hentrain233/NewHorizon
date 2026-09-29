@@ -1,8 +1,8 @@
 [
   {
     "path": "index.html",
-    "bytes": 2807,
-    "sha256": "08c2f65220d6e7c950f1996fac38966d4bc7bb4c86fd85d60072d95bb62881e3"
+    "bytes": 2976,
+    "sha256": "0ccdae3c5a83641aa7a35789fa32eb737110cb9a32949fb43ae13174cdbb5148"
   },
   {
     "path": ".nojekyll",
@@ -46,18 +46,18 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 15378,
-    "sha256": "de0e74132498ad1637c70d21facb697f8f91c8462e752223dad2814c9b0cd62c"
+    "bytes": 16775,
+    "sha256": "469b83f1b05a1ca1ba4ec2dac34639cf15593077c0cf6f24622e1977526047df"
   },
   {
     "path": "js/shared/currency-ui.js",
-    "bytes": 3683,
-    "sha256": "4d65d7f7a3fd2a542ab486b3a67701764a98e22a4f1295cc133c823ccb7b7f0d"
+    "bytes": 3722,
+    "sha256": "b7701866cdccc385c8581b6bb1c860dc1730861d067a4680b8ee7734dcc80813"
   },
   {
     "path": "js/shared/media.js",
-    "bytes": 5862,
-    "sha256": "9999ea196505559e3212e71e5e548398792500b69d8168ac7a3493bb3cb4a9ee"
+    "bytes": 5965,
+    "sha256": "d825d9979b440e3d43ec350ce4791e9c14f7dd22767816814bddac1eb96ec782"
   },
   {
     "path": "js/shared/font-assets.js",
@@ -66,8 +66,8 @@
   },
   {
     "path": "js/shared/fonts.js",
-    "bytes": 937,
-    "sha256": "b97c119eabf1773d42ef1cbd30937db0a2fc53c5b6536136edc6f2dbe89a31ee"
+    "bytes": 1305,
+    "sha256": "5aedeb664f5eaa89dffdc46403d308528822f11efa03a67d15043d715597527a"
   },
   {
     "path": "js/shared/startup-design.js",
@@ -86,8 +86,8 @@
   },
   {
     "path": "js/game/content/catalog.js",
-    "bytes": 3471,
-    "sha256": "ad59bbbf755280baa7e8089a7108620940cfd272846ff373432ec4fb0c1ef167"
+    "bytes": 4026,
+    "sha256": "1083d518f028846ae097506c42debf3477ba1a7a7f35be483065f31ae6a5492d"
   },
   {
     "path": "js/game/content/validation.js",
@@ -141,8 +141,8 @@
   },
   {
     "path": "js/game/input.js",
-    "bytes": 5627,
-    "sha256": "f02dc1618a6334ca58b35bc2a7574d2bb1ab16436cc2e5c038f94576063fcc11"
+    "bytes": 6437,
+    "sha256": "f5a5821616a6b292000f894451fc8d28be6254f4631ac08bd7868f68a1480113"
   },
   {
     "path": "js/game/order-preview.js",
@@ -151,13 +151,23 @@
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 5216,
-    "sha256": "bb04b9b74a8bc7fb24f5e6d976b1c1c5854adddd8f75e26d81ac03e55e6ebed2"
+    "bytes": 6576,
+    "sha256": "3f89358e269c5950f73b465cd7e05ce15451decf050df01562e7cda0ee0b0bfd"
+  },
+  {
+    "path": "js/game/item-detail-assets.js",
+    "bytes": 4568313,
+    "sha256": "2bc1f1e1b5f9fa106acf18a5a28274bb1a4ad59537e2e1c3f0031155312e6c19"
+  },
+  {
+    "path": "js/game/item-details.js",
+    "bytes": 10870,
+    "sha256": "67146ff2ded0d2637da40440debcd953cf183a8537a467de807a08ccdb62dd0b"
   },
   {
     "path": "js/game/animations.js",
-    "bytes": 15984,
-    "sha256": "345a893636e32640958ce15eedf900792eae0b69b742f5de33504837f5271096"
+    "bytes": 16995,
+    "sha256": "678925b688cb191101d589cfdc42a2601bacc56268f61148d34da921eb4acc86"
   },
   {
     "path": "js/game/feedback.js",
@@ -166,8 +176,8 @@
   },
   {
     "path": "js/game/controller.js",
-    "bytes": 5189,
-    "sha256": "071be42059d324f0c6917f1ed59b0c9c28dfb24e7d67fef7fb1d14cda7e33e7f"
+    "bytes": 5272,
+    "sha256": "c8128722c979ed437a032e7733cf0c9da0df9ea2e0181a0d3af1ac7a4fcc22d7"
   },
   {
     "path": "js/game/renovation-motion.js",
@@ -186,13 +196,23 @@
   },
   {
     "path": "player.css",
-    "bytes": 2609,
-    "sha256": "73f079b40239d7c7539d447d60d758abfee1e1c1d1f7bd65b93c9606c9c1536b"
+    "bytes": 2748,
+    "sha256": "01b155b1d50d9e739840dc130fceacffeca1e0f02078e734066ddab1675c9279"
   },
   {
     "path": "assets/navigation.css",
     "bytes": 1009,
     "sha256": "4dccf467c0bae61c13f6c446397bdf36ca1afeb85386805b4755dce2e54eef48"
+  },
+  {
+    "path": "assets/item-details.css",
+    "bytes": 776,
+    "sha256": "9345c7d31fcfb571718c0257eaf0085fb1339d19941ee016183e98c4c5506154"
+  },
+  {
+    "path": "fonts/FZCuYuan-Web.woff2",
+    "bytes": 159840,
+    "sha256": "944cff3c188f9a1859c7851bd33eb5d5703fb0df1b91be4db787b9af1fffeeb1"
   },
   {
     "path": "js/game/renovation-assets.js",
@@ -223,6 +243,11 @@
     "path": "assets/baked-bars/bar-dark.png",
     "bytes": 122209,
     "sha256": "c005230d081ad2a5b6af004c5dae761ab0fb92cc6be32ca9f6403b5b6b66c9ff"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "bytes": 1182,
+    "sha256": "3ec0e401208e21e8864679ac2c9be02ea442fcd5d960aa8e4c9a62294d35aac2"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

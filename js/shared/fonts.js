@@ -1,9 +1,16 @@
 'use strict';
 // Embedded data avoids local-file CORS restrictions and system font dependencies.
-const bundledFontsReady=Promise.all((window.MERGE_FONT_ASSETS||[]).map(async spec=>{
+// Title face is fonts/FZCuYuan-Web.woff2, family "FZCuYuan" in CSS.
+let FZCuYuanLoaded=false;
+const titleFontReady=(async()=>{
+ try{await document.fonts.load('64px "FZCuYuan"');}catch(error){console.error(error);}
+ await document.fonts.ready;
+ FZCuYuanLoaded=[...document.fonts].some(font=>font.family==='FZCuYuan'&&font.status==='loaded');
+})();
+const bundledFontsReady=Promise.all([...(window.MERGE_FONT_ASSETS||[]).map(async spec=>{
  const face=new FontFace(spec.family,`url("${spec.source}")`,{style:spec.style,weight:spec.weight});
  try{await face.load();document.fonts.add(face);return face;}catch(error){notify(`字体加载失败：${spec.family}`);throw error;}
-}));
+}),titleFontReady]);
 bundledFontsReady.then(()=>{if(geometry)updatePreview();}).catch(()=>{});
 function currencyFont(size=state.fxCurrencyFontSize){
  const name=state.fxCurrencyFont;

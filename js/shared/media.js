@@ -61,4 +61,4 @@ function filteredMedia(media,opt,drawWidth){
  c.putImageData(pixels,0,0);entry.key=key;return entry.canvas;
 }
 function updatePlayback(){if(!assets.video)return;if(state.backgroundType==='video')assets.video.play().catch(()=>notify('浏览器暂停了自动播放，请点击预览继续。'));else assets.video.pause();}
-function animate(){if(!document.hidden&&(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused))drawCanvas();requestAnimationFrame(animate);}
+function animate(){if(!document.hidden){if(window.itemDetails?.active){window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawCanvas();}requestAnimationFrame(animate);}
