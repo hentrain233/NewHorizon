@@ -131,6 +131,8 @@ function drawOrderOverflow(g,draw){
 }
 function paintFullBleed(g){
  const b=g.bleed;if(!b)return null;
+ if(window.renovationScreen?.active){if(bleedDisplay)bleedDisplay.hidden=true;return b;}
+ if(bleedDisplay)bleedDisplay.hidden=false;
  if(!bleedDisplay){
   bleedDisplay=document.createElement('canvas');bleedDisplay.id='game-backdrop';bleedDisplay.setAttribute('aria-hidden','true');
   bleedDisplay.style.cssText='position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;pointer-events:none;z-index:0;box-shadow:none;background:none';
@@ -142,11 +144,7 @@ function paintFullBleed(g){
  else if(bleedDisplay.style.left){bleedDisplay.style.left='0';bleedDisplay.style.top='0';bleedDisplay.style.right='0';bleedDisplay.style.bottom='0';bleedDisplay.style.width='100vw';bleedDisplay.style.height='100dvh';}
  const back=bleedBack.getContext('2d'),front=bleedFront.getContext('2d'),display=bleedDisplay.getContext('2d');
  let changed=false;
- if(window.renovationScreen?.active){
-  back.clearRect(0,0,b.W,b.H);front.clearRect(0,0,b.W,b.H);
-  window.renovationScreen.drawBackdrop(back,g);bleedSceneCache=null;changed=true;
- }
- else{
+ {
   const expanded={...g,W:b.W,H:b.H,bar:{...g.bar,x:-b.W*.12,width:b.W*1.24,y:g.bar.y+b.y},barBottom:g.barBottom+b.y};
   const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+JSON.stringify([b,g.bar,g.board]);
   const refs=[assets.image,assets.texture,assets.video,...Object.values(artwork)];

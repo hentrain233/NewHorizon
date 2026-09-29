@@ -46,8 +46,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 17266,
-    "sha256": "e6d80dc3c6e7d38cdba59ad2fb6bbfda0ab4b464f2762f64562b19ca5da3eb45"
+    "bytes": 17212,
+    "sha256": "fb75b67c5a68be0ee63b3e890b5003ca0e7e0e538f32d6b3fac748aa7292b4bc"
   },
   {
     "path": "js/shared/ui-bake-assets.js",
@@ -171,8 +171,8 @@
   },
   {
     "path": "js/game/item-details.js",
-    "bytes": 10800,
-    "sha256": "c9aa20ad47b1c3e8e167eb3a231561e6bf0a769303afec49058be38a5d0144a0"
+    "bytes": 10904,
+    "sha256": "256775f49f01d3d510da299938b36703f7f2adea35474d3103ca067f0af3c41a"
   },
   {
     "path": "js/game/animations.js",
@@ -196,8 +196,8 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 22800,
-    "sha256": "96e6c80ef6f955b4b3b098a531a953ec505261015883f12a2d5f243ec12eb974"
+    "bytes": 23017,
+    "sha256": "a157af27876360a9cca4bdbfb6e891f5415ea69346c460b83a29761a2d9a43ce"
   },
   {
     "path": "js/mobile-play.js",
@@ -211,8 +211,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 1009,
-    "sha256": "4dccf467c0bae61c13f6c446397bdf36ca1afeb85386805b4755dce2e54eef48"
+    "bytes": 1098,
+    "sha256": "28c61c773c8b0bafce374982bca495f71f5d9df6d590f4a3064c3646b5b431f1"
   },
   {
     "path": "assets/item-details.css",
@@ -256,8 +256,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 3132,
-    "sha256": "6c402d9229044926bcab36563c025f8a1a0bf64d86f51401ee282584948f3519"
+    "bytes": 4210,
+    "sha256": "17234a27763d0d767bf25da3c9116f3f6c77ef948e00d40a2dbd5968b8f05f03"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

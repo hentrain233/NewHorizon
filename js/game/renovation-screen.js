@@ -6,7 +6,15 @@
  const cloudMotion=RenovationMotion.createCloudMotion();
  const camera={x:1573,y:2354,zoom:.75}; // World-space center; zoom is deliberately transient.
  let active=false,loading=false,transition=null,animation=null,pan=null,pinch=null,ready=null,background=null,building=null,stage=-1,cameraTween=null;
- const images=new Map(),pointers=new Map();let cloudSprite=null,repairPoints=[],mapLayer=null,mapKey='',bubbleBake=null,cloudBase=0,cloudEpoch=0,cloudHold=null;
+ const images=new Map(),pointers=new Map();let cloudSprite=null,repairPoints=[],bubbleBake=null,cloudBase=0,cloudEpoch=0,cloudHold=null;
+ // World coordinates never move. Only the camera transform maps them into the viewport.
+ const mapView=document.createElement('div'),mapWorld=document.createElement('div');
+ mapView.id='renovation-world-view';mapView.hidden=true;mapView.setAttribute('aria-hidden','true');
+ mapView.style.cssText='position:fixed;overflow:hidden;pointer-events:none;z-index:0;background:#54BFD5;contain:strict';
+ mapWorld.style.cssText=`position:absolute;width:${world.width}px;height:${world.height}px;transform-origin:0 0`;
+ mapView.appendChild(mapWorld);document.body.appendChild(mapView);
+ let worldReady=false,worldStage=-1,buildingNode=null;const cloudNodes=[];
+ const style=(el,key,value)=>{if(el.style[key]!==value)el.style[key]=value;};
  const sweepCanvas=document.createElement('canvas');sweepCanvas.width=640;sweepCanvas.height=457;
  const sweepContext=sweepCanvas.getContext('2d');
  const wrap=document.getElementById('canvas-wrap');wrap.style.position='relative';
@@ -23,7 +31,7 @@
  const limit=(n,a,b)=>Math.max(a,Math.min(b,n)),ease=t=>1-(1-t)**3;
  const completed=()=>{let n=0;while(n<tasks.length&&runtime.state.renovation.completedTaskIds.includes(tasks[n].id))n++;return n;};
  const task=()=>tasks[stage];
- const redraw=()=>drawCanvas();
+ // The existing animation loop owns rendering; input only changes camera/state.
  function viewMargins(g){const geo=g||(typeof geometry==='undefined'?null:geometry);if(!geo?.bleed)return {left:W/2,right:W/2,top:H/2,bottom:H/2};const s=geo.W/W,b=geo.bleed;return {left:(b.x+geo.W/2)/s,right:(b.W-b.x-geo.W/2)/s,top:(b.y+geo.H/2)/s,bottom:(b.H-b.y-geo.H/2)/s};}
  function fitZoom(g){const m=viewMargins(g);return Math.max(.65,(m.left+m.right)/world.width,(m.top+m.bottom)/world.height);}
  function clampCamera(g){const m=viewMargins(g),minZ=fitZoom(g);if(camera.zoom<minZ){camera.zoom=minZ;zoomText.textContent=Math.round(minZ*100)+'%';}const z=camera.zoom,place=(v,lo,hi)=>lo>hi?(lo+hi)/2:limit(v,lo,hi);camera.x=place(camera.x,m.left/z,world.width-m.right/z);camera.y=place(camera.y,m.top/z,world.height-m.bottom/z);}
@@ -33,13 +41,13 @@
  function loadImage(url){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('餐厅图片加载失败，请检查素材文件。'));image.src=url;});}
  function loadAssets(){return ready||(ready=new Promise((resolve,reject)=>{if(window.RENOVATION_ASSETS)return resolve();const script=document.createElement('script');script.src='js/game/renovation-assets.js';script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('餐厅素材加载失败'));};document.head.appendChild(script);}).then(async()=>{background=await loadImage(window.RENOVATION_ASSETS.background);cloudSprite=await loadImage(window.RENOVATION_ASSETS.cloudSprite);building=window.RENOVATION_ASSETS.building;}).catch(e=>{ready=null;throw e;}));}
  async function loadStage(n){if(!images.has(n))images.set(n,await loadImage(window.RENOVATION_ASSETS.stages[n]));for(const key of images.keys())if(Math.abs(key-n)>1)images.delete(key);return images.get(n);}
- function setZoom(z,p={x:W/2,y:H/2}){if(animation||transition)return;const x=camera.x+(p.x-W/2)/camera.zoom,y=camera.y+(p.y-H/2)/camera.zoom;camera.zoom=limit(z,fitZoom(),1.2);camera.x=x-(p.x-W/2)/camera.zoom;camera.y=y-(p.y-H/2)/camera.zoom;clampCamera();zoomText.textContent=Math.round(camera.zoom*100)+'%';saveCamera();redraw();}
+ function setZoom(z,p={x:W/2,y:H/2}){if(animation||transition)return;const x=camera.x+(p.x-W/2)/camera.zoom,y=camera.y+(p.y-H/2)/camera.zoom;camera.zoom=limit(z,fitZoom(),1.2);camera.x=x-(p.x-W/2)/camera.zoom;camera.y=y-(p.y-H/2)/camera.zoom;clampCamera();zoomText.textContent=Math.round(camera.zoom*100)+'%';if(!pointers.size)saveCamera();}
  minus.onclick=()=>setZoom(camera.zoom-.05);plus.onclick=()=>setZoom(camera.zoom+.05);
  function focusTask(smooth=true){const t=task();if(!t)return;const target={x:t.mapAnchor[0],y:t.mapAnchor[1]-H*.17/camera.zoom};if(smooth)cameraTween={from:{...camera},to:target,start:performance.now()};else{Object.assign(camera,target);clampCamera();saveCamera();}}
  locate.onclick=()=>{if(!animation&&!transition)focusTask();};
- function setActive(value){active=value;window.mergePlayTest.freeze(value);updatePlayback();nav.setAttribute('aria-label',value?'返回合成':'翻新餐厅');nav.dataset.scene=value?'map':'board';nav.querySelector('img').src=value?'assets/stall-icon.png':'assets/map-icon.png';controls.hidden=!value||window.MERGE_PLAYER_BUILD===true||document.body.classList.contains('mobile-play');for(const el of document.querySelectorAll('#test-toolbar button,#playtest'))el.disabled=value;canvas.setAttribute('aria-label',value?'餐厅翻新地图。拖动查看，滚轮或双指缩放，点击金币气泡清理。':'合成测试盘');}
+ function setActive(value){active=value;mapView.hidden=!value;document.body.classList.toggle('renovation-active',value);if(bleedDisplay)bleedDisplay.hidden=value;window.mergePlayTest.freeze(value);updatePlayback();nav.setAttribute('aria-label',value?'返回合成':'翻新餐厅');nav.dataset.scene=value?'map':'board';nav.querySelector('img').src=value?'assets/stall-icon.png':'assets/map-icon.png';controls.hidden=!value||window.MERGE_PLAYER_BUILD===true||document.body.classList.contains('mobile-play');for(const el of document.querySelectorAll('#test-toolbar button,#playtest'))el.disabled=value;canvas.setAttribute('aria-label',value?'餐厅翻新地图。拖动查看，滚轮或双指缩放，点击金币气泡清理。':'合成测试盘');}
  // The white transition is an isolated hook; replace its draw/timing without changing scenes.
- function beginTransition(toMap){transition={start:performance.now(),duration:600,toMap,switched:false};nav.disabled=true;redraw();}
+ function beginTransition(toMap){transition={start:performance.now(),duration:600,toMap,switched:false};nav.disabled=true;}
  async function navigate(){if(loading||transition)return;if(active){saveCamera();window.flushGameSave();animation=null;cameraTween=null;beginTransition(false);return;}
   loading=true;nav.disabled=true;nav.setAttribute('aria-label','加载中…');try{if(!window.mergePlayTest.active)await window.mergePlayTest.toggle();if(!window.mergePlayTest.active)return;await loadAssets();stage=completed();await loadStage(stage);Object.assign(camera,{x:1573,y:2354},runtime.state.renovation.camera||{},{zoom:.75});clampCamera();zoomText.textContent='75%';beginTransition(true);}catch(e){notify(e.message);}finally{loading=false;if(!transition){nav.disabled=false;nav.setAttribute('aria-label','翻新餐厅');}}
  }
@@ -56,7 +64,7 @@
    // Save committed purchase before starting presentation. Closing mid-animation is safe.
    if(!window.flushGameSave())notify('本机存档暂不可用，请勿关闭页面，避免进度丢失。');
    const timing=RenovationMotion.timing(state.fxRepairFillDuration,state.fxRepairReveal);
-   animation={start:performance.now(),from:before,cost:t.coinCost,task:t,previous:stage,timing,duration:timing.duration};cameraTween=null;pan=null;redraw();
+   animation={start:performance.now(),from:before,cost:t.coinCost,task:t,previous:stage,timing,duration:timing.duration};cameraTween=null;pan=null;
   }catch(e){notify(e.message);}finally{loading=false;}
  }
  function displayCoins(){if(!active||!animation)return runtime.state.currencies.coins;const t=RenovationMotion.fill((performance.now()-animation.start)/animation.timing.fill);return runtime.state.currencies.coins+animation.cost-Math.round(animation.cost*t);}
@@ -69,13 +77,23 @@
  function coin(c,x,y,size){const img=artwork.backgroundcoin;if(img)c.drawImage(img,x-size/2,y-size/2,size,size);else{c.fillStyle='#FFC83D';c.beginPath();c.arc(x,y,size*.4,0,Math.PI*2);c.fill();}}
  function cloudTime(now){const hold=pointers.size>0||!!pan||!!pinch||!!cameraTween;if(hold){if(cloudHold==null)cloudHold=cloudBase+(cloudEpoch?now-cloudEpoch:0);return cloudHold;}if(cloudHold!=null){cloudBase=cloudHold;cloudEpoch=now;cloudHold=null;}if(!cloudEpoch)cloudEpoch=now;return cloudBase+now-cloudEpoch;}
  function visibleStage(now){return animation&&now-animation.start>=animation.timing.revealStart?animation.previous+1:stage;}
- function ensureMap(g,now){if(!background)return null;const b=g.bleed,w=b?b.W:g.W,h=b?b.H:g.H,shown=visibleStage(now),key=[camera.x,camera.y,camera.zoom,w,h,b?b.x:0,b?b.y:0,shown].join(',');if(!mapLayer)mapLayer=document.createElement('canvas');if(mapLayer.width!==w)mapLayer.width=w;if(mapLayer.height!==h)mapLayer.height=h;if(mapKey===key)return mapLayer;const wctx=mapLayer.getContext('2d');wctx.setTransform(1,0,0,1,0,0);wctx.imageSmoothingEnabled=true;wctx.imageSmoothingQuality='high';wctx.fillStyle='#54BFD5';wctx.fillRect(0,0,w,h);const s=g.W/W;wctx.translate(b?b.x+g.W/2:g.W/2,b?b.y+g.H/2:g.H/2);wctx.scale(s*camera.zoom,s*camera.zoom);wctx.translate(-camera.x,-camera.y);wctx.drawImage(background,-2,-2,world.width+4,world.height+4);const img=images.get(shown)||images.get(stage);if(img)wctx.drawImage(img,building.x,building.y,building.width,building.height);mapKey=key;return mapLayer;}
- function drawClouds(c,now){
-  if(!cloudSprite)return;
-  const left=camera.x-W/2/camera.zoom,right=camera.x+W/2/camera.zoom,top=camera.y-H/2/camera.zoom,bottom=camera.y+H/2/camera.zoom;
-  window.RENOVATION_ASSETS.clouds.forEach((box,i)=>{const m=cloudMotion(now,i),w=box.width*m.scale,h=box.height*m.scale,x=box.x+(box.width-w)/2+m.dx,y=box.y+(box.height-h)/2;
-   if(x>right||x+w<left||y>bottom||y+h<top)return;c.drawImage(cloudSprite,x,y,w,h);
-  });
+ function presentWorld(g,now){
+  if(!background)return;
+  if(!worldReady){
+   const add=(source,box)=>{const img=source.cloneNode();img.draggable=false;img.style.cssText=`position:absolute;left:${box.x}px;top:${box.y}px;width:${box.width}px;height:${box.height}px;max-width:none`;mapWorld.appendChild(img);return img;};
+   add(background,{x:-2,y:-2,width:world.width+4,height:world.height+4});
+   buildingNode=add(images.get(stage),building);
+   for(const box of window.RENOVATION_ASSETS.clouds)cloudNodes.push(add(cloudSprite,box));
+   worldReady=true;
+  }
+  const shown=visibleStage(now);if(worldStage!==shown){buildingNode.src=images.get(shown).src;worldStage=shown;}
+  const r=canvas.getBoundingClientRect(),frame=window.playFrame;
+  const view=g.bleed?(frame||{left:0,top:0,width:innerWidth,height:innerHeight}):r;
+  for(const key of ['left','top','width','height'])style(mapView,key,view[key]+'px');
+  const unit=r.width/W,z=unit*camera.zoom;
+  style(mapWorld,'transform',`matrix(${z},0,0,${z},${r.left-view.left+r.width/2-camera.x*z},${r.top-view.top+r.height/2-camera.y*z})`);
+  const time=cloudTime(now);
+  window.RENOVATION_ASSETS.clouds.forEach((box,i)=>{const m=cloudMotion(time,i);style(cloudNodes[i],'transform',`translateX(${m.dx}px) scale(${m.scale})`);});
  }
  function drawRepairEffect(c,now){
   if(!animation)return;
@@ -107,19 +125,11 @@
  function update(now){if(cameraTween){const t=limit((now-cameraTween.start)/500,0,1);camera.x=cameraTween.from.x+(cameraTween.to.x-cameraTween.from.x)*ease(t);camera.y=cameraTween.from.y+(cameraTween.to.y-cameraTween.from.y)*ease(t);clampCamera();if(t===1){cameraTween=null;saveCamera();}}
   if(animation&&now-animation.start>=animation.duration){stage=completed();animation=null;focusTask();}
  }
- let frameNow=0;
- function syncView(g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera(g);}frameNow=performance.now();update(frameNow);return frameNow;}
- function draw(c,g){const now=g.bleed?frameNow||syncView(g):syncView(g);
-  if(g.bleed)c.drawImage(bleedBack,-g.bleed.x,-g.bleed.y);else{const layer=ensureMap(g,now);if(layer)c.drawImage(layer,0,0);}
+ function syncView(g){const height=g.H*W/g.W;if(H!==height){H=height;clampCamera(g);}const now=performance.now();update(now);return now;}
+ function draw(c,g){const now=syncView(g);presentWorld(g,now);
   c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);
-  if(!g.bleed)drawClouds(c,cloudTime(now));
   drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
   drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
- }
- function drawBackdrop(c,g){
-  if(!background)return;const b=g.bleed,s=g.W/W,now=syncView(g);
-  const layer=ensureMap(g,now);c.setTransform(1,0,0,1,0,0);if(layer)c.drawImage(layer,0,0);
-  c.save();c.translate(b.x+g.W/2,b.y+g.H/2);c.scale(s*camera.zoom,s*camera.zoom);c.translate(-camera.x,-camera.y);drawClouds(c,cloudTime(now));c.restore();
  }
  function drawOverlay(c,g){
   const bottom=(g?.navBottom??state.fxNavBottom)+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
@@ -127,10 +137,10 @@
   if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}const alpha=1-Math.abs(2*t-1);if(g.bleed){transitionVeil.hidden=t===1;transitionVeil.style.opacity=alpha;}else{c.save();c.globalAlpha=alpha;c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();}if(t===1){transition=null;nav.disabled=false;}}
  function stop(e){e.preventDefault();e.stopImmediatePropagation();}
  canvas.addEventListener('pointerdown',e=>{if(!active&&!transition)return;stop(e);if(!active||transition||e.button!==0)return;const p=point(e);pointers.set(e.pointerId,p);canvas.setPointerCapture(e.pointerId);if(animation)return;cameraTween=null;pan={id:e.pointerId,start:p,from:{...camera},moved:false};if(pointers.size===2){const a=[...pointers.values()];pinch={distance:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),zoom:camera.zoom};pan=null;}},true);
- canvas.addEventListener('pointermove',e=>{if(!active)return;stop(e);if(!pointers.has(e.pointerId))return;const p=point(e);pointers.set(e.pointerId,p);if(animation||transition)return;if(pinch&&pointers.size===2){const a=[...pointers.values()];setZoom(pinch.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/Math.max(1,pinch.distance),{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2});return;}if(pan?.id!==e.pointerId)return;if(Math.hypot(p.x-pan.start.x,p.y-pan.start.y)>14)pan.moved=true;if(pan.moved){camera.x=pan.from.x-(p.x-pan.start.x)/camera.zoom;camera.y=pan.from.y-(p.y-pan.start.y)/camera.zoom;clampCamera();redraw();}},true);
+ canvas.addEventListener('pointermove',e=>{if(!active)return;stop(e);if(!pointers.has(e.pointerId))return;const p=point(e);pointers.set(e.pointerId,p);if(animation||transition)return;if(pinch&&pointers.size===2){const a=[...pointers.values()];setZoom(pinch.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/Math.max(1,pinch.distance),{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2});return;}if(pan?.id!==e.pointerId)return;if(Math.hypot(p.x-pan.start.x,p.y-pan.start.y)>14)pan.moved=true;if(pan.moved){camera.x=pan.from.x-(p.x-pan.start.x)/camera.zoom;camera.y=pan.from.y-(p.y-pan.start.y)/camera.zoom;clampCamera();}},true);
  function end(e){if(!active&&!transition)return;stop(e);pointers.delete(e.pointerId);const old=pan;pan=null;if(pointers.size<2)pinch=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(old&&!old.moved&&e.type==='pointerup'&&!animation&&!transition){const p=point(e),b=bubble();if(b){const m=RenovationMotion.bubble(performance.now()),cx=b.x+b.width/2,cy=b.y+b.height/2;const x=cx+(p.x-cx)/m.sx,y=cy+(p.y-cy-m.dy)/m.sy;bubblePath(ctx,b);if(ctx.isPointInPath(x,y))void buy();}}saveCamera();}
  canvas.addEventListener('pointerup',end,true);canvas.addEventListener('pointercancel',end,true);canvas.addEventListener('lostpointercapture',e=>{if(active){pointers.delete(e.pointerId);pan=null;pinch=null;}},true);
  canvas.addEventListener('wheel',e=>{if(active){stop(e);setZoom(camera.zoom+(e.deltaY<0?.025:-.025),point(e));}},{capture:true,passive:false});
  canvas.addEventListener('keydown',e=>{if(!active)return;stop(e);if(e.key==='Escape')void navigate();if(e.key==='+'||e.key==='=')setZoom(camera.zoom+.05);if(e.key==='-')setZoom(camera.zoom-.05);if(e.key==='Enter')void buy();if(!animation&&!transition&&e.key.startsWith('Arrow')){camera.x+=({ArrowLeft:-100,ArrowRight:100}[e.key]||0)/camera.zoom;camera.y+=({ArrowUp:-100,ArrowDown:100}[e.key]||0)/camera.zoom;clampCamera();saveCamera();}},true);
- window.renovationScreen={get active(){return active;},get moving(){return !!animation||!!cameraTween||pointers.size>0;},get busy(){return loading||!!transition;},get transitioning(){return !!transition;},draw,drawBackdrop,drawOverlay,displayCoins,navigate,getSnapshot:()=>({active,stage,camera:{...camera},animating:!!animation,effect:animation?RenovationMotion.reveal(performance.now()-animation.start,animation.timing).phase:null,revealed:!!animation&&performance.now()-animation.start>=animation.timing.revealStart,bubble:bubble()})};
+ window.renovationScreen={get active(){return active;},get moving(){return !!animation||!!cameraTween||pointers.size>0;},get busy(){return loading||!!transition;},get transitioning(){return !!transition;},draw,drawOverlay,displayCoins,navigate,getSnapshot:()=>({active,stage,camera:{...camera},animating:!!animation,effect:animation?RenovationMotion.reveal(performance.now()-animation.start,animation.timing).phase:null,revealed:!!animation&&performance.now()-animation.start>=animation.timing.revealStart,bubble:bubble()})};
 })();

@@ -7,5 +7,6 @@
 .mobile-play main{position:relative;z-index:1}
 .mobile-play .workspace{background:transparent!important}
 .mobile-play #preview{background:none}
+.renovation-active #preview{position:relative;z-index:1;background:none;box-shadow:none}
 .mobile-play #canvas-wrap{touch-action:none}
 .player-restart{bottom:max(12px,env(safe-area-inset-bottom))}

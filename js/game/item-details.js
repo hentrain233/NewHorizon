@@ -40,11 +40,12 @@ function createItemDetails(session,renderer,runtime){
   const v=window.visualViewport,left=(v?.offsetLeft||0)+(parseFloat(main.paddingLeft)||0),top=(v?.offsetTop||0)+(parseFloat(main.paddingTop)||0)+8;
   const width=Math.max(1,(v?.width||innerWidth)-(parseFloat(main.paddingLeft)||0)-(parseFloat(main.paddingRight)||0));
   const height=Math.max(1,(v?.height||innerHeight)-(parseFloat(main.paddingTop)||0)-(parseFloat(main.paddingBottom)||0)-16);
-  // Fixed iPhone 14 reference size (390×844 CSS px); only shrink when the available screen cannot fit it.
-  const scale=Math.min(390/sheet.width,width/sheet.width,height/sheet.height);
+  // Phones stay at the 390×844 reference. A desktop column uses that same fraction of the game frame.
+  const frame=window.playFrame,refW=frame?r.width:390,refTop=frame?r.height*sheet.top/sheet.screen:844*sheet.top/sheet.screen;
+  const scale=Math.min(refW/sheet.width,width/sheet.width,height/sheet.height);
   stage.style.width=sheet.width*scale+'px';stage.style.height=sheet.height*scale+'px';
   stage.style.left=Math.max(left,Math.min(left+width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2))+'px';
-  stage.style.top=Math.max(top,Math.min(top+height-sheet.height*scale,r.top+844*sheet.top/sheet.screen))+'px';
+  stage.style.top=Math.max(top,Math.min(top+height-sheet.height*scale,r.top+refTop))+'px';
  }
  function button(label,box,action){
   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
