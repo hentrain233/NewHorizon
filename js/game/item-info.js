@@ -1,6 +1,11 @@
 'use strict';
 // PSD 物品信息栏.psd layer boxes, in the 1320×2868 sheet. Selection still owns the text.
-function infoLayout(){return {w:1320,h:2868,bar:[251,2606,818,224],shortHit:[451,2573,418,76],short:[446,2569,428,87],longHit:[409,2573,502,76],long:[404,2569,512,87],left:[31,2608,214,219],right:[1076,2608,214,219],body:[431,2696,456,38],title:34.671,bodySize:40.005,bodyColor:'#9C7B60'};}
+function infoLayout(){
+ const layout={w:1320,h:2868,bar:[251,2606,818,224],shortHit:[451,2573,418,76],short:[446,2569,428,87],longHit:[409,2573,502,76],long:[404,2569,512,87],left:[31,2608,214,219],right:[1076,2608,214,219],body:[431,2696,456,38],title:40,bodySize:40.005,bodyColor:'#9C7B60'};
+ // Move the whole footer together, including both title hit boxes and DOM buttons.
+ for(const key of ['bar','shortHit','short','longHit','long','left','right','body'])layout[key][1]+=18;
+ return layout;
+}
 function infoBox(g,box){const L=infoLayout();return {x:box[0]/L.w*g.W,y:box[1]/L.h*g.H,width:box[2]/L.w*g.W,height:box[3]/L.h*g.H};}
 const infoArt={};
 function blitInfo(c,g,name,box){if(typeof Image==='undefined')return;let img=infoArt[name];if(!img){img=infoArt[name]=new Image();img.onload=()=>{if(typeof drawCanvas==='function')drawCanvas();};img.src='assets/info-ui/'+name;}if(!img.complete||!img.naturalWidth)return;const d=infoBox(g,box);c.drawImage(img,d.x,d.y,d.width,d.height);}
