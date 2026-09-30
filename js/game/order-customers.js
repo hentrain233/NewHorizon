@@ -45,6 +45,7 @@ function drawOrderRewards(c,g,e){
  const bubbleHeight=449*a.fxBubbleHeight/100*g.W*.82/1510;
  c.save();c.globalAlpha=e.alpha??1;
  c.translate(p.x+orderPortraitShift(g)+a.fxRewardX*s,orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-h)*s);c.scale(s,s);
+ cachedOrderPart(c,e,'reward',JSON.stringify([rows,Object.entries(a).filter(([k])=>k.startsWith('fxReward')||k.startsWith('fxCurrency')),!!artwork.backgroundcoin,!!artwork.backgroundenergy,!!artwork.backgroundpremium]),w,h,c=>{
  rounded(c,0,0,w,h,Math.min(a.fxRewardRadius,w/2,h/2));c.fillStyle=rgba(a.fxRewardFill,a.fxRewardOpacity/100);c.fill();
  c.font=currencyFont(a.fxRewardFontSize);c.textAlign='right';c.textBaseline='middle';
  rows.forEach((row,i)=>{
@@ -55,7 +56,24 @@ function drawOrderRewards(c,g,e){
   const text='+'+formatOrderReward(row.amount),tx=w-pad+a.fxRewardTextX,ty=y+a.fxRewardTextY,maxWidth=Math.max(1,tx-pad*2-size-a.fxRewardIconX);
   if(a.fxRewardTextStroke>0){c.lineJoin='round';c.lineWidth=a.fxRewardTextStroke;drawCurrencyText(c,text,tx,ty,a.fxRewardLetterSpacing,'strokeText',maxWidth);}
   drawCurrencyText(c,text,tx,ty,a.fxRewardLetterSpacing,'fillText',maxWidth);
- });c.restore();
+ });});c.restore();
+}
+const orderPartCache=new WeakMap();
+function cachedOrderPart(c,entry,kind,key,w,h,paint){
+ let parts=orderPartCache.get(entry);if(!parts){parts={};orderPartCache.set(entry,parts);}
+ let part=parts[kind];
+ if(!part||part.key!==key){
+  // One current sprite per order/part; removed orders are garbage-collected.
+  const pad=128,image=document.createElement('canvas');image.width=Math.ceil(w+pad*2);image.height=Math.ceil(h+pad*2);
+  const d=image.getContext('2d');d.translate(pad,pad);paint(d);part=parts[kind]={key,image,pad};
+ }
+ c.drawImage(part.image,-part.pad,-part.pad);
+}
+function orderInView(e,g){
+ const p=orderPose(e,g),s=g.W/1170;
+ const img=orderImages[e.type+e.variant+(e.phase==='complete'?'1':'')];
+ const reach=Math.max((img?p.height*img.width/img.height/2:p.height)+Math.abs(orderPortraitShift(g)),orderBubbleWidth()*g.W*.82/1510/2+Math.abs(state.fxBubbleX)*s,(Math.abs(state.fxRewardX)+state.fxRewardWidth+128)*s+Math.abs(orderPortraitShift(g)));
+ return p.x+reach>=-(g.bleed?.x||0)&&p.x-reach<=(g.bleed?g.bleed.W-g.bleed.x:g.W);
 }
 const generatorRewardIcons=new Map();
 function generatorRewardIcon(type){
@@ -73,8 +91,10 @@ function drawGeneratorReward(c,g,e){
  const bubbleHeight=449*a.fxBubbleHeight/100*g.W*.82/1510;
  const top=orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-(rows.length?currencyH:0))*s-(gap+box)*s;
  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x+orderPortraitShift(g)+a.fxRewardX*s,top);c.scale(s,s);
+ const icon=generatorRewardIcon(e.generator.type);
+ cachedOrderPart(c,e,'generator',JSON.stringify([e.generator.type,!!icon,Object.entries(a).filter(([k])=>k.startsWith('fxReward')||k.startsWith('fxStar'))]),w,box,c=>{
  rounded(c,0,0,w,box,Math.min(a.fxRewardRadius,w/2,box/2));c.fillStyle=rgba(a.fxRewardFill,a.fxRewardOpacity/100);c.fill();
- const icon=generatorRewardIcon(e.generator.type);if(icon){const size=a.fxRewardGeneratorSize;c.drawImage(icon,(w-size)/2,(box-size)/2+a.fxRewardGeneratorY,size,size);}
+ if(icon){const size=a.fxRewardGeneratorSize;c.drawImage(icon,(w-size)/2,(box-size)/2+a.fxRewardGeneratorY,size,size);}});
  c.restore();
 }
 const orderPayouts=[];
@@ -125,23 +145,25 @@ function drawOrderCustomers(c,g){
   if(e.completedAt!==null&&!e.rewarded&&now-e.completedAt>=hold)e.rewarded=true;
   const alpha=entrance.alpha*(e.completedAt===null?1:Math.max(0,1-Math.max(0,now-e.completedAt-hold)/(state.fxOrderFade*1000)));e.alpha=alpha;
   const jump=e.completedAt===null?0:orderJumpOffset(now-e.completedAt,state.fxOrderJumpDuration*1000,state.fxOrderJumpHeight)*g.W/1170;
+  if(!orderInView(e,g))return;
   const w=p.height*img.width/img.height,px=p.x+orderPortraitShift(g);c.save();c.globalAlpha=alpha;c.drawImage(img,px-w/2,p.bottom-p.height+jump+entrance.offset*g.W/1170,w,p.height);c.restore();
  });
  // A separate pass keeps every reward panel above all character portraits.
- orderQueue.entries.forEach(e=>{drawGeneratorReward(c,g,e);drawOrderRewards(c,g,e);});
+ orderQueue.entries.forEach(e=>{if(orderInView(e,g)){drawGeneratorReward(c,g,e);drawOrderRewards(c,g,e);}});
  c.restore();
 }
 function drawCustomerBubbles(c,g,markers){
  if(!ordersVisible)return;
  if(g.bleed&&c===ctx)drawOrderOverflow(g,d=>drawCustomerBubbles(d,g,markers));
- orderQueue.entries.forEach(e=>{const p=orderPose(e,g),scale=g.W*.82/1510,h=449*state.fxBubbleHeight/100,w=orderBubbleWidth(),s=g.W/1170;
-  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x-w*scale/2+state.fxBubbleX*s,orderBubbleBottom(g)-h*scale);c.scale(scale,scale);paintOrderBubble(c);
+ orderQueue.entries.forEach(e=>{if(!orderInView(e,g))return;const p=orderPose(e,g),scale=g.W*.82/1510,h=449*state.fxBubbleHeight/100,w=orderBubbleWidth(),s=g.W/1170;
+  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x-w*scale/2+state.fxBubbleX*s,orderBubbleBottom(g)-h*scale);c.scale(scale,scale);
+  cachedOrderPart(c,e,'bubble',JSON.stringify([e.phase,e.requirements,markers?.requirements.get(e.id),Object.entries(state).filter(([k])=>k.startsWith('fxBubble')||k.startsWith('fxOrder')),orderCheckImage.complete,e.requirements.map(r=>!!window.mergePlayTest.getItemImage(r))]),w,h,c=>{paintOrderBubble(c);
   c.fillStyle='#A36F48';c.textAlign='center';c.textBaseline='middle';
   if(e.phase==='waiting'){
    const step=(w-40)/e.requirements.length;
    e.requirements.forEach((r,i)=>{const img=window.mergePlayTest.getItemImage(r),x=20+step*(i+.5),size=orderRequirementIconSize(h,state.fxOrderItemScale,r),y=(h-size)/2;c.save();if(r.delivered)c.globalAlpha*=.4;if(img)c.drawImage(img,x-size/2,y,size,size);c.restore();if(r.delivered||markers?.requirements.get(e.id)?.[i])drawOrderCheck(c,{x:x-size/2,y,width:size,height:size});});
   }
-  c.restore();
+  });c.restore();
  });
 }
 function refreshOrderButtons(){window.refreshOrderTools?.();}

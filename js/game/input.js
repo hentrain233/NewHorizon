@@ -1,6 +1,7 @@
 'use strict';
 function bindPlaytestInput(session,feedback,message,busy,label,center){
  let orderPan=null,ignoreInfoClick=false;
+ Object.defineProperty(session,'orderPanning',{get:()=>!!orderPan});
  const HOLD_DELAY=400,REPEAT_INTERVAL=250;
  let holdTimer=null;
  function stopHold(){clearTimeout(holdTimer);holdTimer=null;}
@@ -24,13 +25,15 @@ function bindPlaytestInput(session,feedback,message,busy,label,center){
  function pointerDown(e){
   if(!session.active||window.itemDetails?.active||e.button!==0||e.isPrimary===false||session.drag||orderPan)return;const p=point(e);
   ignoreInfoClick=false;
-  if(hitInfo(p)){e.preventDefault();return;}
+  if(hitInfo(p)){e.preventDefault();session.infoPressed=true;drawCanvas();return;}
   if(session.keyboardSource<0&&hitOrderCustomer(p,geometry)){e.preventDefault();orderPan={id:e.pointerId,x:p.x,scroll:orderScroll};canvas.setPointerCapture(e.pointerId);return;}
   const i=at(p);if(i<0||busy(i))return;e.preventDefault();session.selected=i;session.keyboardSource=-1;
   if(session.board.slots[i]){const origin=center(geometry.cells[i]);session.drag={from:i,target:i,startX:e.clientX,startY:e.clientY,p,offset:{x:origin.x-p.x,y:origin.y-p.y},lift:performance.now(),moved:false,id:e.pointerId};canvas.setPointerCapture(e.pointerId);startHold(session.drag);}
   message(label(session.board.slots[i])||'空格');drawCanvas();
  }
  canvas.addEventListener('pointerdown',pointerDown);
+ const releaseInfo=()=>{if(session.infoPressed){session.infoPressed=false;drawCanvas();}};
+ window.addEventListener('pointerup',releaseInfo);window.addEventListener('pointercancel',releaseInfo);window.addEventListener('blur',releaseInfo);
  // Open after the tap completes, so its release cannot immediately dismiss the modal.
  canvas.addEventListener('click',e=>{if(!ignoreInfoClick&&session.active&&!window.itemDetails?.active&&hitInfo(point(e)))void window.itemDetails.open(session.board.slots[session.selected]);ignoreInfoClick=false;});
  // The full-width order strip extends beyond the centered board canvas on short screens.

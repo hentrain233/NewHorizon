@@ -207,10 +207,10 @@ function createPlaytestRenderer(session){
   }
   c.restore();
  }
- function draw(c,g){
+ function draw(c,g,separateOrders=false){
   if(!session.active)return;const time=performance.now();
   const markers=session.showOrders?orderMarkerState(orderQueue.entries,session.board.slots):null;
-  if(session.showOrders){drawCustomerBubbles(c,g,markers);refreshOrderButtons();}
+  if(session.showOrders&&!separateOrders){drawCustomerBubbles(c,g,markers);refreshOrderButtons();}
   for(let i=0;i<63;i++)if(session.board.slots[i])drawMaxLevelSparkles(c,g,session.board.slots[i],i,time-visualPause,true);
   for(let i=0;i<63;i++)if(session.board.slots[i])drawIcon(c,g,session.board.slots[i],i,time,session.drag?.moved&&session.drag.from===i?0.2:1);
   for(let i=0;i<63;i++)if(session.board.slots[i])drawPrismaticSweep(c,g,session.board.slots[i],i,time-visualPause);
@@ -235,5 +235,5 @@ function createPlaytestRenderer(session){
   drawMaxLevelSparkles(c,g,item,index,time);
  }
  // The details window reuses these same sprite caches and bounded sweep-frame cache.
- return {draw,drawSelection,drawDetailsItem,resume};
+ return {draw,drawSelection,drawDetailsItem,resume,drawOrderDrag:(c,g)=>drawDragged(c,g,performance.now())};
 }

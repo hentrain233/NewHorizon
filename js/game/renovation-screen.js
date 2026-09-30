@@ -24,7 +24,9 @@
  new ResizeObserver(placeOverlay).observe(wrap);new ResizeObserver(placeOverlay).observe(canvas);placeOverlay();
  const nav=document.createElement('button');nav.id='renovation-nav';nav.setAttribute('aria-label','翻新餐厅');nav.className='renovation-nav';overlay.appendChild(nav);
  nav.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 C82 3 94 12 97 46 C99 80 89 94 55 97 C20 99 6 90 3 56 C0 21 12 4 50 3Z" fill="#FFEBD2" stroke="#A18166" stroke-width="2"/></svg><img src="assets/map-icon.png" alt="">';
- nav.addEventListener('pointerdown',()=>{if(!nav.disabled)nav.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
+ const inventory=document.createElement('button');inventory.type='button';inventory.id='inventory-nav';inventory.className='renovation-nav inventory-nav';inventory.setAttribute('aria-label','仓库');
+ inventory.innerHTML=nav.innerHTML;inventory.querySelector('img').src='assets/inventory-icon.png';overlay.appendChild(inventory);
+ for(const button of [nav,inventory])button.addEventListener('pointerdown',()=>{if(!button.disabled)button.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
  const controls=document.createElement('div');controls.className='renovation-map-controls';controls.hidden=true;
  controls.innerHTML='<button aria-label="缩小地图">−</button><span>75%</span><button aria-label="放大地图">＋</button><button class="locate" aria-label="定位当前清理任务">定位任务</button>';overlay.appendChild(controls);
  const zoomText=controls.querySelector('span'),[minus,plus,locate]=controls.querySelectorAll('button');
@@ -131,8 +133,20 @@
   drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
   drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
  }
+ function placeInfoButton(el,box){
+  style(el,'left',box[0]/1320*100+'%');style(el,'top',box[1]/2868*100+'%');style(el,'width',box[2]/1320*100+'%');style(el,'height',box[3]/2868*100+'%');
+  style(el,'right','auto');style(el,'bottom','auto');style(el,'aspectRatio','auto');style(el,'opacity','1');
+ }
  function drawOverlay(c,g){
-  const bottom=(g?.navBottom??state.fxNavBottom)+'%';if(nav.style.bottom!==bottom)nav.style.bottom=bottom;
+  nav.classList.toggle('info-art',!active);inventory.classList.add('info-art');
+  const navImage=active?'assets/stall-icon.png':'assets/info-ui/infoUI_ButtonRight.png';
+  if(nav.querySelector('img').getAttribute('src')!==navImage)nav.querySelector('img').src=navImage;
+  if(inventory.querySelector('img').getAttribute('src')!=='assets/info-ui/infoUI_ButtonLeft.png')inventory.querySelector('img').src='assets/info-ui/infoUI_ButtonLeft.png';
+  const bottom=(g?.navBottom??state.fxNavBottom)+'%';
+  if(active){if(nav.style.bottom!==bottom)nav.style.bottom=bottom;for(const key of ['top','left','width','height','right','aspectRatio','opacity'])style(nav,key,'');inventory.hidden=true;style(inventory,'bottom',bottom);style(inventory,'opacity','');}
+  else{placeInfoButton(nav,infoLayout().right);placeInfoButton(inventory,infoLayout().left);inventory.hidden=false;}
+  // Keep the test-only restart control away from both the new icon and the bottom board row.
+  const restart=document.querySelector('.player-restart');if(restart){style(restart,'bottom',active?'':'auto');style(restart,'top',active?'':'max(8px, env(safe-area-inset-top))');}
   const stallScale=String((state.fxNavStallScale??100)/100);if(nav.style.getPropertyValue('--stall-icon-scale')!==stallScale)nav.style.setProperty('--stall-icon-scale',stallScale);
   if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}const alpha=1-Math.abs(2*t-1);if(g.bleed){transitionVeil.hidden=t===1;transitionVeil.style.opacity=alpha;}else{c.save();c.globalAlpha=alpha;c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();}if(t===1){transition=null;nav.disabled=false;}}
  function stop(e){e.preventDefault();e.stopImmediatePropagation();}

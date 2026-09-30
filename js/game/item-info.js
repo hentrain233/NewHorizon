@@ -1,50 +1,33 @@
 'use strict';
-// Presentation only: selection and item definitions remain owned by the game.
+// PSD 物品信息栏.psd layer boxes, in the 1320×2868 sheet. Selection still owns the text.
+function infoLayout(){return {w:1320,h:2868,bar:[251,2606,818,224],shortHit:[451,2573,418,76],short:[446,2569,428,87],longHit:[409,2573,502,76],long:[404,2569,512,87],left:[31,2608,214,219],right:[1076,2608,214,219],body:[431,2696,456,38],title:34.671,bodySize:40.005,bodyColor:'#9C7B60'};}
+function infoBox(g,box){const L=infoLayout();return {x:box[0]/L.w*g.W,y:box[1]/L.h*g.H,width:box[2]/L.w*g.W,height:box[3]/L.h*g.H};}
+const infoArt={};
+function blitInfo(c,g,name,box){if(typeof Image==='undefined')return;let img=infoArt[name];if(!img){img=infoArt[name]=new Image();img.onload=()=>{if(typeof drawCanvas==='function')drawCanvas();};img.src='assets/info-ui/'+name;}if(!img.complete||!img.naturalWidth)return;const d=infoBox(g,box);c.drawImage(img,d.x,d.y,d.width,d.height);}
 function drawItemInfo(c,g,session){
  session.infoHit=null;
- const s=state,unit=g.W/1170,w=g.W*s.fxInfoWidth/100/unit,h=s.fxInfoHeight;
- const x=g.W*s.fxInfoX/100,y=g.infoY??(g.H*(1-s.fxInfoBottom/100)-h*unit);
- const item=session.board.slots[session.selected],definition=session.board.definition(item);
- c.save();c.translate(x,y);c.scale(unit,unit);c.lineJoin='round';
- const frame=c=>{
- const radius=Math.min(s.fxInfoRadius,w/2,h/2),bow=Math.min(s.fxInfoCurve,Math.max(0,Math.min(w-2*radius,h-2*radius))/8);
- // Horizontal edges stay straight; corners match the gently bowed side tangents.
- const vertical=Math.atan2(2*bow,(h-2*radius)/2),handle=radius*.55228475;
- const hx=handle,hy=0,vx=Math.sin(vertical)*handle,vy=Math.cos(vertical)*handle;
- c.beginPath();c.moveTo(radius,0);
- c.quadraticCurveTo(w/2,0,w-radius,0);c.bezierCurveTo(w-radius+hx,hy,w-vx,radius-vy,w,radius);
- c.quadraticCurveTo(w+2*bow,h/2,w,h-radius);c.bezierCurveTo(w-vx,h-radius+vy,w-radius+hx,h-hy,w-radius,h);
- c.quadraticCurveTo(w/2,h,radius,h);c.bezierCurveTo(radius-hx,h-hy,vx,h-radius+vy,0,h-radius);
- c.quadraticCurveTo(-2*bow,h/2,0,radius);c.bezierCurveTo(vx,radius-vy,radius-hx,hy,radius,0);c.closePath();
- // Match the navigation frame's subtle external shadow, isolated from tab/text.
- c.save();c.shadowColor='#334d5260';c.shadowOffsetX=0;c.shadowOffsetY=6*unit;c.shadowBlur=3*unit;
- c.fillStyle=s.fxInfoFill;c.fill();c.restore();
- if(s.fxInfoStroke>0){c.lineWidth=s.fxInfoStroke;c.strokeStyle=s.fxInfoBorder;c.stroke();}
- };
- if(typeof paintCachedUI==='function')paintCachedUI(c,'info',[w,h,unit],{x:-40,y:-40,width:w+80,height:h+80},frame);else frame(c);
+ const L=infoLayout(),item=session.board.slots[session.selected],definition=session.board.definition(item);
+ c.save();
+ blitInfo(c,g,'infoUI_info.png',L.bar);
  if(definition){
-  const title=definition.name+'（等级'+definition.tier+'）';
-  const size=s.fxInfoTitleSize;
-  c.font=`bold ${size}px "${s.fxInfoTitleFont}", sans-serif`;
-  const th=s.fxInfoTabHeight,pad=s.fxInfoTabPadding,iconSpace=s.fxInfoISize*.65;
-  const textW=c.measureText(title).width;
-  const tw=Math.min(w,Math.max(th,(textW+pad*2+iconSpace)*s.fxInfoTabWidth/100));
-  const slant=Math.min(s.fxInfoTabSlant,tw/3),r=Math.min(s.fxInfoTabRadius,th/2,(tw-slant)/4);
-  c.save();c.translate(s.fxInfoTabX,s.fxInfoTabY);const tab=new Path2D();
-  tab.moveTo(r,0);tab.lineTo(tw-slant-r,0);tab.quadraticCurveTo(tw-slant,0,tw-slant+r/2,r);
-  tab.lineTo(tw-r/2,th-r);tab.quadraticCurveTo(tw,th,tw-r,th);tab.lineTo(r,th);
-  tab.quadraticCurveTo(0,th,0,th-r);tab.lineTo(0,r);tab.quadraticCurveTo(0,0,r,0);tab.closePath();
-  const paintTab=c=>{paintInfoTab(c,tab,th,s);if(s.fxInfoTabStroke>0){c.strokeStyle=s.fxInfoTabBorder;c.lineWidth=s.fxInfoTabStroke;c.stroke(tab);}};
-  if(typeof paintCachedUI==='function')paintCachedUI(c,'tab',[tw,th],{x:-20,y:-20,width:tw+40,height:th+40},paintTab);else paintTab(c);
-  c.textAlign='left';c.textBaseline='middle';c.fillStyle=s.fxInfoTitleColor;
-  const maxW=Math.max(1,tw-pad*2-iconSpace);
-  if(s.fxInfoTitleStroke>0){c.strokeStyle=s.fxInfoTitleBorder;c.lineWidth=s.fxInfoTitleStroke;c.strokeText(title,pad,th/2,maxW);}
-  c.fillText(title,pad,th/2,maxW);
-  const ix=tw-iconSpace/2-pad/2+s.fxInfoIX,iy=th/2+s.fxInfoIY;
-  session.infoHit={x:x+s.fxInfoTabX*unit,y:y+(s.fxInfoTabY+Math.min(0,iy-s.fxInfoISize/2))*unit,width:Math.max(tw,ix+s.fxInfoISize/3)*unit,height:Math.max(th,iy+s.fxInfoISize/2,th-Math.min(0,iy-s.fxInfoISize/2))*unit};
-  drawInfoI(c,ix,iy,s.fxInfoISize,s.fxInfoIStroke,s.fxInfoIBorder,s.fxInfoIColor);c.restore();
-  c.font=`bold ${s.fxInfoBodySize}px "${s.fxInfoBodyFont}", sans-serif`;c.textAlign='left';c.textBaseline='middle';c.fillStyle=s.fxInfoBodyColor;
-  c.fillText(definition.description||'合成相同的物品进行升级。',s.fxInfoTextX,s.fxInfoTextY,Math.max(1,w-s.fxInfoTextX-20));
+  const title=definition.name+'(Lv.'+definition.tier+')',sy=g.H/L.h,short=infoBox(g,L.shortHit);
+  c.font=`400 ${L.title*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;
+  c.textAlign='center';c.textBaseline='middle';
+  // ponytail: one cutoff. Add a width when a third tab asset exists.
+  const wide=c.measureText(title).width>short.width*.72,tab=wide?infoBox(g,L.longHit):short;
+  session.infoHit={x:tab.x,y:tab.y,width:tab.width,height:tab.height};
+  c.save();const tx=tab.x+tab.width/2,ty=tab.y+tab.height/2;
+  if(session.infoPressed){c.translate(tx,ty);c.scale(.96,.94);c.translate(-tx,-ty);}
+  blitInfo(c,g,wide?'infoUI2.png':'infoUI.png',wide?L.long:L.short);
+  // PSD: outside stroke 2px; normal #19709F shadow, distance 4px, size 1px.
+  c.strokeStyle='#19709F';c.lineJoin='round';c.lineWidth=4*sy;
+  c.shadowColor='#19709F';c.shadowOffsetY=4*sy;c.shadowBlur=sy;
+  c.strokeText(title,tx,ty,tab.width*.86);
+  c.shadowColor='transparent';c.shadowOffsetY=0;c.shadowBlur=0;
+  c.fillStyle='#FFFFFF';c.fillText(title,tx,ty,tab.width*.86);c.restore();
+  const body=infoBox(g,L.body);
+  c.font=`400 ${L.bodySize*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle=L.bodyColor;
+  c.fillText(definition.description||'合成相同的物品进行升级。',body.x+body.width/2,body.y+body.height/2,body.width);
  }
  c.restore();
 }
@@ -66,32 +49,5 @@ function drawCloudTitle(c,name){
   c.strokeStyle=ink;c.fillStyle=ink;c.lineWidth=6;c.strokeText(line,x,y+4);c.fillText(line,x,y+4);
   c.lineWidth=8;c.strokeText(line,x,y);c.fillStyle='#FFFFFF';c.fillText(line,x,y);
  });
- c.restore();
-}
-function paintInfoTab(c,path,h,s){
- const fill=c.createLinearGradient(0,0,0,h);
- fill.addColorStop(0,s.fxInfoTabFill);fill.addColorStop(.5,s.fxInfoTabMiddle);fill.addColorStop(1,s.fxInfoTabBottom);
- c.fillStyle=fill;c.fill(path);c.save();c.clip(path);
- const rim=(x,y,width,color,opacity,blur)=>{
-  if(width<=0||opacity<=0)return;
-  c.save();c.translate(x,y);c.strokeStyle=color;c.lineJoin='round';
-  const passes=blur>0?8:1,alpha=opacity/100;
-  for(let i=passes;i>=1;i--){c.lineWidth=width+blur*2*i/passes;c.globalAlpha=alpha*(passes-i+1)/(passes*(passes+1)/2);c.stroke(path);}
-  c.restore();
- };
- rim(s.fxInfoTabShadeX,s.fxInfoTabShadeY,s.fxInfoTabShadeWidth,s.fxInfoTabShadeColor,s.fxInfoTabShadeOpacity,s.fxInfoTabShadeBlur);
- rim(s.fxInfoTabShadeX,s.fxInfoTabShadeY,s.fxInfoTabShadeWidth,s.fxInfoTabShadeColor,s.fxInfoTabInnerOpacity,s.fxInfoTabShadeBlur);
- rim(s.fxInfoTabLightX,s.fxInfoTabLightY,s.fxInfoTabLightWidth,s.fxInfoTabLightColor,s.fxInfoTabLightOpacity,s.fxInfoTabLightBlur);
- rim(s.fxInfoTabLightX,s.fxInfoTabLightY,s.fxInfoTabLightWidth,s.fxInfoTabLightColor,s.fxInfoTabLeftLightOpacity,s.fxInfoTabLightBlur);
- c.restore();
-}
-// Fredoka bold "i": stem bottom, corner radius and the gap under the dot are adjustable.
-function drawInfoI(c,x,y,size,stroke,border,fill){
- const k=size/1000,stemTop=498,left=35,width=181,bottom=Math.min(stemTop-1,-9+state.fxInfoIShorten/k),dotBottom=stemTop+state.fxInfoIGap/k;
- const X=g=>(g-125.5)*k,Y=g=>-(g-500)*k,w=width*k;
- c.save();c.translate(x,y);c.transform(1,0,-.21,1,0,0);c.beginPath();
- const box=(gx,gy,gh)=>{const r=Math.max(0,Math.min(state.fxInfoIRadius,w/2,gh*k/2)),x0=X(gx),y0=Y(gy+gh),h=gh*k;c.moveTo(x0+r,y0);c.arcTo(x0+w,y0,x0+w,y0+h,r);c.arcTo(x0+w,y0+h,x0,y0+h,r);c.arcTo(x0,y0+h,x0,y0,r);c.arcTo(x0,y0,x0+w,y0,r);c.closePath();};
- box(left,bottom,stemTop-bottom);box(left,dotBottom,width);
- c.fillStyle=fill;if(stroke>0){c.strokeStyle=border;c.lineWidth=stroke;c.lineJoin='round';c.stroke();}c.fill();
  c.restore();
 }

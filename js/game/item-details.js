@@ -36,16 +36,20 @@ function createItemDetails(session,renderer,runtime){
  }
  function place(){
   if(!dialog.open)return;
-  const r=canvas.getBoundingClientRect(),main=getComputedStyle(document.querySelector('main'));
-  const v=window.visualViewport,left=(v?.offsetLeft||0)+(parseFloat(main.paddingLeft)||0),top=(v?.offsetTop||0)+(parseFloat(main.paddingTop)||0)+8;
-  const width=Math.max(1,(v?.width||innerWidth)-(parseFloat(main.paddingLeft)||0)-(parseFloat(main.paddingRight)||0));
-  const height=Math.max(1,(v?.height||innerHeight)-(parseFloat(main.paddingTop)||0)-(parseFloat(main.paddingBottom)||0)-16);
-  // Phones stay at the 390×844 reference. A desktop column uses that same fraction of the game frame.
-  const frame=window.playFrame,refW=frame?r.width:390,refTop=frame?r.height*sheet.top/sheet.screen:844*sheet.top/sheet.screen;
-  const scale=Math.min(refW/sheet.width,width/sheet.width,height/sheet.height);
+  const r=canvas.getBoundingClientRect(),view=document.getElementById('viewport').getBoundingClientRect();
+  const mobile=document.body.classList.contains('mobile-play'),frame=window.playFrame;
+  const area=mobile?(frame||view):r,v=window.visualViewport;
+  const left=Math.max(area.left,view.left,v?.offsetLeft||0),top=Math.max(area.top,view.top,v?.offsetTop||0);
+  const right=Math.min(area.left+area.width,view.right,(v?.offsetLeft||0)+(v?.width||innerWidth));
+  const bottom=Math.min(area.top+area.height,view.bottom,(v?.offsetTop||0)+(v?.height||innerHeight));
+  const width=Math.max(1,right-left),height=Math.max(1,bottom-top);
+  Object.assign(dialog.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});
+  // Editor follows its actual zoomed canvas. Phones keep their reference size and only shrink to fit.
+  const refW=!mobile||frame?r.width:390,refTop=!mobile||frame?r.height*sheet.top/sheet.screen:844*sheet.top/sheet.screen;
+  const scale=Math.min(refW/sheet.width,width/sheet.width,Math.max(1,height-16)/sheet.height);
   stage.style.width=sheet.width*scale+'px';stage.style.height=sheet.height*scale+'px';
-  stage.style.left=Math.max(left,Math.min(left+width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2))+'px';
-  stage.style.top=Math.max(top,Math.min(top+height-sheet.height*scale,r.top+refTop))+'px';
+  stage.style.left=Math.max(0,Math.min(width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2-left))+'px';
+  stage.style.top=Math.max(8,Math.min(height-8-sheet.height*scale,r.top+refTop-top))+'px';
  }
  function button(label,box,action){
   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
@@ -139,6 +143,7 @@ function createItemDetails(session,renderer,runtime){
  window.addEventListener('resize',place);
  window.visualViewport?.addEventListener('resize',place);
  window.visualViewport?.addEventListener('scroll',place);
+ document.addEventListener('scroll',place,true);
  new ResizeObserver(place).observe(canvas);
  return {open,close,draw,get active(){return dialog.open;},drawFrozen(target){
   // The board, orders, and item motion stay on the frame from open. Video and the energy countdown keep moving.

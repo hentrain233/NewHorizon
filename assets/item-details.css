@@ -1,5 +1,6 @@
 #item-details{position:fixed;inset:0;margin:0;padding:0;border:0;width:100vw;height:100dvh;max-width:none;max-height:none;background:transparent;color:inherit;overflow:hidden;touch-action:none;overscroll-behavior:none}
-#item-details::backdrop{background:rgba(0,0,0,.7)}
+#item-details::backdrop{background:transparent}
+#item-details[open]{inset:auto;background:rgba(0,0,0,.7)}
 .item-details-stage{position:absolute}
 #item-details canvas{display:block;width:100%;height:100%;max-width:none;max-height:none;background:transparent;box-shadow:none;border:0}
 #item-details button{position:absolute;margin:0;padding:0;min-width:0;min-height:0;border:0;border-radius:12px;background:transparent;box-shadow:none;cursor:pointer;touch-action:manipulation}

@@ -179,7 +179,8 @@ function playSceneLayers(g,includeHelpers){
  if(!g.bleed){drawBar(f,g);drawBarTopStroke(f,g);}drawBoard(f,g);drawGrid(f,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(f,g);
  return playSceneCache={key,refs,back,front};
 }
-function drawCanvas(target=canvas,includeHelpers=true){
+function drawCanvas(target=canvas,includeHelpers=true,separateOrders=false){
+ if(!separateOrders&&orderSurface)orderSurface.hidden=true;
  if(target===canvas&&window.itemDetails?.active)return window.itemDetails.drawFrozen(target);
  const g=geometry||calculateLayout();if(target.width!==g.W)target.width=g.W;if(target.height!==g.H)target.height=g.H;
  const c=target===canvas?ctx:target.getContext('2d',{alpha:true,colorSpace:'srgb'});c.clearRect(0,0,g.W,g.H);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
@@ -188,7 +189,7 @@ function drawCanvas(target=canvas,includeHelpers=true){
  const cached=target===canvas&&window.mergePlayTest?.active&&g.W*g.H<=8000000?playSceneLayers(g,includeHelpers):null;
  if(bleed)c.drawImage(bleedBack,-bleed.x,-bleed.y);
  else if(cached){if(state.backgroundType==='video')drawTopBackground(c,g);c.drawImage(cached.back,0,0);}else{playSceneCache=null;drawTopBackground(c,g);drawBoardArea(c,g);drawSupports(c,g);drawShadow(c,g);}
- if(target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function'){
+ if(!separateOrders&&target===canvas&&includeHelpers&&typeof drawOrderCustomers==='function'){
   if(hasOrderOverflow(g)&&bleed){
    if(!orderLayer)orderLayer=document.createElement('canvas');
    const h=Math.ceil(bleed.y+g.barBottom);if(orderLayer.width!==bleed.W)orderLayer.width=bleed.W;if(orderLayer.height!==h)orderLayer.height=h;
@@ -199,9 +200,35 @@ function drawCanvas(target=canvas,includeHelpers=true){
  }
  if(bleed)c.drawImage(bleedFront,-bleed.x,-bleed.y);
  if(cached)c.drawImage(cached.front,0,0);else{if(!bleed){drawBar(c,g);drawBarTopStroke(c,g);}drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
- if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g);
+ if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g,separateOrders);
  if(!state.boardOnly)drawCurrencyUI(c,g);
  if(target===canvas&&includeHelpers&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);
  if(target===canvas&&includeHelpers)window.renovationScreen?.drawOverlay(c,g);
  return target;
+}
+// Orders own a short, full-width surface. The board is refreshed only for its own changes/effects.
+let orderSurface=null,boardFrameKey='',boardFrameAt=0;
+function drawPlayFrame(){
+ const game=window.mergePlayTest,g=geometry;
+ if(!game?.active||!g||window.renovationScreen?.active||window.renovationScreen?.busy){if(orderSurface)orderSurface.hidden=true;drawCanvas();return;}
+ const key=game.boardVisualKey+JSON.stringify(state)+JSON.stringify([g.W,g.H,g.board,g.bleed]);
+ const now=performance.now();
+ if(!orderSurface||orderSurface.hidden||key!==boardFrameKey||game.boardMoving||game.boardAnimated&&now-boardFrameAt>=50){
+  drawCanvas(canvas,true,true);boardFrameKey=key;boardFrameAt=now;
+ }
+ if(!orderSurface){orderSurface=document.createElement('canvas');orderSurface.id='order-surface';orderSurface.setAttribute('aria-hidden','true');orderSurface.style.cssText='position:fixed;pointer-events:none;z-index:2;max-width:none;max-height:none;background:none;box-shadow:none';document.body.appendChild(orderSurface);}
+ const b=g.bleed||{W:g.W,x:0},r=canvas.getBoundingClientRect(),scale=r.width/g.W,h=Math.ceil(g.barBottom);
+ if(orderSurface.width!==b.W)orderSurface.width=b.W;if(orderSurface.height!==h)orderSurface.height=h;
+ const css={left:(r.left-b.x*scale)+'px',top:r.top+'px',width:b.W*scale+'px',height:h*scale+'px'};
+ for(const [k,v]of Object.entries(css))if(orderSurface.style[k]!==v)orderSurface.style[k]=v;
+ orderSurface.hidden=false;
+ const d=orderSurface.getContext('2d');d.clearRect(0,0,b.W,h);d.save();d.translate(b.x,0);
+ d.imageSmoothingEnabled=true;d.imageSmoothingQuality='high';
+ const expanded={...g,W:b.W,bar:{...g.bar,y:g.bar.y+(b.y||0)},barBottom:g.barBottom+(b.y||0)};
+ d.save();d.translate(-b.x,-(b.y||0));drawTopBackground(d,expanded);d.restore();
+ drawOrderCustomers(d,g);
+ if(g.bleed&&bleedFront)d.drawImage(bleedFront,0,b.y,b.W,h,-b.x,0,b.W,h);else d.drawImage(playSceneLayers(g,true).front,0,0,g.W,h,0,0,g.W,h);
+ drawCustomerBubbles(d,g,game.orderMarkers);refreshOrderButtons();game.drawOrderDrag(d,g);
+ drawCurrencyUI(d,g);drawOrderPayouts(d,g);d.restore();
+ window.renovationScreen?.drawOverlay(ctx,g);
 }

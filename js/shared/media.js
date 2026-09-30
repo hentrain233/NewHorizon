@@ -83,7 +83,7 @@ function updatePlayback(){
 }
 function animate(){
  const start=performance.now();
- if(!document.hidden){if(window.itemDetails?.active){window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawCanvas();}
+ if(!document.hidden){if(window.itemDetails?.active){if(orderSurface)orderSurface.hidden=true;window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawPlayFrame();}
  const moving=window.renovationScreen?.active?window.renovationScreen?.moving:window.mergePlayTest?.moving;
  const interval=document.hidden?250:moving||window.renovationScreen?.busy?1000/60:1000/20;
  setTimeout(()=>requestAnimationFrame(animate),Math.max(0,interval-(performance.now()-start)-5));
