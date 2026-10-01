@@ -28,7 +28,16 @@ function createItemDetails(session,renderer,runtime){
  const surface=document.createElement('canvas');surface.width=sheet.width;surface.height=sheet.height;surface.setAttribute('aria-hidden','true');
  stage.appendChild(surface);dialog.appendChild(stage);document.body.appendChild(dialog);
  const c=surface.getContext('2d'),snapshot=document.createElement('canvas'),still=document.createElement('canvas');
- let selected=null,items=[],producer=null,openedAt=0,enteredAt=0,loading=false,focusBefore=null,backdropFit='';
+ let selected=null,items=[],producer=null,outputRows=[],openedAt=0,enteredAt=0,loading=false,focusBefore=null,backdropFit='';
+ function prepareOutputLabel(){
+  if(pictures['products-label'])return;
+  // PSD 产出: FZY4JW 48.006px, #2676A3, no layer effects. Rasterize once after font readiness.
+  const label=document.createElement('canvas'),ctx=label.getContext('2d'),text='产出以下物品',font='400 48.006px "FZCuYuan"';
+  ctx.font=font;const m=ctx.measureText(text);
+  label.width=Math.ceil(m.width);label.height=46;
+  ctx.font=font;ctx.fillStyle='#2676A3';ctx.fillText(text,0,m.actualBoundingBoxAscent);
+  pictures['products-label']=label;
+ }
  const boxFor=i=>({x:sheet.grid.x+(i%4)*sheet.grid.col,y:sheet.grid.y+Math.floor(i/4)*sheet.grid.row,width:sheet.grid.size,height:sheet.grid.size});
  function knownTier(type){
   const ids=new Set(runtime.state.discoveries);
@@ -59,7 +68,12 @@ function createItemDetails(session,renderer,runtime){
  function select(item){
   const refocus=stage.contains(document.activeElement);
   selected={...item};const definition=session.board.definition(item),chain=runtime.content.chains.find(c=>c.id===definition.chainId);
-  items=chain.itemIds.map(id=>runtime.content.items.find(d=>d.id===id));producer=null;
+  items=chain.itemIds.map(id=>runtime.content.items.find(d=>d.id===id));producer=null;outputRows=[];
+  if(definition.producerId){
+   const recipe=runtime.content.producers.find(p=>p.id===definition.producerId);
+   const outputs=[...new Set(recipe.outputs.filter(o=>o.weight>0).map(o=>o.itemId))].map(id=>runtime.content.items.find(d=>d.id===id));
+   outputRows=[...new Set(outputs.map(d=>d.chainId))].map(id=>outputs.filter(d=>d.chainId===id).sort((a,b)=>a.tier-b.tier));
+  }
   if(!definition.producerId){
    producer=session.board.slots.filter(Boolean).filter(i=>{
     const p=runtime.content.producers.find(p=>p.id===session.board.definition(i)?.producerId);
@@ -70,12 +84,14 @@ function createItemDetails(session,renderer,runtime){
   const unlocked=knownTier(item.type);
   items.forEach((d,i)=>{
    const b=button(d.tier<=unlocked?`${d.name}，等级${d.tier}`:`等级${d.tier}，未解锁`,boxFor(i),()=>select({type:d.type,level:d.tier}));
-   b.disabled=d.tier>unlocked;b.setAttribute('aria-pressed',String(d.tier===selected.level));
+   b.setAttribute('aria-pressed',String(d.tier===selected.level));
   });
   if(producer)button('查看生成器合成路线',{x:sheet.info.hit.x,y:sheet.info.hit.y,width:sheet.info.hit.w,height:sheet.info.hit.h},()=>{select(producer);stage.querySelector('button[aria-pressed="true"]')?.focus({preventScroll:true});});
   button('关闭物品详情',{x:sheet.close.hit.x,y:sheet.close.hit.y,width:sheet.close.hit.w,height:sheet.close.hit.h},close);
   if(refocus)stage.querySelector('button[aria-pressed="true"]')?.focus({preventScroll:true});
-  dialog.setAttribute('aria-label',definition.name+'合成路线');draw();
+  dialog.setAttribute('aria-label',(item.level>unlocked?'未解锁':definition.name)+'合成路线');
+  dialog.setAttribute('aria-description',definition.producerId?'产出以下物品：'+outputRows.flat().map(d=>`${d.name}（等级${d.tier}）`).join('、'):'由以下物品产出：'+(producer?session.board.definition(producer).name:'暂无'));
+  draw();
  }
  const paint=(key,x,y,w,h)=>{const img=pictures[key];if(img)c.drawImage(img,x,y,w??img.width,h??img.height);};
  // Back, then the board, then the pieces on top. The next layer starts before the previous one finishes.
@@ -90,8 +106,8 @@ function createItemDetails(session,renderer,runtime){
   layer(140,16,()=>paint('front',sheet.front.x,sheet.front.y));
   layer(280,10,()=>{
   paint('close',sheet.close.paint.x,sheet.close.paint.y,sheet.close.paint.w,sheet.close.paint.h);
-  drawCloudTitle(c,session.board.definition(selected).name);
   const time=performance.now(),unlocked=knownTier(selected.type);
+  drawCloudTitle(c,selected.level>unlocked?'未解锁':session.board.definition(selected).name);
   items.forEach((d,i)=>{
    const box=boxFor(i),last=i===items.length-1,isSelected=d.tier===selected.level,bed=last?sheet.end:sheet.arrow;
    paint(isSelected?(last?'selected-end':'selected'):(last?'end':'cell'),box.x+bed.dx,box.y+bed.dy,bed.w,bed.h);
@@ -99,7 +115,16 @@ function createItemDetails(session,renderer,runtime){
    else paint('question',box.x+sheet.question.dx,box.y+sheet.question.dy,sheet.question.w,sheet.question.h);
    if(isSelected){const k=sheet.corners,w=k.w*k.scale,h=k.h*k.scale;renderer.drawSelection(c,{x:box.x+k.dx+(k.w-w)/2,y:box.y+k.dy+(k.h-h)/2,width:w,height:h},time);}
   });
-  if(!session.board.definition(selected).producerId){
+  if(session.board.definition(selected).producerId){
+   paint('products-label',sheet.output.x-pictures['products-label'].width/2,sheet.output.y);
+   paint('producer-bed',sheet.bed.x,sheet.bed.y);
+   outputRows.forEach((row,r)=>row.forEach((d,i)=>{
+    const box={x:sheet.output.x-((row.length-1)*sheet.grid.col+166)/2+i*sheet.grid.col,
+     y:sheet.bed.y+(pictures['producer-bed'].height-(outputRows.length*166+(outputRows.length-1)*20))/2+r*186,width:166,height:166};
+    paint('producer',box.x-2,box.y-2,170,170);
+    renderer.drawDetailsItem(c,box,{type:d.type,level:d.tier},120+r*4+i,time,pictures['icon-'+d.assetId]);
+   }));
+  }else{
    paint('output-label',sheet.output.x-pictures['output-label'].width/2,sheet.output.y);paint('producer-bed',sheet.bed.x,sheet.bed.y);
    if(producer){
     paint('producer',sheet.producer.frame.x,sheet.producer.frame.y,sheet.producer.frame.w,sheet.producer.frame.h);
@@ -115,6 +140,7 @@ function createItemDetails(session,renderer,runtime){
   loading=true;
   try{
    await ready;await titleFontReady;if(!session.active||window.renovationScreen?.active)return;
+   prepareOutputLabel();
    drawCanvas();snapshot.width=canvas.width;snapshot.height=canvas.height;snapshot.getContext('2d').drawImage(canvas,0,0);
    const sky=state.transparentTop;state.transparentTop=true;
    try{drawCanvas();still.width=canvas.width;still.height=canvas.height;still.getContext('2d').drawImage(canvas,0,0);}

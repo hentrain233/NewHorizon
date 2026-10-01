@@ -171,8 +171,8 @@
   },
   {
     "path": "js/game/item-details.js",
-    "bytes": 11201,
-    "sha256": "ac5934ea89f3f060299343fb237e3b50ed920ceca6c685d4d4a6a0a7e1e2f2ee"
+    "bytes": 13034,
+    "sha256": "862bacd35e2e2f1e8cacee4d62f3bd0945bab37825fdc22762e5af5b95604065"
   },
   {
     "path": "js/game/animations.js",
@@ -291,8 +291,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 584,
-    "sha256": "5092c4b5e967612d6cb2dc081b525f444533519863d58b3655c351700d948e79"
+    "bytes": 680,
+    "sha256": "dbf9ad2ecaf972ad50110536d779d5c59b2a484b354cee488c60187ebc1d9fd1"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",
