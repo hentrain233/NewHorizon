@@ -170,7 +170,7 @@ function paintFullBleed(g){
 function playSceneLayers(g,includeHelpers){
  // Two layers retain the customer-behind-counter ordering. Videos never enter the cache.
  const key=JSON.stringify(Object.fromEntries(Object.entries(state).filter(([k])=>!k.startsWith('fx'))))+includeHelpers+':'+[g.W,g.H,g.bar.y,g.board.y,!!g.bleed].join(',');
- const refs=[assets.image,assets.texture,artwork.background1,artwork.background2,artwork.background2a,artwork.background2b];
+ const refs=[assets.image,assets.texture,artwork.background1,artwork['background1-new'],artwork.background2,artwork.background2a,artwork.background2b];
  if(playSceneCache?.key===key&&refs.every((r,i)=>r===playSceneCache.refs[i]))return playSceneCache;
  const make=()=>{const layer=document.createElement('canvas');layer.width=g.W;layer.height=g.H;return layer;};
  const back=make(),front=make(),b=back.getContext('2d'),f=front.getContext('2d');

@@ -56,6 +56,6 @@ const DEFAULT_STATE = Object.freeze({
   transparentTop:false,boardOnly:false,guides:false,
   template:'mint',planks:false,plankWidth:96,plankOpacity:16,supports:false,supportWidth:38,supportInset:96,cellBevel:0,frameHighlight:0,
   imageBarTint:false,imageBarColor:'#EACDA4',imageBarBrightness:100,imageBarSaturation:100,supportHeight:128,barArt:'current',
-  imageWallTint:false,imageWallColor:'#9CD6DA',imageWallBrightness:100,imageWallSaturation:100,
+  wallArt:'new',imageWallTint:false,imageWallColor:'#9CD6DA',imageWallBrightness:100,imageWallSaturation:100,
   barTopStroke:true,barTopStrokeWidth:3,barTopStrokeColor:'#A88B68',barTopStrokeOpacity:28,barTopStrokeBlur:1
 });

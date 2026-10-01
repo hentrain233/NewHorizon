@@ -26,8 +26,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 6384,
-    "sha256": "a3f56369b566fd56a48c61fba22f7c83dafec2bfdd16f6865b4d246e1bd3ede3"
+    "bytes": 6398,
+    "sha256": "1b218d879e142d7e9fd2b140228271dac0a62767a1ab5370f09c9aaf6262f83c"
   },
   {
     "path": "js/shared/state.js",
@@ -46,8 +46,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 19464,
-    "sha256": "42fd0c5a02ce4e05de8742ed356feb68c1cbdad703473d48c4daf347ec6151f0"
+    "bytes": 19491,
+    "sha256": "0fc054e363c94f70c5ce9a62f7566d047014dc4577d761e89299ca88c90804f2"
   },
   {
     "path": "js/shared/ui-bake-assets.js",
@@ -66,8 +66,8 @@
   },
   {
     "path": "js/shared/media.js",
-    "bytes": 7655,
-    "sha256": "aac3178f41bf61db7b24b44009a072c9187e976db5241ad8659eef2e5bd1e428"
+    "bytes": 7892,
+    "sha256": "e8e3d88b9ef37d66b8094314368d3600e0a8de8383f2f6aac96bf040c7cad23c"
   },
   {
     "path": "js/shared/font-assets.js",
@@ -280,14 +280,19 @@
     "sha256": "c005230d081ad2a5b6af004c5dae761ab0fb92cc6be32ca9f6403b5b6b66c9ff"
   },
   {
+    "path": "assets/background1-new.png",
+    "bytes": 1058449,
+    "sha256": "e33da2f171f7bba3127068b52221dbbde50f372009ac663f95e984472fc84a2c"
+  },
+  {
     "path": "assets/play-background-baked.mp4",
     "bytes": 104869,
     "sha256": "8b026a83344614ca37a47577ad7ca213f813aefde675232ad7e4524a4a11301a"
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 7328,
-    "sha256": "e83a4d14b3db1849c5bab67c2026783f7ace8b96b1ceed2651ac3527a67e6054"
+    "bytes": 584,
+    "sha256": "5092c4b5e967612d6cb2dc081b525f444533519863d58b3655c351700d948e79"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

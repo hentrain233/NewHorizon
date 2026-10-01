@@ -1,12 +1,14 @@
 'use strict';
 const artwork={};
 const recolorCache=new Map();
-const artworkReady=Promise.all([1,2,'2a','2b','coin','energy','premium',...(window.BAR_BAKES||[]).map(b=>b.id)].map(n=>new Promise(resolve=>{
+const artworkReady=Promise.all([1,'1-new',2,'2a','2b','coin','energy','premium',...(window.BAR_BAKES||[]).map(b=>b.id)].map(n=>new Promise(resolve=>{
  const img=new Image();img.onload=()=>{artwork['background'+n]=img;resolve();if(geometry)updatePreview();};
  img.onerror=()=>{notify('内置图片加载失败，请保留背景及货币资源文件。');resolve();};
- img.src=String(n).startsWith('bar-')?'assets/baked-bars/'+n+'.png':window.MERGE_BACKGROUND_ASSETS?.['background'+n]||window.MERGE_CURRENCY_ASSETS?.[n]||'';
+ img.src=n==='1-new'?'assets/background1-new.png':String(n).startsWith('bar-')?'assets/baked-bars/'+n+'.png':window.MERGE_BACKGROUND_ASSETS?.['background'+n]||window.MERGE_CURRENCY_ASSETS?.[n]||'';
 })));
 function artworkImage(n){
+ // The new preset is finished artwork; keep the original preset's tint settings untouched.
+ if(n===1&&state.wallArt==='new'&&artwork['background1-new'])return artwork['background1-new'];
  let name=n===2&&state.barArt==='a'?'background2a':n===2&&state.barArt==='b'?'background2b':'background'+n;
  let original=artwork[name];if(!original&&n===2){name='background2';original=artwork.background2;}if(!original)return null;
  const prefix=n===1?'imageWall':'imageBar',tint=!!state[prefix+'Tint'],brightness=(state[prefix+'Brightness']??100)/100,saturation=(state[prefix+'Saturation']??100)/100;
