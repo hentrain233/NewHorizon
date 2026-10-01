@@ -39,7 +39,7 @@ function drawCurrencyUI(c,g,only){
   const icon=entry.icon&&artwork['background'+entry.icon];
   if(entry.icon==='energy'&&window.mergePlayTest?.active){const seconds=gameRuntime.energySeconds();if(seconds){c.save();c.font='bold 24px sans-serif';c.textAlign='center';c.fillStyle='#31585B';c.fillText(Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'),pillX+pillW/2,y+h+20);c.restore();}}
   if(icon){
-   const size=entry.icon==='energy'?145:137,ratio=icon.width/icon.height;
+   const size=entry.icon==='energy'?126:137,ratio=icon.width/icon.height;
    const ih=size*state.fxCurrencyIconScale/100,iw=ih*ratio;
    const prefix={energy:'fxCurrencyEnergy',coin:'fxCurrencyCoin',premium:'fxCurrencyPremium'}[entry.icon];
    c.drawImage(icon,x+49-iw/2+state[prefix+'X'],y+h/2-ih/2+state[prefix+'Y'],iw,ih);

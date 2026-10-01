@@ -1,9 +1,8 @@
 'use strict';
-function createPlaytestRenderer(session){
- const iconScales={ice1:.5,fish1:.75,shell6:.9,shell10:1.1};
- const iconScale=item=>iconScales[item.type+item.level]??1;
- const itemShadows=new Map();
- function itemShadow(item,img){
+const iconScales={ice1:.5,fish1:.75,shell6:.9,shell10:1.1};
+const iconScale=item=>iconScales[item.type+item.level]??1;
+const itemShadows=new Map();
+function itemShadow(item,img){
   const key=item.type+item.level;if(itemShadows.has(key))return itemShadows.get(key);
   const n=256,out=document.createElement('canvas');out.width=out.height=n;
   const s=out.getContext('2d');
@@ -25,7 +24,8 @@ function createPlaytestRenderer(session){
   const blurred=document.createElement('canvas');blurred.width=blurred.height=n;
   const o=blurred.getContext('2d');o.filter=`blur(${(2.048/iconScale(item)).toFixed(3)}px)`;o.drawImage(out,0,0);
   itemShadows.set(key,blurred);return blurred;
- }
+}
+function createPlaytestRenderer(session){
  // Integrate a positive velocity curve: slow near 40%, then accelerate; fixed duration.
  const sweepPath=[0];
  const sweepSpeed=t=>.09+1.05*(1-Math.exp(-(((t-.4)/.19)**2)))+.55*Math.max(0,t-.4);
@@ -144,7 +144,7 @@ function createPlaytestRenderer(session){
   c.globalCompositeOperation=state.fxSweepBlend;c.globalAlpha=opacity;
   c.drawImage(foilCanvas,dx,dy,size,size);c.restore();
  }
- function drawProducerEnergy(c,box){const img=artwork?.backgroundenergy;if(!img)return;const r=orderCheckRect(box,state.fxBoardCheckSize/100,state.fxBoardCheckX/100,state.fxBoardCheckY/100);c.drawImage(img,r.x,r.y,r.width,r.height);}
+ function drawProducerEnergy(c,box){const img=artwork?.backgroundenergyCorner;if(!img?.width||!img.height)return;const fraction=state.fxBoardCheckSize/100,pad=Math.min(box.width,box.height)*.035,bound=Math.min(box.width,box.height)*fraction,scale=bound/Math.max(img.width,img.height),width=img.width*scale,height=img.height*scale;const x=Math.max(box.x,Math.min(box.x+box.width-width,box.x+box.width-pad-width+state.fxBoardCheckX/100*box.width)),y=Math.max(box.y,Math.min(box.y+box.height-height,box.y+box.height-pad-height+state.fxBoardCheckY/100*box.height));c.drawImage(img,x,y,width,height);}
  // 格子角标只画在已放上合成盘的格子上。右下角：体力、订单绿勾。左下角以后加最高级标识。
  function drawCellBadges(c,g,markers){
   for(let i=0;i<session.board.slots.length;i++){

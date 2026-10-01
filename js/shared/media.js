@@ -1,7 +1,7 @@
 'use strict';
 const artwork={};
 const recolorCache=new Map();
-const artworkReady=Promise.all([1,'1-new',2,'2a','2b','coin','energy','premium',...(window.BAR_BAKES||[]).map(b=>b.id)].map(n=>new Promise(resolve=>{
+const artworkReady=Promise.all([1,'1-new',2,'2a','2b','coin','energy','energyCorner','premium',...(window.BAR_BAKES||[]).map(b=>b.id)].map(n=>new Promise(resolve=>{
  const img=new Image();img.onload=()=>{artwork['background'+n]=img;resolve();if(geometry)updatePreview();};
  img.onerror=()=>{notify('内置图片加载失败，请保留背景及货币资源文件。');resolve();};
  img.src=n==='1-new'?'assets/background1-new.png':String(n).startsWith('bar-')?'assets/baked-bars/'+n+'.png':window.MERGE_BACKGROUND_ASSETS?.['background'+n]||window.MERGE_CURRENCY_ASSETS?.[n]||'';

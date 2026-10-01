@@ -217,7 +217,7 @@ function drawPlayFrame(){
   drawCanvas(canvas,true,true);boardFrameKey=key;boardFrameAt=now;
  }
  if(!orderSurface){orderSurface=document.createElement('canvas');orderSurface.id='order-surface';orderSurface.setAttribute('aria-hidden','true');orderSurface.style.cssText='position:fixed;pointer-events:none;z-index:2;max-width:none;max-height:none;background:none;box-shadow:none';document.body.appendChild(orderSurface);}
- const b=g.bleed||{W:g.W,x:0},r=canvas.getBoundingClientRect(),scale=r.width/g.W,h=Math.ceil(g.barBottom);
+ const b=g.bleed||{W:g.W,x:0},r=canvas.getBoundingClientRect(),scale=r.width/g.W,barH=Math.ceil(g.barBottom),h=barH+Math.ceil(typeof orderIconSpill==='function'?orderIconSpill(g):0);
  if(orderSurface.width!==b.W)orderSurface.width=b.W;if(orderSurface.height!==h)orderSurface.height=h;
  const css={left:(r.left-b.x*scale)+'px',top:r.top+'px',width:b.W*scale+'px',height:h*scale+'px'};
  for(const [k,v]of Object.entries(css))if(orderSurface.style[k]!==v)orderSurface.style[k]=v;
@@ -227,7 +227,7 @@ function drawPlayFrame(){
  const expanded={...g,W:b.W,bar:{...g.bar,y:g.bar.y+(b.y||0)},barBottom:g.barBottom+(b.y||0)};
  d.save();d.translate(-b.x,-(b.y||0));drawTopBackground(d,expanded);d.restore();
  drawOrderCustomers(d,g);
- if(g.bleed&&bleedFront)d.drawImage(bleedFront,0,b.y,b.W,h,-b.x,0,b.W,h);else d.drawImage(playSceneLayers(g,true).front,0,0,g.W,h,0,0,g.W,h);
+ if(g.bleed&&bleedFront)d.drawImage(bleedFront,0,b.y,b.W,barH,-b.x,0,b.W,barH);else d.drawImage(playSceneLayers(g,true).front,0,0,g.W,barH,0,0,g.W,barH);
  drawCustomerBubbles(d,g,game.orderMarkers);refreshOrderButtons();game.drawOrderDrag(d,g);
  drawCurrencyUI(d,g);drawOrderPayouts(d,g);d.restore();
  window.renovationScreen?.drawOverlay(ctx,g);

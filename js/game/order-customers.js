@@ -8,14 +8,14 @@ const orderPortraitsReady=Promise.all(Object.entries(window.ORDER_PORTRAITS||{})
 orderPortraitsReady.catch(()=>{});
 function orderPose(e,g,scroll=orderScroll){
  const s=g.W/1170,key=Object.keys(ORDER_ANIMAL_TYPES).find(k=>ORDER_ANIMAL_TYPES[k]===e.type),prefix='fxAnimal'+key;
- return {x:(state.fxOrderStartX+e.slot*state.fxOrderStep+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
+ return {x:(state.fxOrderStartX+e.slot*orderStride()+(state[prefix+'X']??0)-scroll)*s,bottom:g.barBottom+(state.fxOrderPortraitY+(state[prefix+'Y']??0))*s,height:state.fxOrderPortraitHeight*s*(state[prefix+'Scale']??100)/100};
 }
 // Keep the original default bubble baseline, independent of every portrait Y adjustment.
 function orderBubbleBottom(g){return g.barBottom+(-6-state.fxBubbleGap)*g.W/1170;}
 function orderPortraitShift(g){return (state.fxOrderPortraitX??0)*g.W/1170;}
 // Bounds use settled queue slots, so arrival animation cannot stretch the scroll range.
 function orderScrollMax(g){
- const s=g.W/1170,halfBubble=orderBubbleWidth()*g.W*.82/1510/2;
+ const s=g.W/1170,halfBubble=orderBubbleWidth()*s/2;
  const visibleRight=g.bleed?g.bleed.W-g.bleed.x:g.W;
  let right=visibleRight;
  orderQueue.entries.forEach((e,i)=>{
@@ -42,7 +42,7 @@ function orderRewardRows(order){
 function drawOrderRewards(c,g,e){
  const rows=orderRewardRows(e);if(!rows.length)return;
  const s=g.W/1170,p=orderPose(e,g),a=state,pad=a.fxRewardPadding,w=a.fxRewardWidth,h=rows.length*a.fxRewardRowHeight+pad*2;
- const bubbleHeight=449*a.fxBubbleHeight/100*g.W*.82/1510;
+ const bubbleHeight=orderBubbleHeight()*s;
  c.save();c.globalAlpha=e.alpha??1;
  c.translate(p.x+orderPortraitShift(g)+a.fxRewardX*s,orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-h)*s);c.scale(s,s);
  cachedOrderPart(c,e,'reward',JSON.stringify([rows,Object.entries(a).filter(([k])=>k.startsWith('fxReward')||k.startsWith('fxCurrency')),!!artwork.backgroundcoin,!!artwork.backgroundenergy,!!artwork.backgroundpremium]),w,h,c=>{
@@ -51,7 +51,7 @@ function drawOrderRewards(c,g,e){
  rows.forEach((row,i)=>{
   const colorKey=row.icon==='energy'?'Energy':row.icon==='premium'?'Premium':'Text';
   c.fillStyle=a['fxReward'+colorKey+'Color'];c.strokeStyle=a['fxReward'+colorKey+'Border'];
-  const y=pad+(i+.5)*a.fxRewardRowHeight,img=artwork['background'+row.icon],size=row.icon==='coin'?a.fxRewardCoinSize:a.fxRewardIconSize;
+  const y=pad+(i+.5)*a.fxRewardRowHeight,img=artwork['background'+row.icon],size=(row.icon==='coin'?a.fxRewardCoinSize:a.fxRewardIconSize)*(row.icon==='energy'?.92:1);
   if(img){const scale=size/Math.max(img.width,img.height);c.drawImage(img,pad+(size-img.width*scale)/2+a.fxRewardIconX,y-img.height*scale/2+a.fxRewardIconY,img.width*scale,img.height*scale);}
   const text='+'+formatOrderReward(row.amount),tx=w-pad+a.fxRewardTextX,ty=y+a.fxRewardTextY,maxWidth=Math.max(1,tx-pad*2-size-a.fxRewardIconX);
   if(a.fxRewardTextStroke>0){c.lineJoin='round';c.lineWidth=a.fxRewardTextStroke;drawCurrencyText(c,text,tx,ty,a.fxRewardLetterSpacing,'strokeText',maxWidth);}
@@ -59,12 +59,12 @@ function drawOrderRewards(c,g,e){
  });});c.restore();
 }
 const orderPartCache=new WeakMap();
-function cachedOrderPart(c,entry,kind,key,w,h,paint){
+function cachedOrderPart(c,entry,kind,key,w,h,paint,pad=128){
  let parts=orderPartCache.get(entry);if(!parts){parts={};orderPartCache.set(entry,parts);}
  let part=parts[kind];
  if(!part||part.key!==key){
   // One current sprite per order/part; removed orders are garbage-collected.
-  const pad=128,image=document.createElement('canvas');image.width=Math.ceil(w+pad*2);image.height=Math.ceil(h+pad*2);
+  const image=document.createElement('canvas');image.width=Math.ceil(w+pad*2);image.height=Math.ceil(h+pad*2);
   const d=image.getContext('2d');d.translate(pad,pad);paint(d);part=parts[kind]={key,image,pad};
  }
  c.drawImage(part.image,-part.pad,-part.pad);
@@ -72,7 +72,7 @@ function cachedOrderPart(c,entry,kind,key,w,h,paint){
 function orderInView(e,g){
  const p=orderPose(e,g),s=g.W/1170;
  const img=orderImages[e.type+e.variant+(e.phase==='complete'?'1':'')];
- const reach=Math.max((img?p.height*img.width/img.height/2:p.height)+Math.abs(orderPortraitShift(g)),orderBubbleWidth()*g.W*.82/1510/2+Math.abs(state.fxBubbleX)*s,(Math.abs(state.fxRewardX)+state.fxRewardWidth+128)*s+Math.abs(orderPortraitShift(g)));
+ const reach=Math.max((img?p.height*img.width/img.height/2:p.height)+Math.abs(orderPortraitShift(g)),orderBubbleWidth()*s/2+Math.abs(state.fxBubbleX)*s,(Math.abs(state.fxRewardX)+state.fxRewardWidth+128)*s+Math.abs(orderPortraitShift(g)));
  return p.x+reach>=-(g.bleed?.x||0)&&p.x-reach<=(g.bleed?g.bleed.W-g.bleed.x:g.W);
 }
 const generatorRewardIcons=new Map();
@@ -88,7 +88,7 @@ function drawGeneratorReward(c,g,e){
  if(!e.generator)return;
  const rows=orderRewardRows(e),s=g.W/1170,p=orderPose(e,g),a=state,pad=a.fxRewardPadding,w=a.fxRewardWidth;
  const currencyH=rows.length*a.fxRewardRowHeight+pad*2,box=a.fxRewardRowHeight+pad*2,gap=10;
- const bubbleHeight=449*a.fxBubbleHeight/100*g.W*.82/1510;
+ const bubbleHeight=orderBubbleHeight()*s;
  const top=orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-(rows.length?currencyH:0))*s-(gap+box)*s;
  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x+orderPortraitShift(g)+a.fxRewardX*s,top);c.scale(s,s);
  const icon=generatorRewardIcon(e.generator.type);
@@ -100,7 +100,7 @@ function drawGeneratorReward(c,g,e){
 const orderPayouts=[];
 function rewardRowPoint(e,g,icon){
  const rows=orderRewardRows(e),s=g.W/1170,p=orderPose(e,g),a=state,pad=a.fxRewardPadding;
- const h=rows.length*a.fxRewardRowHeight+pad*2,bubbleHeight=449*a.fxBubbleHeight/100*g.W*.82/1510;
+ const h=rows.length*a.fxRewardRowHeight+pad*2,bubbleHeight=orderBubbleHeight()*s;
  const i=Math.max(0,rows.findIndex(r=>r.icon===icon));
  return {x:p.x+orderPortraitShift(g)+(a.fxRewardX+a.fxRewardWidth/2)*s,y:orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-h+pad+(i+.5)*a.fxRewardRowHeight)*s};
 }
@@ -123,7 +123,7 @@ function drawOrderPayouts(c,g){
  if(!orderPayouts.length)return;
  const now=performance.now(),W=window.RENOVATION_ASSETS?.width||6344,k=W/g.W,scale=state.fxRewardFlightScale;
  c.save();c.scale(g.W/W,g.W/W);
- for(const p of orderPayouts){const popFrom=(p.icon==='coin'?state.fxRewardCoinSize:state.fxRewardIconSize)*(window.RENOVATION_ASSETS?.width||6344)/1170;RenovationMotion.paintFlights(c,now,p.start,p.duration,p.count,{x:p.source.x*k,y:p.source.y*k},{x:p.target.x*k,y:p.target.y*k},(c,x,y,size)=>{const img=artwork['background'+p.icon];if(img)c.drawImage(img,x-size/2,y-size/2,size,size);},scale,popFrom);}
+ for(const p of orderPayouts){const popFrom=(p.icon==='coin'?state.fxRewardCoinSize:state.fxRewardIconSize)*(p.icon==='energy'?.92:1)*(window.RENOVATION_ASSETS?.width||6344)/1170;RenovationMotion.paintFlights(c,now,p.start,p.duration,p.count,{x:p.source.x*k,y:p.source.y*k},{x:p.target.x*k,y:p.target.y*k},(c,x,y,size)=>{const img=artwork['background'+p.icon];if(img)c.drawImage(img,x-size/2,y-size/2,size,size);},scale,popFrom);}
  c.restore();
  for(let i=orderPayouts.length-1;i>=0;i--){const p=orderPayouts[i],flight=Math.max(1,state.fxRewardFlightDuration),gap=Math.max(0,state.fxRewardCoinGap);if(now-p.start>=flight+(p.count-1)*gap+40)orderPayouts.splice(i,1);}
 }
@@ -155,25 +155,33 @@ function drawOrderCustomers(c,g){
 function drawCustomerBubbles(c,g,markers){
  if(!ordersVisible)return;
  if(g.bleed&&c===ctx)drawOrderOverflow(g,d=>drawCustomerBubbles(d,g,markers));
- orderQueue.entries.forEach(e=>{if(!orderInView(e,g))return;const p=orderPose(e,g),scale=g.W*.82/1510,h=449*state.fxBubbleHeight/100,w=orderBubbleWidth(),s=g.W/1170;
-  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x-w*scale/2+state.fxBubbleX*s,orderBubbleBottom(g)-h*scale);c.scale(scale,scale);
+ orderQueue.entries.forEach(e=>{if(!orderInView(e,g))return;const p=orderPose(e,g),s=g.W/1170,h=orderBubbleHeight(),w=orderBubbleWidth();
+  c.save();c.globalAlpha=e.alpha??1;c.translate(p.x-w*s/2+state.fxBubbleX*s,orderBubbleBottom(g)-h*s);c.scale(s,s);
+  const spill=Math.ceil(orderRequirementIconSize(h,state.fxOrderItemScale)/.94+Math.abs(state.fxOrderItemX)+Math.abs(state.fxOrderItemY));
   cachedOrderPart(c,e,'bubble',JSON.stringify([e.phase,e.requirements,markers?.requirements.get(e.id),Object.entries(state).filter(([k])=>k.startsWith('fxBubble')||k.startsWith('fxOrder')),orderCheckImage.complete,e.requirements.map(r=>!!window.mergePlayTest.getItemImage(r))]),w,h,c=>{paintOrderBubble(c);
   c.fillStyle='#A36F48';c.textAlign='center';c.textBaseline='middle';
   if(e.phase==='waiting'){
-   const step=(w-40)/e.requirements.length;
-   e.requirements.forEach((r,i)=>{const img=window.mergePlayTest.getItemImage(r),x=20+step*(i+.5),size=orderRequirementIconSize(h,state.fxOrderItemScale,r),y=(h-size)/2;c.save();if(r.delivered)c.globalAlpha*=.4;if(img)c.drawImage(img,x-size/2,y,size,size);c.restore();if(r.delivered||markers?.requirements.get(e.id)?.[i])drawOrderCheck(c,{x:x-size/2,y,width:size,height:size});});
+   const step=w/e.requirements.length;
+   e.requirements.forEach((r,i)=>{const img=window.mergePlayTest.getItemImage(r),size=orderRequirementIconSize(h,state.fxOrderItemScale,r),x=step*(i+.5)+state.fxOrderItemX,y=(h-size)/2+state.fxOrderItemY;c.save();if(r.delivered)c.globalAlpha*=.4;if(img){const shadowSize=size/.94;c.drawImage(itemShadow(r,img),x-shadowSize/2,y-(shadowSize-size)/2,shadowSize,shadowSize);c.drawImage(img,x-size/2,y,size,size);}c.restore();if(r.delivered||markers?.requirements.get(e.id)?.[i])drawOrderCheck(c,{x:x-size/2,y,width:size,height:size});});
   }
-  });c.restore();
+  },spill);c.restore();
  });
 }
 function refreshOrderButtons(){window.refreshOrderTools?.();}
 function setOrdersVisible(value){ordersVisible=value;if(value&&!orderQueue.entries.length)while(orderQueue.add()){}orderFrame=performance.now();const actions=document.getElementById('order-actions');if(actions)actions.hidden=!value;refreshOrderButtons();}
 function resetOrderCustomers(){orderScroll=0;orderPayouts.length=0;orderQueue.reset();const input=document.getElementById('order-count-input');if(input){delete input.dataset.dirty;input.value=0;}refreshOrderButtons();}
+function orderIconSpill(g){const s=g.W/1170,size=orderRequirementIconSize(state.fxBubbleHeight,state.fxOrderItemScale);return Math.max(0,(size-state.fxBubbleHeight)/2+state.fxOrderItemY)*s;}
+function orderBubbleHit(e,g){
+ const s=g.W/1170,p=orderPose(e,g),w=orderBubbleWidth(),h=orderBubbleHeight(),x=p.x-w*s/2+state.fxBubbleX*s,y=orderBubbleBottom(g)-h*s;
+ const size=orderRequirementIconSize(h,state.fxOrderItemScale),left=Math.min(0,state.fxOrderItemX-size/2),right=Math.max(w,w+state.fxOrderItemX+size/2);
+ const top=Math.min(0,(h-size)/2+state.fxOrderItemY),bottom=Math.max(h,(h+size)/2+state.fxOrderItemY);
+ return {x:x+left*s,y:y+top*s,width:(right-left)*s,height:(bottom-top)*s};
+}
 function hitOrderCustomer(point,g){
  if(!ordersVisible||!window.mergePlayTest?.active)return null;
- const entries=[...orderQueue.entries].filter(e=>!e.entering).reverse(),s=g.W/1170,scale=g.W*.82/1510;
- // Bubbles are in front; hit them before testing the exposed portraits.
- for(const e of entries){const p=orderPose(e,g),w=orderBubbleWidth()*scale,h=449*state.fxBubbleHeight/100*scale,x=p.x-w/2+state.fxBubbleX*s,y=orderBubbleBottom(g)-h;if(point.x>=x&&point.x<=x+w&&point.y>=y&&point.y<=y+h)return e;}
+ const entries=[...orderQueue.entries].filter(e=>!e.entering).reverse();
+ // Trays are in front; hit them before testing the exposed portraits.
+ for(const e of entries){const r=orderBubbleHit(e,g);if(point.x>=r.x&&point.x<=r.x+r.width&&point.y>=r.y&&point.y<=r.y+r.height)return e;}
   for(const e of entries){const p=orderPose(e,g),img=orderImages[e.type+e.variant+(e.phase==='complete'?'1':'')];if(!img)continue;const w=p.height*img.width/img.height,px=p.x+orderPortraitShift(g);if(point.x>=px-w/2&&point.x<=px+w/2&&point.y>=p.bottom-p.height&&point.y<g.bar.y)return e;}
  return null;
 }
