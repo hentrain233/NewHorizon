@@ -45,6 +45,13 @@
  }
  session.showOrders=true;
  function submitOrderItem(id,index){if(!active||drag||busy(index)||!orderQueue.submit(id,board,index,performance.now()))return false;effects.delete(index);if(selected===index)selected=-1;keyboardSource=-1;message('订单已接收物品。');return true;}
+ function canRecycle(){return active&&!drag&&!session.orderPanning&&!busy(selected)&&runtime.recyclePrice(board.slots[selected])>0&&!window.itemDetails?.active&&!window.renovationScreen?.active&&!window.renovationScreen?.busy;}
+ function recycleSelected(){
+  if(!canRecycle())return false;
+  const result=runtime.recycleItem(selected);if(!result.ok)return false;
+  effects.delete(selected);session.failures.delete(selected);selected=-1;keyboardSource=-1;
+  notify('已回收，获得 '+result.coins+' 金币。');drawCanvas();return true;
+ }
  let frozenAt=null;
  function freeze(value){
   if(value){if(frozenAt===null)frozenAt=performance.now();return;}
@@ -54,4 +61,6 @@
   if(orderQueue.refillReadyAt!=null)orderQueue.refillReadyAt+=elapsed;orderFrame=performance.now();
  }
  window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},get boardMoving(){return !!drag||flights.size>0||effects.size>0||session.failures.size>0;},get boardVisualKey(){return JSON.stringify([board.slots,selected,keyboardSource,orderQueue.entries.map(e=>[e.id,e.phase,e.requirements])]);},get boardAnimated(){return selected>=0||board.slots.some(i=>i&&board.getEffectTier(i)!=='none');},get orderMarkers(){return orderMarkerState(orderQueue.entries,board.slots);},drawOrderDrag:renderer.drawOrderDrag,get moving(){return session.orderPanning||!!drag||flights.size>0||effects.size>0||session.failures.size>0||orderPayouts.length>0||orderQueue.entries.some((e,i)=>e.arrivedAt===undefined||e.entering||e.phase==='complete'||Math.abs(e.slot-i)>.001);},freeze,draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
+ window.mergePlayTest.recycleSelected=recycleSelected;
+ Object.defineProperties(window.mergePlayTest,{selectedItem:{get:()=>board.slots[selected]||null},canRecycle:{get:canRecycle}});
 })();

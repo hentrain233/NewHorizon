@@ -26,8 +26,8 @@
   },
   {
     "path": "js/shared/design-defaults.js",
-    "bytes": 6082,
-    "sha256": "ed62af932cfe89c3630772b8cf3c61ae488a338c6096d5a927d931f65ad3dddf"
+    "bytes": 6147,
+    "sha256": "68d6eff2fe8efc8d9510354c8cf4acedc86414f84fabe99c21532eb65f1fb3d9"
   },
   {
     "path": "js/shared/state.js",
@@ -106,8 +106,8 @@
   },
   {
     "path": "js/game/domain/runtime.js",
-    "bytes": 11421,
-    "sha256": "f191aa21f1e044a99712b5475d62f1845315e35fb1ba3167b913085ed2d9e5b7"
+    "bytes": 12154,
+    "sha256": "6d08ff3d994da1bff42f90c6fbda3d5e5fd4961deb815c27c647c60a6b437666"
   },
   {
     "path": "js/game/persistence/save.js",
@@ -166,8 +166,8 @@
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 3803,
-    "sha256": "996b768108af6d4dd795586d1aef2807fc1c54d7f9aa2f1b0b739e979a9d1c3e"
+    "bytes": 4333,
+    "sha256": "eb5d50b0f38ae747f4acf3d39eb91346ce66a8b4537b133e54518f5e2be67581"
   },
   {
     "path": "js/game/item-detail-assets.js",
@@ -191,8 +191,8 @@
   },
   {
     "path": "js/game/controller.js",
-    "bytes": 6507,
-    "sha256": "a4c631ebe75ca4369d807f5de57aa100d3233dc470a2fb0dbdf6dd11bd208d61"
+    "bytes": 7233,
+    "sha256": "eab6d95bb48a76907637485904dc34af52fc21548e5f8a26c5a8a689b74a38a8"
   },
   {
     "path": "js/game/renovation-motion.js",
@@ -201,8 +201,8 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 24725,
-    "sha256": "5042fa05a5689bd3c48400da5ee2de68dcec6ed236ac48473b2d76755eafd413"
+    "bytes": 25763,
+    "sha256": "eab173c3d667ca9cc828398a2fd175ed8c84110c761857779aa90c514b0a223a"
   },
   {
     "path": "js/mobile-play.js",
@@ -216,8 +216,8 @@
   },
   {
     "path": "assets/navigation.css",
-    "bytes": 1345,
-    "sha256": "22122102dabb92ca9893e90d69965bfda649b49504ce76beb18dd71a332a2cdd"
+    "bytes": 1511,
+    "sha256": "364ecc6fc7185fd597f604b8960062d7688fad4a47be6b57e603e8cbefb21403"
   },
   {
     "path": "assets/item-details.css",
@@ -296,8 +296,18 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 902,
-    "sha256": "5606bf06aad8e9c6d456306eae90dc6773eeb8f597197d287be17514799fa018"
+    "bytes": 963,
+    "sha256": "a890dd30f5fab925eb910f87d4e8a397ff4216e92b88c1c43cc1af6f495b4aab"
+  },
+  {
+    "path": "assets/info-ui/infoUI_recycle.png",
+    "bytes": 8432,
+    "sha256": "cf74f5a578eb4441c8bd64817bf4e1f9d818ed62d6f5b13b15f52fa6584f2385"
+  },
+  {
+    "path": "assets/info-ui/infoUI_recycle2.png",
+    "bytes": 9467,
+    "sha256": "46259ea6e7048950e399a40c8af48c3591c1f701a00430bf9c5d5bcc6a61ce13"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

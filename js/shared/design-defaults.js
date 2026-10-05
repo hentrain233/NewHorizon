@@ -3,6 +3,7 @@ const ORDER_ANIMAL_TYPES=Object.freeze({Squirrel:'飞鼠',Wolf:'狼',Otter:'獭�
 const DEFAULT_STATE = Object.freeze({
   energyInitial:200,energyMax:999,energyRecoverySeconds:300,
  fxNavBottom:2,fxNavStallScale:100,
+  fxInfoRecycleArt:'outlined',fxInfoRecycleX:0,fxInfoRecycleY:0,
   fxInfoX:20,fxInfoBottom:2.2,fxInfoWidth:60,fxInfoHeight:180,fxInfoRadius:32,fxInfoCurve:4,fxInfoFill:'#FFEBD2',fxInfoBorder:'#A18166',fxInfoStroke:4,
   fxInfoTabHeight:62,fxInfoTabPadding:24,fxInfoTabWidth:100,fxInfoTabRadius:14,fxInfoTabSlant:34,fxInfoTabX:0,fxInfoTabY:-32,fxInfoTabFill:'#74D0EC',fxInfoTabMiddle:'#6FCFEC',fxInfoTabBottom:'#35BBE3',fxInfoTabBorder:'#548C9B',fxInfoTabStroke:0,
   fxInfoTabShadeColor:'#0F4B66',fxInfoTabShadeOpacity:0,fxInfoTabShadeWidth:1,fxInfoTabShadeBlur:4,fxInfoTabShadeX:-3,fxInfoTabShadeY:-2,fxInfoTabInnerOpacity:40,

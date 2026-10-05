@@ -7,6 +7,8 @@
 .renovation-nav.inventory-nav{position:absolute;left:2.5%;right:auto;pointer-events:auto;cursor:pointer}
 .renovation-nav.info-art svg{display:none}
 .renovation-nav.info-art img{width:100%;height:100%;margin:0;object-fit:fill}
+.renovation-nav.recycle-nav{position:absolute;pointer-events:auto;cursor:pointer}
+.renovation-nav.recycle-nav img{width:100%;height:100%;margin:0;object-fit:contain}
 .mobile-play main{position:relative;z-index:1}
 .mobile-play .workspace{background:transparent!important}
 .mobile-play #preview{background:none}

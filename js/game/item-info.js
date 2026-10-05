@@ -4,6 +4,9 @@ function infoLayout(){
  const layout={w:1320,h:2868,bar:[251,2606,818,224],shortHit:[451,2573,418,76],short:[446,2569,428,87],longHit:[409,2573,502,76],long:[404,2569,512,87],left:[31,2608,214,219],right:[1076,2608,214,219],body:[431,2696,456,38],title:40,bodySize:40.005,bodyColor:'#9C7B60'};
  // Move the whole footer together, including both title hit boxes and DOM buttons.
  for(const key of ['bar','shortHit','short','longHit','long','left','right','body'])layout[key][1]+=18;
+ const x=state.fxInfoRecycleX??0,y=(state.fxInfoRecycleY??0)+18;
+ layout.recycle=[907+x,2663+y,124,123];
+ layout.recycleLabel=[936.950528+x,2648.960954+y];
  return layout;
 }
 function infoBox(g,box){const L=infoLayout();return {x:box[0]/L.w*g.W,y:box[1]/L.h*g.H,width:box[2]/L.w*g.W,height:box[3]/L.h*g.H};}
@@ -30,9 +33,12 @@ function drawItemInfo(c,g,session){
   c.strokeText(title,tx,ty,tab.width*.86);
   c.shadowColor='transparent';c.shadowOffsetY=0;c.shadowBlur=0;
   c.fillStyle='#FFFFFF';c.fillText(title,tx,ty,tab.width*.86);c.restore();
-  const body=infoBox(g,L.body);
+  const description=definition.producerId?'点击消耗能量生成物品。':!definition.mergeResultId?'已到达该合成路线最高级。':'合成相同的物品进行升级。';
   c.font=`400 ${L.bodySize*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle=L.bodyColor;
-  c.fillText(definition.description||'合成相同的物品进行升级。',body.x+body.width/2,body.y+body.height/2,body.width);
+  c.textAlign='left';c.textBaseline='alphabetic';
+  c.fillText(description,429.950528/1320*g.W,(2728.960954+18)/L.h*g.H,L.body[2]/1320*g.W);
+  c.font=`400 ${32.004*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle='#147DB5';
+  if(!definition.producerId)c.fillText('回收',L.recycleLabel[0]/L.w*g.W,L.recycleLabel[1]/L.h*g.H);
  }
  c.restore();
 }

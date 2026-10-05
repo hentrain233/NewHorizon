@@ -16,7 +16,7 @@ class GameRuntime {
   board.onChange=(type,item)=>{this.discover(item);this.changed(type,{item});};
   orders.onChange=(type,order)=>{if(type==='ORDERS_RESET')this.state.currencies.coins=100;if(type==='ORDER_COMPLETED'){this.state.currencies.coins+=order.reward;this.state.coinsEarned+=order.reward;for(const reward of order.rewards||[])if(reward.type==='currency'&&reward.currency==='energy')this.state.currencies.energy+=reward.amount;if(order.generator){const slot=this.board.empty()[0];if(slot!==undefined){const item={type:order.generator.type,level:1};this.board.slots[slot]=item;this.discover(item);}}else this.orders.generatorChance=Math.min(1,(this.orders.generatorChance??.01)+.03);if(order.xpReward)this.addXP(order.xpReward);}this.changed(type,{orderId:order?.id});};
   // Nested rewards/unlocks publish only after the complete operation is committed.
-  for(const name of ['addXP','unlock','storeItem','retrieveItem','enqueueRewards','claimReward','purchaseTask']){const method=this[name].bind(this);this[name]=(...args)=>{this.transactionDepth++;try{return method(...args);}finally{if(--this.transactionDepth===0){const events=this.pendingEvents.splice(0);for(const [type,payload]of events)this.emit(type,payload);if(this.dirty){this.dirty=false;this.scheduleSave();}}}};}
+  for(const name of ['addXP','unlock','storeItem','retrieveItem','recycleItem','enqueueRewards','claimReward','purchaseTask']){const method=this[name].bind(this);this[name]=(...args)=>{this.transactionDepth++;try{return method(...args);}finally{if(--this.transactionDepth===0){const events=this.pendingEvents.splice(0);for(const [type,payload]of events)this.emit(type,payload);if(this.dirty){this.dirty=false;this.scheduleSave();}}}};}
  }
  // Persist the recovery anchor, not a ticking countdown. Offline recovery uses the same clock.
  configureEnergy(rules){
@@ -65,6 +65,19 @@ class GameRuntime {
  retrieveItem(index){const inv=this.state.inventory,slot=this.board.empty()[0];if(!Number.isInteger(index)||!inv.items[index]||slot===undefined)return false;this.board.slots[slot]=inv.items.splice(index,1)[0];this.changed('INVENTORY_CHANGED');return true;}
  isBoardFull(){return !this.board.empty().length;}
  isInventoryFull(){return this.state.inventory.items.length>=this.state.inventory.capacity;}
+ recyclePrice(item){
+  const d=this.board.definition(item);if(!d||d.producerId)return 0;
+  const tier=d.tier,base=2**(tier-1)*4*(1+.2*tier)+10*tier;
+  const discounted=tier<=5?base*(1-.1*(6-tier)):base;
+  return Math.round(Math.round(discounted*(.90+.02*tier)*.7)*.6);
+ }
+ recycleItem(index){
+  if(!Number.isInteger(index)||index<0||index>=this.board.slots.length)return {ok:false};
+  const item=this.board.slots[index],coins=this.recyclePrice(item),balance=this.state.currencies.coins+coins;
+  if(!item||!coins||!Number.isSafeInteger(balance))return {ok:false};
+  this.board.slots[index]=null;this.state.currencies.coins=balance;
+  this.changed('ITEM_RECYCLED',{item:{...item},index,coins});return {ok:true,coins};
+ }
  validRewards(rewards){return Array.isArray(rewards)&&rewards.every(r=>r.type==='unlock'?this.content.unlocks.some(u=>u.id===r.unlockId):Number.isSafeInteger(r.amount)&&r.amount>0&&(r.type==='item'?this.content.items.some(i=>i.id===r.itemId):r.type==='xp'||r.type==='currency'&&Object.hasOwn(this.state.currencies,r.currency)));}
  enqueueRewards(rewards=[]){if(!this.validRewards(rewards))return false;this.state.rewardQueue.push(...structuredClone(rewards));if(rewards.length)this.changed('REWARDS_QUEUED');return true;}
  claimReward(index=0){const reward=this.state.rewardQueue[index];if(!reward||!this.validRewards([reward]))return false;if(reward.type==='item'&&this.board.empty().length<reward.amount)return false;

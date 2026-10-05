@@ -26,7 +26,10 @@
  nav.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 C82 3 94 12 97 46 C99 80 89 94 55 97 C20 99 6 90 3 56 C0 21 12 4 50 3Z" fill="#FFEBD2" stroke="#A18166" stroke-width="2"/></svg><img src="assets/map-icon.png" alt="">';
  const inventory=document.createElement('button');inventory.type='button';inventory.id='inventory-nav';inventory.className='renovation-nav inventory-nav';inventory.setAttribute('aria-label','仓库');
  inventory.innerHTML=nav.innerHTML;inventory.querySelector('img').src='assets/inventory-icon.png';overlay.appendChild(inventory);
- for(const button of [nav,inventory])button.addEventListener('pointerdown',()=>{if(!button.disabled)button.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
+ const recycle=document.createElement('button');recycle.type='button';recycle.id='recycle-item';recycle.className='renovation-nav recycle-nav';recycle.setAttribute('aria-label','回收物品');recycle.hidden=true;
+ recycle.innerHTML='<img src="assets/info-ui/infoUI_recycle2.png" alt="">';overlay.appendChild(recycle);
+ recycle.onclick=()=>window.mergePlayTest.recycleSelected();
+ for(const button of [nav,inventory,recycle])button.addEventListener('pointerdown',()=>{if(!button.disabled)button.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
  const controls=document.createElement('div');controls.className='renovation-map-controls';controls.hidden=true;
  controls.innerHTML='<button aria-label="缩小地图">−</button><span>75%</span><button aria-label="放大地图">＋</button><button class="locate" aria-label="定位当前清理任务">定位任务</button>';overlay.appendChild(controls);
  const zoomText=controls.querySelector('span'),[minus,plus,locate]=controls.querySelectorAll('button');
@@ -138,6 +141,14 @@
   style(el,'right','auto');style(el,'bottom','auto');style(el,'aspectRatio','auto');style(el,'opacity','1');
  }
  function drawOverlay(c,g){
+  recycle.hidden=active||!window.mergePlayTest.active||runtime.recyclePrice(window.mergePlayTest.selectedItem)===0;
+  if(!recycle.hidden){
+   placeInfoButton(recycle,infoLayout().recycle);recycle.disabled=!window.mergePlayTest.canRecycle;
+   const src='assets/info-ui/'+(state.fxInfoRecycleArt==='solid'?'infoUI_recycle.png':'infoUI_recycle2.png');
+   if(recycle.querySelector('img').getAttribute('src')!==src)recycle.querySelector('img').src=src;
+   const label='回收物品，获得 '+runtime.recyclePrice(window.mergePlayTest.selectedItem)+' 金币';
+   if(recycle.getAttribute('aria-label')!==label)recycle.setAttribute('aria-label',label);
+  }
   nav.classList.toggle('info-art',!active);inventory.classList.add('info-art');
   const navImage=active?'assets/stall-icon.png':'assets/info-ui/infoUI_ButtonRight.png';
   if(nav.querySelector('img').getAttribute('src')!==navImage)nav.querySelector('img').src=navImage;
