@@ -49,18 +49,22 @@ function createItemDetails(session,renderer,runtime){
   if(!dialog.open)return;
   const r=canvas.getBoundingClientRect(),view=document.getElementById('viewport').getBoundingClientRect();
   const mobile=document.body.classList.contains('mobile-play'),frame=window.playFrame;
-  const area=mobile?(frame||view):r,v=window.visualViewport;
-  const left=Math.max(area.left,view.left,v?.offsetLeft||0),top=Math.max(area.top,view.top,v?.offsetTop||0);
-  const right=Math.min(area.left+area.width,view.right,(v?.offsetLeft||0)+(v?.width||innerWidth));
-  const bottom=Math.min(area.top+area.height,view.bottom,(v?.offsetTop||0)+(v?.height||innerHeight));
+  // Phone artwork bleeds beneath safe-area padding; editor shade still stops at its preview.
+  const area=mobile?(frame||{left:0,top:0,width:innerWidth,height:innerHeight}):r,v=window.visualViewport;
+  const bounds=mobile?area:view;
+  const left=Math.max(area.left,bounds.left,v?.offsetLeft||0),top=Math.max(area.top,bounds.top,v?.offsetTop||0);
+  const right=Math.min(area.left+area.width,bounds.left+bounds.width,(v?.offsetLeft||0)+(v?.width||innerWidth));
+  const bottom=Math.min(area.top+area.height,bounds.top+bounds.height,(v?.offsetTop||0)+(v?.height||innerHeight));
   const width=Math.max(1,right-left),height=Math.max(1,bottom-top);
   Object.assign(dialog.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});
+  const fitLeft=Math.max(left,view.left),fitTop=Math.max(top,view.top),fitRight=Math.min(right,view.right),fitBottom=Math.min(bottom,view.bottom);
+  const fitWidth=Math.max(1,fitRight-fitLeft),fitHeight=Math.max(1,fitBottom-fitTop);
   // Editor follows its actual zoomed canvas. Phones keep their reference size and only shrink to fit.
   const refW=!mobile||frame?r.width:390,refTop=!mobile||frame?r.height*sheet.top/sheet.screen:844*sheet.top/sheet.screen;
-  const scale=Math.min(refW/sheet.width,width/sheet.width,Math.max(1,height-16)/sheet.height);
+  const scale=Math.min(refW/sheet.width,fitWidth/sheet.width,Math.max(1,fitHeight-16)/sheet.height);
   stage.style.width=sheet.width*scale+'px';stage.style.height=sheet.height*scale+'px';
-  stage.style.left=Math.max(0,Math.min(width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2-left))+'px';
-  stage.style.top=Math.max(8,Math.min(height-8-sheet.height*scale,r.top+refTop+(panel?0:128*refW/1170)-top))+'px';
+  stage.style.left=(Math.max(fitLeft,Math.min(fitRight-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2))-left)+'px';
+  stage.style.top=(Math.max(fitTop+8,Math.min(fitBottom-8-sheet.height*scale,r.top+refTop+(panel?0:128*refW/1170)))-top)+'px';
  }
  function button(label,box,action){
   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
@@ -171,6 +175,8 @@ function createItemDetails(session,renderer,runtime){
   selected=null;resizePreview();drawCanvas();focusBefore?.focus({preventScroll:true});
  }
  dialog.addEventListener('close',finishClose);
+ dialog.addEventListener('pointerdown',()=>dialog.classList.remove('keyboard-focus'));
+ dialog.addEventListener('keydown',e=>{if(e.key==='Tab')dialog.classList.add('keyboard-focus');});
  dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
  surface.addEventListener('click',e=>{
   const r=surface.getBoundingClientRect(),x=(e.clientX-r.left)*sheet.width/r.width,y=(e.clientY-r.top)*sheet.height/r.height+sheet.top;

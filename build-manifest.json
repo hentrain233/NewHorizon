@@ -176,8 +176,8 @@
   },
   {
     "path": "js/game/item-details.js",
-    "bytes": 14096,
-    "sha256": "702cc8108b3e394490094d7a38814a03fc8d3e8a1684a6e16e0d83b793302ae8"
+    "bytes": 14748,
+    "sha256": "5eba722de9d7e1ad6d9aee5f54c4089c40d5557ebc5654f4bbb6aa020c8e2cb1"
   },
   {
     "path": "js/game/bundle.js",
@@ -226,8 +226,8 @@
   },
   {
     "path": "assets/item-details.css",
-    "bytes": 831,
-    "sha256": "7f7afcefcb25de14e08640678e48457946bd283c179db3de5431262f8f319b83"
+    "bytes": 926,
+    "sha256": "500ca37c644567cbdb644070af62d85243116e4ab989c6ba80e71af65c772369"
   },
   {
     "path": "fonts/FZCuYuan-Web.woff2",
@@ -301,8 +301,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 1078,
-    "sha256": "93114a376dab0d9a0c83556a9d1d7d049bf0ea79d43985b61eb7cdd0073422df"
+    "bytes": 1135,
+    "sha256": "781114dfc2e2c24ec8c86b742b6f84fcd351056b528759f32cd40b28fa23c6c2"
   },
   {
     "path": "assets/info-ui/infoUI_recycle.png",
