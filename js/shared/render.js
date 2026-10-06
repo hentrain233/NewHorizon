@@ -202,7 +202,7 @@ function drawCanvas(target=canvas,includeHelpers=true,separateOrders=false){
  if(cached)c.drawImage(cached.front,0,0);else{if(!bleed){drawBar(c,g);drawBarTopStroke(c,g);}drawBoard(c,g);drawGrid(c,g);if(includeHelpers&&state.guides)window.drawEditorGuides?.(c,g);}
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g,separateOrders);
  if(!state.boardOnly)drawCurrencyUI(c,g);
- if(target===canvas&&includeHelpers&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);
+ if(target===canvas&&includeHelpers&&!window.mergePlayTest?.active&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);
  if(target===canvas&&includeHelpers)window.renovationScreen?.drawOverlay(c,g);
  return target;
 }
@@ -217,7 +217,7 @@ function drawPlayFrame(){
   drawCanvas(canvas,true,true);boardFrameKey=key;boardFrameAt=now;
  }
  if(!orderSurface){orderSurface=document.createElement('canvas');orderSurface.id='order-surface';orderSurface.setAttribute('aria-hidden','true');orderSurface.style.cssText='position:fixed;pointer-events:none;z-index:2;max-width:none;max-height:none;background:none;box-shadow:none';document.body.appendChild(orderSurface);}
- const b=g.bleed||{W:g.W,x:0},r=canvas.getBoundingClientRect(),scale=r.width/g.W,barH=Math.ceil(g.barBottom),h=barH+Math.ceil(typeof orderIconSpill==='function'?orderIconSpill(g):0);
+ const b=g.bleed||{W:g.W,x:0},r=canvas.getBoundingClientRect(),scale=r.width/g.W,barH=Math.ceil(g.barBottom),h=orderPayouts.some(p=>p.source.y>barH)?g.H:barH+Math.ceil(typeof orderIconSpill==='function'?orderIconSpill(g):0);
  if(orderSurface.width!==b.W)orderSurface.width=b.W;if(orderSurface.height!==h)orderSurface.height=h;
  const css={left:(r.left-b.x*scale)+'px',top:r.top+'px',width:b.W*scale+'px',height:h*scale+'px'};
  for(const [k,v]of Object.entries(css))if(orderSurface.style[k]!==v)orderSurface.style[k]=v;
@@ -225,7 +225,7 @@ function drawPlayFrame(){
  const d=orderSurface.getContext('2d');d.clearRect(0,0,b.W,h);d.save();d.translate(b.x,0);
  d.imageSmoothingEnabled=true;d.imageSmoothingQuality='high';
  const expanded={...g,W:b.W,bar:{...g.bar,y:g.bar.y+(b.y||0)},barBottom:g.barBottom+(b.y||0)};
- d.save();d.translate(-b.x,-(b.y||0));drawTopBackground(d,expanded);d.restore();
+ d.save();d.beginPath();d.rect(-b.x,0,b.W,barH);d.clip();d.translate(-b.x,-(b.y||0));drawTopBackground(d,expanded);d.restore();
  drawOrderCustomers(d,g);
  if(g.bleed&&bleedFront)d.drawImage(bleedFront,0,b.y,b.W,barH,-b.x,0,b.W,barH);else d.drawImage(playSceneLayers(g,true).front,0,0,g.W,barH,0,0,g.W,barH);
  drawCustomerBubbles(d,g,game.orderMarkers);refreshOrderButtons();game.drawOrderDrag(d,g);

@@ -81,12 +81,12 @@ function updatePlayback(){
   if(!source)return;
   if(video.getAttribute('src')!==source){video.dataset.baked=String(baked);video.src=source;videoFrameCache=null;videoFrameTime=-1;}
  }
- if(state.backgroundType==='video'&&!document.hidden&&!window.renovationScreen?.active)video.play().catch(()=>{});else video.pause();
+ if(state.backgroundType==='video'&&!document.hidden&&!window.renovationScreen?.active&&!window.itemDetails?.active)video.play().catch(()=>{});else video.pause();
 }
 function animate(){
  const start=performance.now();
  if(!document.hidden){if(window.itemDetails?.active){if(orderSurface)orderSurface.hidden=true;window.itemDetails.drawFrozen(canvas);window.itemDetails.draw();}else if(window.mergePlayTest?.active||state.backgroundType==='video'&&assets.video?.readyState>=2&&!assets.video.paused)drawPlayFrame();}
- const moving=window.renovationScreen?.active?window.renovationScreen?.moving:window.mergePlayTest?.moving;
+ const moving=!window.itemDetails?.active&&(window.renovationScreen?.active?window.renovationScreen?.moving:window.mergePlayTest?.moving);
  const interval=document.hidden?250:moving||window.renovationScreen?.busy?1000/60:1000/20;
  setTimeout(()=>requestAnimationFrame(animate),Math.max(0,interval-(performance.now()-start)-5));
 }

@@ -15,6 +15,7 @@ class MergeTestBoard {
  add(type='drinkgen',level=1){const free=this.empty();if(!free.length||!this.definition({type,level}))return -1;const i=free[Math.floor(this.random()*free.length)];this.slots[i]={type,level};this.onChange('ITEM_ADDED',this.slots[i]);return i;}
  reset(){this.slots.fill(null);return this.add();}
  generate(i){
+  if(this.definition(this.slots[i])?.tags.includes('chest'))return {kind:'chest-pending',source:i};
   const generator=this.slots[i],producer=this.content.producers.find(p=>p.id===this.definition(generator)?.producerId);if(!producer||!this.isProducerAvailable(producer))return {kind:'none',source:i};
   const free=this.empty();if(!free.length)return {kind:'full',source:i};
   if(this.spendGenerationEnergy&&!this.spendGenerationEnergy(producer))return {kind:'no-energy',source:i};

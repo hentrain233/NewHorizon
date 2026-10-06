@@ -33,8 +33,8 @@ function drawCurrencyUI(c,g,only){
   c.restore();
   c.font=currencyFont();c.textAlign='right';c.textBaseline='middle';
   // Anchor to the capsule's right edge, independent of digit count and spacing.
-  const live=icon=>typeof orderPayoutBalance==='function'?orderPayoutBalance(icon,gameRuntime.state.currencies[icon==='coin'?'coins':'energy']):gameRuntime.state.currencies[icon==='coin'?'coins':'energy'];
-  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.active?window.renovationScreen.displayCoins():live('coin')):entry.icon==='energy'?String(window.mergePlayTest?.active?live('energy'):Math.min(state.energyInitial,state.energyMax)):entry.icon==='premium'?String(window.mergePlayTest?.active?gameRuntime.state.currencies.gems:0):entry.value;
+  const live=icon=>{const value=gameRuntime.state.currencies[{coin:'coins',energy:'energy',premium:'gems'}[icon]];return typeof orderPayoutBalance==='function'?orderPayoutBalance(icon,value):value;};
+  const value=entry.icon==='coin'&&window.mergePlayTest?.active?String(window.renovationScreen?.active?window.renovationScreen.displayCoins():live('coin')):entry.icon==='energy'?String(window.mergePlayTest?.active?live('energy'):Math.min(state.energyInitial,state.energyMax)):entry.icon==='premium'?String(window.mergePlayTest?.active?live('premium'):0):entry.value;
   c.fillStyle=state.fxCurrencyTextColor;drawCurrencyText(c,value,pillX+pillW-36+state.fxCurrencyTextX,y+h*.54+state.fxCurrencyTextY,state.fxCurrencyLetterSpacing);
   const icon=entry.icon&&artwork['background'+entry.icon];
   if(entry.icon==='energy'&&window.mergePlayTest?.active){const seconds=gameRuntime.energySeconds();if(seconds){c.save();c.font='bold 24px sans-serif';c.textAlign='center';c.fillStyle='#31585B';c.fillText(Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'),pillX+pillW/2,y+h+20);c.restore();}}

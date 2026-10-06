@@ -7,6 +7,7 @@ class GameRuntime {
   this.content=content;this.board=board;this.orders=orders;this.listeners=new Map();this.scheduleSave=()=>{};
   this.transactionDepth=0;this.pendingEvents=[];this.dirty=false;
   this.state={progression:{level:1,xp:0},currencies:{coins:100,energy:this.energyRules.initial,gems:0},coinsEarned:0,energy:{updatedAt:now()},inventory:{capacity:0,items:[]},unlocks:content.unlocks.filter(u=>u.initial).map(u=>u.id),discoveries:[],renovation:{completedTaskIds:[],rewardedAreaIds:[]},rewardQueue:[],recovery:[]};
+  this.state.welcomeBundleClaimed=false;
   orders.isEligible=id=>!id||(this.isUnlocked(id)&&(!content.orders.chainIds.includes(id)||board.slots.some(item=>{
    const producer=content.producers.find(p=>p.id===board.definition(item)?.producerId);
    return producer&&board.isProducerAvailable(producer)&&producer.outputs.some(o=>content.items.find(d=>d.id===o.itemId)?.chainId===id);
@@ -66,7 +67,7 @@ class GameRuntime {
  isBoardFull(){return !this.board.empty().length;}
  isInventoryFull(){return this.state.inventory.items.length>=this.state.inventory.capacity;}
  recyclePrice(item){
-  const d=this.board.definition(item);if(!d||d.producerId)return 0;
+  const d=this.board.definition(item);if(!d||d.producerId||d.tags.includes('chest'))return 0;
   const tier=d.tier,base=2**(tier-1)*4*(1+.2*tier)+10*tier;
   const discounted=tier<=5?base*(1-.1*(6-tier)):base;
   return Math.round(Math.round(discounted*(.90+.02*tier)*.7)*.6);
@@ -77,6 +78,15 @@ class GameRuntime {
   if(!item||!coins||!Number.isSafeInteger(balance))return {ok:false};
   this.board.slots[index]=null;this.state.currencies.coins=balance;
   this.changed('ITEM_RECYCLED',{item:{...item},index,coins});return {ok:true,coins};
+ }
+ claimWelcomeBundle(){
+  const slot=this.board.empty()[0],c=this.state.currencies;
+  if(this.state.welcomeBundleClaimed)return {ok:false,reason:'claimed'};
+  if(slot===undefined)return {ok:false,reason:'full'};
+  if(!Number.isSafeInteger(c.gems+50)||!Number.isSafeInteger(c.energy+100))return {ok:false,reason:'balance'};
+  const item={type:'chest',level:1};this.board.slots[slot]=item;
+  c.gems+=50;c.energy+=100;this.state.welcomeBundleClaimed=true;this.discover(item);
+  this.changed('WELCOME_BUNDLE_CLAIMED',{slot});return {ok:true,slot};
  }
  validRewards(rewards){return Array.isArray(rewards)&&rewards.every(r=>r.type==='unlock'?this.content.unlocks.some(u=>u.id===r.unlockId):Number.isSafeInteger(r.amount)&&r.amount>0&&(r.type==='item'?this.content.items.some(i=>i.id===r.itemId):r.type==='xp'||r.type==='currency'&&Object.hasOwn(this.state.currencies,r.currency)));}
  enqueueRewards(rewards=[]){if(!this.validRewards(rewards))return false;this.state.rewardQueue.push(...structuredClone(rewards));if(rewards.length)this.changed('REWARDS_QUEUED');return true;}

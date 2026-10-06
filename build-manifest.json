@@ -1,8 +1,8 @@
 [
   {
     "path": "index.html",
-    "bytes": 3146,
-    "sha256": "de6e60497036932ab0ec05e138b8235970e269a7c725d7ca80836ffac8ecea5e"
+    "bytes": 3194,
+    "sha256": "79954a33e3915c74f2f146f2e6ed104109a368289546787623a6de7bd2b3b5df"
   },
   {
     "path": ".nojekyll",
@@ -46,8 +46,8 @@
   },
   {
     "path": "js/shared/render.js",
-    "bytes": 19579,
-    "sha256": "71d02505cda82c5d8b725856a5402ba0a5c215d4ae80b16dd308ca855bd83c1b"
+    "bytes": 19699,
+    "sha256": "57e15192f249936755026ced23943a6fb9abc149aeb0dcaf349d2ef04252f5c5"
   },
   {
     "path": "js/shared/ui-bake-assets.js",
@@ -61,13 +61,13 @@
   },
   {
     "path": "js/shared/currency-ui.js",
-    "bytes": 3980,
-    "sha256": "a84c01c8cea05a27b9651342e0200c99e62789f4d85501a6ea6e9f89eb009d18"
+    "bytes": 3956,
+    "sha256": "16223b781a5cde64fca7b47e545c5384cfc59dad417f0b93c5908075ac675d1a"
   },
   {
     "path": "js/shared/media.js",
-    "bytes": 7907,
-    "sha256": "8bad7bb6e79e48d13b34b09390e39bc8c8b630d763f6f43b6df301edbbcbd43a"
+    "bytes": 7967,
+    "sha256": "8f2fa308bc8dd32bc8cb8b100d18822e60f0f1127dd6f77f11565e6752f310e2"
   },
   {
     "path": "js/shared/font-assets.js",
@@ -96,8 +96,8 @@
   },
   {
     "path": "js/game/content/catalog.js",
-    "bytes": 4026,
-    "sha256": "1083d518f028846ae097506c42debf3477ba1a7a7f35be483065f31ae6a5492d"
+    "bytes": 4175,
+    "sha256": "6dadc0f385837a6037b210c7e355fb07afcb218185355c634859ed66cc91beb2"
   },
   {
     "path": "js/game/content/validation.js",
@@ -106,13 +106,13 @@
   },
   {
     "path": "js/game/domain/runtime.js",
-    "bytes": 12154,
-    "sha256": "6d08ff3d994da1bff42f90c6fbda3d5e5fd4961deb815c27c647c60a6b437666"
+    "bytes": 12767,
+    "sha256": "8ceb10a73bfa657ec4f37b52a43ad3cc746b5d69422665a3b9f72d07da1caf2d"
   },
   {
     "path": "js/game/persistence/save.js",
-    "bytes": 8993,
-    "sha256": "7dd3eef5566a0079b1b6ee6dae14351263360876292bbdcd540d9b0f80bb4d2b"
+    "bytes": 9207,
+    "sha256": "8f9778b67ed596c1b00ffc4e983f27ed5b80587d20ece468db4fa06217f7d01d"
   },
   {
     "path": "js/game/order-queue.js",
@@ -146,8 +146,8 @@
   },
   {
     "path": "merge-game.js",
-    "bytes": 3797,
-    "sha256": "f6a5115e63e90045bf5d95ab4d75c77a320b48ffca85addce67dea802db305ea"
+    "bytes": 3897,
+    "sha256": "c21a3b7abc55d8fa02edc748a08611b21b0307233606c4b479477b3589b7f990"
   },
   {
     "path": "js/game/input.js",
@@ -166,8 +166,8 @@
   },
   {
     "path": "js/game/item-info.js",
-    "bytes": 4333,
-    "sha256": "eb5d50b0f38ae747f4acf3d39eb91346ce66a8b4537b133e54518f5e2be67581"
+    "bytes": 4449,
+    "sha256": "1e6d013c9cfc8980eb96e7467d055f6fe1ea20f37396eaf882a671580143ab9c"
   },
   {
     "path": "js/game/item-detail-assets.js",
@@ -176,8 +176,13 @@
   },
   {
     "path": "js/game/item-details.js",
-    "bytes": 13034,
-    "sha256": "862bacd35e2e2f1e8cacee4d62f3bd0945bab37825fdc22762e5af5b95604065"
+    "bytes": 14096,
+    "sha256": "702cc8108b3e394490094d7a38814a03fc8d3e8a1684a6e16e0d83b793302ae8"
+  },
+  {
+    "path": "js/game/bundle.js",
+    "bytes": 7976,
+    "sha256": "ae9a0f81bb93f38d92e29e1540042010efad83976751f51b508bb21430501a08"
   },
   {
     "path": "js/game/animations.js",
@@ -186,13 +191,13 @@
   },
   {
     "path": "js/game/feedback.js",
-    "bytes": 1289,
-    "sha256": "bac4ac8522fb5cc64cbe725bcaf19a8c754da27762f35a18c25148014b99bac5"
+    "bytes": 1378,
+    "sha256": "67760ee9c85afdbf0a9e5316495d002fe406d11d3bf230617ebbd80f9e695e89"
   },
   {
     "path": "js/game/controller.js",
-    "bytes": 7233,
-    "sha256": "eab6d95bb48a76907637485904dc34af52fc21548e5f8a26c5a8a689b74a38a8"
+    "bytes": 7776,
+    "sha256": "9119be84ab751b7c5f006367607702ac920eb00f253cefb52889baf9af24d115"
   },
   {
     "path": "js/game/renovation-motion.js",
@@ -201,13 +206,13 @@
   },
   {
     "path": "js/game/renovation-screen.js",
-    "bytes": 25763,
-    "sha256": "eab173c3d667ca9cc828398a2fd175ed8c84110c761857779aa90c514b0a223a"
+    "bytes": 25801,
+    "sha256": "f9978096575328a507b5380a6e9e69d78a21e7aa4f45ff6746475af2649ec725"
   },
   {
     "path": "js/mobile-play.js",
-    "bytes": 2507,
-    "sha256": "7ef88f3b846f45d68c763b7663e0a24345ee9c46424ac69eec5974f355f36ce3"
+    "bytes": 2537,
+    "sha256": "aed866b1dd8445e90946f767373fe870d1825bcd196717ef1ea129cc3d2d4403"
   },
   {
     "path": "player.css",
@@ -226,8 +231,8 @@
   },
   {
     "path": "fonts/FZCuYuan-Web.woff2",
-    "bytes": 159840,
-    "sha256": "944cff3c188f9a1859c7851bd33eb5d5703fb0df1b91be4db787b9af1fffeeb1"
+    "bytes": 161916,
+    "sha256": "37634f308ca53059f8606b2a14890bcb0ef80384ff85b9d65eb69458e37f528d"
   },
   {
     "path": "js/game/renovation-assets.js",
@@ -296,8 +301,8 @@
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 963,
-    "sha256": "a890dd30f5fab925eb910f87d4e8a397ff4216e92b88c1c43cc1af6f495b4aab"
+    "bytes": 1078,
+    "sha256": "93114a376dab0d9a0c83556a9d1d7d049bf0ea79d43985b61eb7cdd0073422df"
   },
   {
     "path": "assets/info-ui/infoUI_recycle.png",
@@ -308,6 +313,76 @@
     "path": "assets/info-ui/infoUI_recycle2.png",
     "bytes": 9467,
     "sha256": "46259ea6e7048950e399a40c8af48c3591c1f701a00430bf9c5d5bcc6a61ce13"
+  },
+  {
+    "path": "assets/bundle/background.mp4",
+    "bytes": 351186,
+    "sha256": "a8faf658b80a3a7fa2023ba32de5670195796a60f25a725a028c43c2c99b9111"
+  },
+  {
+    "path": "assets/bundle/base.png",
+    "bytes": 56022,
+    "sha256": "443abbb2e6023ed4a401ccf1deacbd8d982a089c8e2a4cc4d78b4f123f3fc633"
+  },
+  {
+    "path": "assets/bundle/set1.png",
+    "bytes": 488414,
+    "sha256": "304703c15aed1015a8771e528adf7a033c658697076f9b594f979a16aaaee999"
+  },
+  {
+    "path": "assets/bundle/set2.png",
+    "bytes": 106813,
+    "sha256": "ff89fb16ba6c71a68be5ffd8e0988ec4ca3d512dd00d07355f5bea193df7ce5a"
+  },
+  {
+    "path": "assets/bundle/button.png",
+    "bytes": 33067,
+    "sha256": "bff62ee14235d719769b610b50e6133ac5219f3d9499157ba146861bbe69bcee"
+  },
+  {
+    "path": "assets/bundle/button_pressed.png",
+    "bytes": 35347,
+    "sha256": "47a50b63ac9c2ac599950bd1a87d1bd49a7f0af22697d3fa848400ae41901652"
+  },
+  {
+    "path": "assets/bundle/close.png",
+    "bytes": 28150,
+    "sha256": "a42dfac905845717f82c4e4509e43fa2e0fca3d76ba02b4c3145ba78fcc4db29"
+  },
+  {
+    "path": "assets/bundle/off.png",
+    "bytes": 89018,
+    "sha256": "646eb616aaa160f4d8600775e642a3089dd9dc72c6636566c34975177f289ccf"
+  },
+  {
+    "path": "assets/bundle/off-motion.png",
+    "bytes": 282258,
+    "sha256": "0893ee320dda2773bbbbfba6c5573b679164ea06101798cec68ee7bd20669ac5"
+  },
+  {
+    "path": "assets/bundle/seastar.png",
+    "bytes": 30175,
+    "sha256": "01a7de309c3368123cadc72bb792c7269cce272e15561cb4e9f44186004f6acb"
+  },
+  {
+    "path": "assets/bundle/tata.png",
+    "bytes": 1192317,
+    "sha256": "37128893fceb9e75c3a2e600077dce787dd697419207c8210cf7e5c11eadd1fb"
+  },
+  {
+    "path": "assets/bundle/tata-shadow.png",
+    "bytes": 169754,
+    "sha256": "7d3e5b9bbceda7d8f9cf067255e55051284e945a09797c48f198941c082c06bd"
+  },
+  {
+    "path": "assets/bundle/background-mask.png",
+    "bytes": 20034,
+    "sha256": "a6834f9401d99695d7080da856bf809c6aede65409c44dc51c31f181bda592ff"
+  },
+  {
+    "path": "assets/bundle/chest.png",
+    "bytes": 1081693,
+    "sha256": "08ba9d19e3d77a236c6d4440b5fe2c0dd5fcd2730642008cbb4e38d1c7c9b714"
   },
   {
     "path": "assets/fonts/changaone/OFL.txt",

@@ -141,6 +141,7 @@
   style(el,'right','auto');style(el,'bottom','auto');style(el,'aspectRatio','auto');style(el,'opacity','1');
  }
  function drawOverlay(c,g){
+  window.welcomeBundle?.placeEntry();
   recycle.hidden=active||!window.mergePlayTest.active||runtime.recyclePrice(window.mergePlayTest.selectedItem)===0;
   if(!recycle.hidden){
    placeInfoButton(recycle,infoLayout().recycle);recycle.disabled=!window.mergePlayTest.canRecycle;

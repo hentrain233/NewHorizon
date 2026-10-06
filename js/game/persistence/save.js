@@ -17,6 +17,8 @@ function hydrateGameSave(runtime,raw,warn=console.warn){
  const s=migrateGameSave(raw,runtime.content),fresh=structuredClone(runtime.state),c=runtime.content;
  const integer=(n,name)=>{if(!Number.isSafeInteger(n)||n<0)throw new Error('Invalid save field: '+name);return n;};
  if(!Array.isArray(s.board)||s.board.length!==63||!s.domains||!Array.isArray(s.orders))throw new Error('Invalid game save structure');
+ if(s.domains.welcomeBundleClaimed!==undefined&&typeof s.domains.welcomeBundleClaimed!=='boolean')throw new Error('Invalid welcome bundle claim');
+ fresh.welcomeBundleClaimed=s.domains.welcomeBundleClaimed===true;
  const recovery=Array.isArray(s.domains.recovery)?structuredClone(s.domains.recovery):[];
  const recover=(value,domain)=>{warn('Missing content retained in recovery:',domain,value);recovery.push({domain,value});return null;};
  const item=(value,domain)=>{if(value===null)return null;const d=c.items.find(i=>i.id===value?.itemId);return d?{type:d.type,level:d.tier}:recover(value,domain);};

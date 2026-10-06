@@ -5,7 +5,7 @@ function infoLayout(){
  // Move the whole footer together, including both title hit boxes and DOM buttons.
  for(const key of ['bar','shortHit','short','longHit','long','left','right','body'])layout[key][1]+=18;
  const x=state.fxInfoRecycleX??0,y=(state.fxInfoRecycleY??0)+18;
- layout.recycle=[907+x,2663+y,124,123];
+ layout.recycle=[907+x-6.2,2663+y-6.15,136.4,135.3];
  layout.recycleLabel=[936.950528+x,2648.960954+y];
  return layout;
 }
@@ -33,12 +33,12 @@ function drawItemInfo(c,g,session){
   c.strokeText(title,tx,ty,tab.width*.86);
   c.shadowColor='transparent';c.shadowOffsetY=0;c.shadowBlur=0;
   c.fillStyle='#FFFFFF';c.fillText(title,tx,ty,tab.width*.86);c.restore();
-  const description=definition.producerId?'点击消耗能量生成物品。':!definition.mergeResultId?'已到达该合成路线最高级。':'合成相同的物品进行升级。';
+  const description=definition.tags.includes('chest')?'点击打开宝箱获取奖励':definition.producerId?'点击消耗能量生成物品。':!definition.mergeResultId?'已到达该合成路线最高级。':'合成相同的物品进行升级。';
   c.font=`400 ${L.bodySize*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle=L.bodyColor;
   c.textAlign='left';c.textBaseline='alphabetic';
   c.fillText(description,429.950528/1320*g.W,(2728.960954+18)/L.h*g.H,L.body[2]/1320*g.W);
   c.font=`400 ${32.004*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle='#147DB5';
-  if(!definition.producerId)c.fillText('回收',L.recycleLabel[0]/L.w*g.W,L.recycleLabel[1]/L.h*g.H);
+  if(!definition.producerId&&!definition.tags.includes('chest'))c.fillText('回收',L.recycleLabel[0]/L.w*g.W,L.recycleLabel[1]/L.h*g.H);
  }
  c.restore();
 }

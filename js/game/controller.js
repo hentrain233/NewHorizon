@@ -10,7 +10,7 @@
  runtime.scheduleSave=()=>saveService?.schedule();
  // Test builds forget coins, energy, and the board on every refresh. Orders and other progress still load.
  function seedTestBoard(){board.slots.fill(null);const seen=new Set();for(const item of GameContent.items)if(item.tier===1&&item.producerId&&!seen.has(item.type)){seen.add(item.type);board.add(item.type,1);}}
- runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;seedTestBoard();
+ if(!runtime.state.welcomeBundleClaimed){runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;seedTestBoard();}
  setInterval(()=>{if(!document.hidden)runtime.recoverEnergy();},1000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)runtime.recoverEnergy();});
  const restaurantTasks=new Set(GameContent.tasks.filter(t=>t.zoneId==='zone_restaurant').map(t=>t.id));
@@ -34,13 +34,13 @@
  function message(text){if(editor)editor.message(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
  function lockEditor(locked){document.body.classList.toggle('testing',locked);editor?.lock(locked);resizePreview();}
- function restart(){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.resetEnergy();runtime.state.coinsEarned=0;runtime.state.discoveries=[];drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();}
+ function restart(showBundle=true){window.configureGameEnergy();runtime.state.currencies.coins=100;runtime.state.currencies.gems=0;runtime.state.welcomeBundleClaimed=false;runtime.resetEnergy();runtime.state.coinsEarned=0;runtime.state.discoveries=[];drag=null;keyboardSource=-1;effects.clear();flights.clear();seedTestBoard();selected=-1;resetOrderCustomers();saveService?.schedule();message('点击生成器出物品；拖到空格移动，拖到同级同类物品合成。');drawCanvas();if(showBundle)window.welcomeBundle?.open();}
  async function toggle(){
   if(window.renovationScreen?.active||window.renovationScreen?.transitioning)return;
   if(loading)return;if(active){active=false;drag=null;keyboardSource=-1;effects.clear();flights.clear();lockEditor(false);drawCanvas();return;}
   if(window.gameTools?.mediaBusy()){notify('请等待预设处理完成，再启用测试。');return;}
   loading=true;editor?.loading(true);
-  try{await Promise.all([loadPictures(),orderPortraitsReady,orderCheckReady]);active=true;lockEditor(true);if(resumePending){resumePending=false;refreshOrderButtons();message('已恢复上次的游戏进度。');drawCanvas();}else restart();setOrdersVisible(true);drawCanvas();canvas.focus({preventScroll:true});}
+  try{await Promise.all([loadPictures(),orderPortraitsReady,orderCheckReady]);active=true;lockEditor(true);if(resumePending){resumePending=false;refreshOrderButtons();message('已恢复上次的游戏进度。');drawCanvas();}else restart(false);setOrdersVisible(true);drawCanvas();canvas.focus({preventScroll:true});}
   catch(e){notify(e.message);}finally{loading=false;editor?.loading(false);}
  }
  session.showOrders=true;
@@ -49,6 +49,8 @@
  function recycleSelected(){
   if(!canRecycle())return false;
   const result=runtime.recycleItem(selected);if(!result.ok)return false;
+  const box=infoBox(geometry,infoLayout().recycle);
+  orderPayouts.push({icon:'coin',amount:result.coins,count:Math.max(1,Math.min(8,Math.ceil(Math.log2(result.coins+1)))),start:performance.now(),duration:state.fxRepairFillDuration,source:center(box),target:currencyBarPoint(geometry,'coin')});
   effects.delete(selected);session.failures.delete(selected);selected=-1;keyboardSource=-1;
   notify('已回收，获得 '+result.coins+' 金币。');drawCanvas();return true;
  }
@@ -62,5 +64,6 @@
  }
  window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},get boardMoving(){return !!drag||flights.size>0||effects.size>0||session.failures.size>0;},get boardVisualKey(){return JSON.stringify([board.slots,selected,keyboardSource,orderQueue.entries.map(e=>[e.id,e.phase,e.requirements])]);},get boardAnimated(){return selected>=0||board.slots.some(i=>i&&board.getEffectTier(i)!=='none');},get orderMarkers(){return orderMarkerState(orderQueue.entries,board.slots);},drawOrderDrag:renderer.drawOrderDrag,get moving(){return session.orderPanning||!!drag||flights.size>0||effects.size>0||session.failures.size>0||orderPayouts.length>0||orderQueue.entries.some((e,i)=>e.arrivedAt===undefined||e.entering||e.phase==='complete'||Math.abs(e.slot-i)>.001);},freeze,draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
  window.mergePlayTest.recycleSelected=recycleSelected;
+ window.welcomeBundle=createWelcomeBundle(runtime,window.itemDetails);
  Object.defineProperties(window.mergePlayTest,{selectedItem:{get:()=>board.slots[selected]||null},canRecycle:{get:canRecycle}});
 })();

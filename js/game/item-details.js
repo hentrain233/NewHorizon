@@ -2,7 +2,7 @@
 // PSD coordinates remain one uniformly scaled surface on phones and in the editor.
 function createItemDetails(session,renderer,runtime){
  // One PSD layout. Drawing and hit targets both read these boxes, in the 1320×2868 sheet.
- const sheet={
+ const itemSheet={
   width:1320,screen:2868,top:335,height:1646,
   // Same picture as the original panel at (22, 335). Split only so the entrance can show the back, then the front.
   back:{x:61,y:444},front:{x:93,y:376},
@@ -18,6 +18,7 @@ function createItemDetails(session,renderer,runtime){
   producer:{frame:{x:576,y:1527,w:170,h:170},item:{x:578,y:1529,width:166,height:166}},
   info:{paint:{x:722,y:1488,w:60,h:67},hit:{x:710,y:1476,w:84,h:91}}
  };
+ let sheet=itemSheet,panel=null;
  const pictures={},source=window.ITEM_DETAILS_ASSETS;
  const ready=Promise.all(Object.entries(source.images).map(([key,url])=>new Promise((resolve,reject)=>{
   const image=new Image();image.onload=()=>{pictures[key]=image;resolve();};image.onerror=()=>reject(Error('物品详情素材加载失败'));image.src=url;
@@ -27,7 +28,8 @@ function createItemDetails(session,renderer,runtime){
  const stage=document.createElement('div');stage.className='item-details-stage';
  const surface=document.createElement('canvas');surface.width=sheet.width;surface.height=sheet.height;surface.setAttribute('aria-hidden','true');
  stage.appendChild(surface);dialog.appendChild(stage);document.body.appendChild(dialog);
- const c=surface.getContext('2d'),snapshot=document.createElement('canvas'),still=document.createElement('canvas');
+ const c=surface.getContext('2d'),snapshot=document.createElement('canvas');
+ let frozenSize='',energyFrame='';
  let selected=null,items=[],producer=null,outputRows=[],openedAt=0,enteredAt=0,loading=false,focusBefore=null,backdropFit='';
  function prepareOutputLabel(){
   if(pictures['products-label'])return;
@@ -58,7 +60,7 @@ function createItemDetails(session,renderer,runtime){
   const scale=Math.min(refW/sheet.width,width/sheet.width,Math.max(1,height-16)/sheet.height);
   stage.style.width=sheet.width*scale+'px';stage.style.height=sheet.height*scale+'px';
   stage.style.left=Math.max(0,Math.min(width-sheet.width*scale,r.left+r.width/2-sheet.width*scale/2-left))+'px';
-  stage.style.top=Math.max(8,Math.min(height-8-sheet.height*scale,r.top+refTop-top))+'px';
+  stage.style.top=Math.max(8,Math.min(height-8-sheet.height*scale,r.top+refTop+(panel?0:128*refW/1170)-top))+'px';
  }
  function button(label,box,action){
   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
@@ -100,8 +102,9 @@ function createItemDetails(session,renderer,runtime){
   const a=fade(delay);c.save();c.globalAlpha=a;c.translate(0,(1-a)*rise);drawLayer();c.restore();
  }
  function draw(){
-  if(!dialog.open||!selected)return;
+  if(!dialog.open||(!selected&&!panel))return;
   c.clearRect(0,0,surface.width,surface.height);c.save();c.translate(0,-sheet.top);
+  if(panel){panel.draw(c,performance.now()-enteredAt,layer);c.restore();return;}
   layer(0,22,()=>paint('back',sheet.back.x,sheet.back.y));
   layer(140,16,()=>paint('front',sheet.front.x,sheet.front.y));
   layer(280,10,()=>{
@@ -124,7 +127,7 @@ function createItemDetails(session,renderer,runtime){
     paint('producer',box.x-2,box.y-2,170,170);
     renderer.drawDetailsItem(c,box,{type:d.type,level:d.tier},120+r*4+i,time,pictures['icon-'+d.assetId]);
    }));
-  }else{
+  }else if(!session.board.definition(selected).tags.includes('chest')){
    paint('output-label',sheet.output.x-pictures['output-label'].width/2,sheet.output.y);paint('producer-bed',sheet.bed.x,sheet.bed.y);
    if(producer){
     paint('producer',sheet.producer.frame.x,sheet.producer.frame.y,sheet.producer.frame.w,sheet.producer.frame.h);
@@ -135,32 +138,39 @@ function createItemDetails(session,renderer,runtime){
   });
   c.restore();
  }
- async function open(item){
-  if(!item||loading||dialog.open||!session.active||window.renovationScreen?.active||window.renovationScreen?.busy)return;
+ async function open(item,external=null){
+  if((!item&&!external)||loading||dialog.open||!session.active||window.renovationScreen?.active||window.renovationScreen?.busy)return;
   loading=true;
   try{
-   await ready;await titleFontReady;if(!session.active||window.renovationScreen?.active)return;
+   if(openedAt&&!dialog.open)finishClose();
+   await ready;await titleFontReady;await external?.ready;if(!session.active||window.renovationScreen?.active)return;
    prepareOutputLabel();
    drawCanvas();snapshot.width=canvas.width;snapshot.height=canvas.height;snapshot.getContext('2d').drawImage(canvas,0,0);
-   const sky=state.transparentTop;state.transparentTop=true;
-   try{drawCanvas();still.width=canvas.width;still.height=canvas.height;still.getContext('2d').drawImage(canvas,0,0);}
-   finally{state.transparentTop=sky;}
-   canvas.getContext('2d').drawImage(snapshot,0,0);
+   frozenSize='';energyFrame='';
    focusBefore=document.activeElement;openedAt=enteredAt=performance.now();
    if(bleedDisplay){backdropFit=bleedDisplay.style.objectFit;bleedDisplay.style.objectFit='cover';}
-   session.drag=null;session.keyboardSource=-1;dialog.showModal();select(item);place();stage.querySelector('button[aria-label="关闭物品详情"]').focus({preventScroll:true});
+   session.drag=null;session.keyboardSource=-1;panel=external;sheet=panel?.layout||itemSheet;
+   surface.width=sheet.width;surface.height=sheet.height;dialog.showModal();updatePlayback();
+   if(panel){stage.querySelectorAll('button').forEach(b=>b.remove());dialog.setAttribute('aria-label','海滩欢迎礼包');panel.start(button,close);}
+   else{dialog.setAttribute('aria-label','物品合成路线');select(item);}
+   place();stage.querySelector('button')?.focus({preventScroll:true});
   }catch(error){notify(error.message);}finally{loading=false;}
  }
  function close(){if(dialog.open)dialog.close();}
- dialog.addEventListener('close',()=>{
+ function finishClose(){
+  if(!openedAt||dialog.open)return;
   const elapsed=performance.now()-openedAt;renderer.resume(elapsed);
+  openedAt=0;
   if(bleedDisplay)bleedDisplay.style.objectFit=backdropFit;
   for(const entry of orderQueue.entries)for(const key of ['arrivedAt','completedAt'])if(entry[key]!=null)entry[key]+=elapsed;
   for(const payout of orderPayouts)payout.start+=elapsed;
   if(orderQueue.refillReadyAt!=null)orderQueue.refillReadyAt+=elapsed;orderFrame=performance.now();
   runtime.recoverEnergy();if(!document.hidden)updatePlayback();
+  panel?.stop();panel=null;sheet=itemSheet;surface.width=sheet.width;surface.height=sheet.height;
+  snapshot.width=snapshot.height=0;frozenSize='';energyFrame='';
   selected=null;resizePreview();drawCanvas();focusBefore?.focus({preventScroll:true});
- });
+ }
+ dialog.addEventListener('close',finishClose);
  dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
  surface.addEventListener('click',e=>{
   const r=surface.getBoundingClientRect(),x=(e.clientX-r.left)*sheet.width/r.width,y=(e.clientY-r.top)*sheet.height/r.height+sheet.top;
@@ -171,15 +181,20 @@ function createItemDetails(session,renderer,runtime){
  window.visualViewport?.addEventListener('scroll',place);
  document.addEventListener('scroll',place,true);
  new ResizeObserver(place).observe(canvas);
- return {open,close,draw,get active(){return dialog.open;},drawFrozen(target){
-  // The board, orders, and item motion stay on the frame from open. Video and the energy countdown keep moving.
+ return {open,openPanel:panel=>open(null,panel),close,draw,get active(){return dialog.open;},drawFrozen(target){
+  // Present the frozen frame once; only the small energy HUD changes on countdown ticks.
   const g=geometry||calculateLayout();if(target.width!==g.W)target.width=g.W;if(target.height!==g.H)target.height=g.H;
-  const ctx=target.getContext('2d');ctx.clearRect(0,0,target.width,target.height);
-  drawTopBackground(ctx,g);
-  const plate=still.width?still:snapshot;
-  drawArtworkCover(ctx,plate,0,0,plate.width,plate.height,0,0,target.width,target.height);
+  const ctx=target.getContext('2d'),size=target.width+':'+target.height;
+  if(frozenSize!==size){ctx.clearRect(0,0,target.width,target.height);ctx.drawImage(snapshot,0,0,target.width,target.height);frozenSize=size;energyFrame='';}
+  const energy=runtime.state.currencies.energy+':'+runtime.energySeconds();
+  if(energyFrame===energy)return target;energyFrame=energy;
   const s=g.W/1170,y=state.fxCurrencyY*g.H/state.height,x=state.fxCurrencyX-80,w=state.fxCurrencyWidth+140,h=state.fxCurrencyHeight+56;
-  ctx.save();ctx.beginPath();ctx.rect(x*s,(y-16)*s,w*s,h*s);ctx.clip();drawTopBackground(ctx,g);drawCurrencyUI(ctx,g,'energy');ctx.restore();
+  const left=Math.max(0,x*s),top=Math.max(0,(y-16)*s),width=Math.min(w*s,target.width-left),height=Math.min(h*s,target.height-top);
+  const sx=snapshot.width/target.width,sy=snapshot.height/target.height;
+  ctx.save();ctx.beginPath();ctx.rect(left,top,width,height);ctx.clip();
+  ctx.clearRect(left,top,width,height);
+  ctx.drawImage(snapshot,left*sx,top*sy,width*sx,height*sy,left,top,width,height);
+  drawCurrencyUI(ctx,g,'energy');ctx.restore();
   return target;
  }};
 }
