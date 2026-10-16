@@ -97,35 +97,16 @@ function drawGeneratorReward(c,g,e){
  if(icon){const size=a.fxRewardGeneratorSize;c.drawImage(icon,(w-size)/2,(box-size)/2+a.fxRewardGeneratorY,size,size);}});
  c.restore();
 }
-const orderPayouts=[];
 function rewardRowPoint(e,g,icon){
  const rows=orderRewardRows(e),s=g.W/1170,p=orderPose(e,g),a=state,pad=a.fxRewardPadding;
  const h=rows.length*a.fxRewardRowHeight+pad*2,bubbleHeight=orderBubbleHeight()*s;
  const i=Math.max(0,rows.findIndex(r=>r.icon===icon));
  return {x:p.x+orderPortraitShift(g)+(a.fxRewardX+a.fxRewardWidth/2)*s,y:orderBubbleBottom(g)-bubbleHeight+(a.fxRewardY-h+pad+(i+.5)*a.fxRewardRowHeight)*s};
 }
-function currencyBarPoint(g,icon){
- const s=g.W/1170,i={energy:0,coin:1,premium:2}[icon],slot=state.fxCurrencyWidth+37,n=icon==='coin'?'Coin':icon==='energy'?'Energy':'Premium';
- return {x:(state.fxCurrencyX+i*(slot+state.fxCurrencyGap)+49+state['fxCurrency'+n+'X'])*s,y:(state.fxCurrencyY+state.fxCurrencyHeight/2+state['fxCurrency'+n+'Y'])*s};
-}
 function beginOrderPayout(e,g){
  if(e.payoutStarted||e.completedAt==null)return;e.payoutStarted=true;
  const count=Math.max(1,...e.requirements.map(r=>r.level)),start=e.completedAt,duration=state.fxRepairFillDuration;
  for(const row of orderRewardRows(e))if(row.icon==='coin'||row.icon==='energy')orderPayouts.push({icon:row.icon,amount:row.amount,count,start,duration,source:rewardRowPoint(e,g,row.icon),target:currencyBarPoint(g,row.icon)});
-}
-function orderPayoutBalance(icon,actual){
- const now=performance.now();let hidden=0;
- for(const p of orderPayouts){if(p.icon!==icon)continue;let arrived=0;const flight=Math.max(1,state.fxRewardFlightDuration),gap=Math.max(0,state.fxRewardCoinGap);
-  for(let i=0;i<p.count;i++)if(now-p.start-i*gap>=flight)arrived++;hidden+=p.amount-Math.round(p.amount*arrived/p.count);}
- return Math.max(0,actual-hidden);
-}
-function drawOrderPayouts(c,g){
- if(!orderPayouts.length)return;
- const now=performance.now(),W=window.RENOVATION_ASSETS?.width||6344,k=W/g.W,scale=state.fxRewardFlightScale;
- c.save();c.scale(g.W/W,g.W/W);
- for(const p of orderPayouts){const popFrom=(p.icon==='coin'?state.fxRewardCoinSize:state.fxRewardIconSize)*(p.icon==='energy'?.92:1)*(window.RENOVATION_ASSETS?.width||6344)/1170;RenovationMotion.paintFlights(c,now,p.start,p.duration,p.count,{x:p.source.x*k,y:p.source.y*k},{x:p.target.x*k,y:p.target.y*k},(c,x,y,size)=>{const img=artwork['background'+p.icon];if(img)c.drawImage(img,x-size/2,y-size/2,size,size);},scale,popFrom);}
- c.restore();
- for(let i=orderPayouts.length-1;i>=0;i--){const p=orderPayouts[i],flight=Math.max(1,state.fxRewardFlightDuration),gap=Math.max(0,state.fxRewardCoinGap);if(now-p.start>=flight+(p.count-1)*gap+40)orderPayouts.splice(i,1);}
 }
 function drawOrderCustomers(c,g){
  if(!ordersVisible||!window.mergePlayTest?.active)return;

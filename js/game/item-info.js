@@ -12,6 +12,11 @@ function infoLayout(){
 function infoBox(g,box){const L=infoLayout();return {x:box[0]/L.w*g.W,y:box[1]/L.h*g.H,width:box[2]/L.w*g.W,height:box[3]/L.h*g.H};}
 const infoArt={};
 function blitInfo(c,g,name,box){if(typeof Image==='undefined')return;let img=infoArt[name];if(!img){img=infoArt[name]=new Image();img.onload=()=>{if(typeof drawCanvas==='function')drawCanvas();};img.src='assets/info-ui/'+name;}if(!img.complete||!img.naturalWidth)return;const d=infoBox(g,box);c.drawImage(img,d.x,d.y,d.width,d.height);}
+function wrapInfoText(c,text,width){
+ const lines=[];let line='';
+ for(const char of text){if(line&&c.measureText(line+char).width>width){lines.push(line);line='';}line+=char;}
+ if(line)lines.push(line);return lines;
+}
 function drawItemInfo(c,g,session){
  session.infoHit=null;
  const L=infoLayout(),item=session.board.slots[session.selected],definition=session.board.definition(item);
@@ -33,10 +38,20 @@ function drawItemInfo(c,g,session){
   c.strokeText(title,tx,ty,tab.width*.86);
   c.shadowColor='transparent';c.shadowOffsetY=0;c.shadowBlur=0;
   c.fillStyle='#FFFFFF';c.fillText(title,tx,ty,tab.width*.86);c.restore();
-  const description=definition.tags.includes('chest')?'点击打开宝箱获取奖励':definition.producerId?'点击消耗能量生成物品。':!definition.mergeResultId?'已到达该合成路线最高级。':'合成相同的物品进行升级。';
+  const isTool=definition.tags.includes('tool');
+  let lines=[definition.tags.includes('chest')?'点击打开宝箱获取奖励':definition.producerId?'点击消耗能量生成物品。':!definition.mergeResultId?'已到达该合成路线最高级。':'合成相同的物品进行升级。'];
+  if(isTool){
+   const range=ToolRules.range(definition.type,definition.tier);
+   const cap=range?.max!=null?range.max+'级':definition.type==='hammer'?'最高级':'次高级';
+   lines=definition.type==='card'?[`可替代${definition.tier}级物品进行合成`]:!range?['合成相同的道具进行升级']:definition.type==='hammer'?['拆解物品为两个低一级的物品',`（2～${cap}）`]:[`复制物品（1～${cap}）`];
+  }
   c.font=`400 ${L.bodySize*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle=L.bodyColor;
-  c.textAlign='left';c.textBaseline='alphabetic';
-  c.fillText(description,429.950528/1320*g.W,(2728.960954+18)/L.h*g.H,L.body[2]/1320*g.W);
+  const width=L.body[2]/L.w*g.W;
+  lines=wrapInfoText(c,lines.join(''),width);
+  c.textAlign='center';c.textBaseline='alphabetic';
+  const baseline=2728.960954+18-(lines.length-1)*49/2;
+  lines.forEach((line,i)=>c.fillText(line,(429.950528+L.body[2]/2)/L.w*g.W,(baseline+i*49)/L.h*g.H));
+  c.textAlign='left';
   c.font=`400 ${32.004*sy}px "FZCuYuan", "PingFang SC", "Microsoft YaHei", sans-serif`;c.fillStyle='#147DB5';
   if(!definition.producerId&&!definition.tags.includes('chest'))c.fillText('回收',L.recycleLabel[0]/L.w*g.W,L.recycleLabel[1]/L.h*g.H);
  }

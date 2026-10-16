@@ -7,7 +7,7 @@ const gameSaveMigrations={0:(raw,content)=>{
  return {saveVersion:1,board:raw.slots.map(resolve),orders:[],completedCount:raw.completedCount||0,serial:0,domains:{currencies:{coins:raw.coins??320,energy:0,gems:0}}};
 }};
 function serializeGame(runtime){
- const item=i=>i?{itemId:runtime.board.definition(i)?.id||'removed:'+i.type+':'+i.level}:null;
+ const item=i=>i?{itemId:runtime.board.definition(i)?.id||'removed:'+i.type+':'+i.level,...Object.fromEntries(['toolUses','toolRoll','chestUses'].filter(k=>i[k]!==undefined).map(k=>[k,i[k]]))}:null;
  const domains=structuredClone(runtime.state);domains.inventory.items=runtime.state.inventory.items.map(item);
  return {saveVersion:GAME_SAVE_VERSION,contentVersion:runtime.content.contentVersion,updatedAt:new Date().toISOString(),domains,board:runtime.board.slots.map(item),completedCount:runtime.orders.completedCount,serial:runtime.orders.serial,
  orders:runtime.orders.entries.filter(e=>e.phase==='waiting').map(e=>({id:e.id,customerId:runtime.content.customers.find(c=>c.portraitPrefix===e.type)?.id,variant:e.variant,requirements:e.requirements.map(r=>({...item(r),delivered:!!r.delivered})),reward:e.reward,rewards:e.rewards||[],generator:e.generator||null,xpReward:e.xpReward||0,stageCount:e.stageCount})),generatorChance:runtime.orders.generatorChance??.01};
@@ -21,7 +21,13 @@ function hydrateGameSave(runtime,raw,warn=console.warn){
  fresh.welcomeBundleClaimed=s.domains.welcomeBundleClaimed===true;
  const recovery=Array.isArray(s.domains.recovery)?structuredClone(s.domains.recovery):[];
  const recover=(value,domain)=>{warn('Missing content retained in recovery:',domain,value);recovery.push({domain,value});return null;};
- const item=(value,domain)=>{if(value===null)return null;const d=c.items.find(i=>i.id===value?.itemId);return d?{type:d.type,level:d.tier}:recover(value,domain);};
+ const item=(value,domain)=>{
+  if(value===null)return null;const d=c.items.find(i=>i.id===value?.itemId);if(!d)return recover(value,domain);
+  const result={type:d.type,level:d.tier};
+  for(const key of ['toolUses','chestUses'])if(value[key]!==undefined){if(key==='toolUses'?d.type!=='mirror':!d.tags.includes('chest'))throw Error('Invalid item metadata: '+key);result[key]=integer(value[key],key);}
+  if(value.toolRoll!==undefined){if(!['hammer','mirror'].includes(d.type)||!Number.isFinite(value.toolRoll)||value.toolRoll<0||value.toolRoll>=1)throw Error('Invalid tool roll');result.toolRoll=value.toolRoll;}
+  return result;
+ };
  const board=s.board.map(i=>item(i,'board'));
   if(s.domains.currencies)for(const key of Object.keys(fresh.currencies))fresh.currencies[key]=integer(s.domains.currencies[key]??fresh.currencies[key],key);
  // Pre-energy saves used zero as a visual placeholder, not an exhausted energy account.

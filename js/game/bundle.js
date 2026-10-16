@@ -36,7 +36,7 @@ function createWelcomeBundle(runtime,host){
   c.globalCompositeOperation='destination-out';c.drawImage(glyph,0,0);
   c.globalCompositeOperation='source-over';c.drawImage(glyph,0,0);
  }
- const panel={get ready(){return load();},layout:{width:1320,screen:2868,top:307,height:1996,inside:{left:86,top:307,right:1202,bottom:2303}},
+ const panel={label:'海滩欢迎礼包',get ready(){return load();},layout:{width:1320,screen:2868,top:307,height:1996,inside:{left:86,top:307,right:1202,bottom:2303}},
   start(button,close){
    const width=Math.min(1037,Math.ceil(canvas.getBoundingClientRect().width/1320*1037*Math.min(2,devicePixelRatio||1)));
    if(frame.width!==width){frame.width=Math.max(1,width);frame.height=Math.ceil(frame.width*1664/1037);hasFrame=false;lastVideoTime=-1;}

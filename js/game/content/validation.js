@@ -1,6 +1,8 @@
 'use strict';
+const ContentChestRules=typeof module!=='undefined'?require('../domain/chest-rules.js'):ChestRules;
 function validateGameContent(c){
  const errors=[],maps={};const fail=m=>errors.push(m);
+ if(!ContentChestRules.valid(c))fail('chest: invalid series, tiers, weights or charges');
  if(!c.energy||!Number.isSafeInteger(c.energy.initial)||c.energy.initial<0||!Number.isSafeInteger(c.energy.max)||c.energy.max<1||c.energy.initial>c.energy.max||!Number.isSafeInteger(c.energy.recoveryMs)||c.energy.recoveryMs<1000)fail('energy: invalid initial/max/recoveryMs');
  for(const name of ['items','chains','producers','customers','unlocks','levels','areas','zones','tasks']){maps[name]=new Map();for(const d of c[name]){if(!d.id||maps[name].has(d.id))fail(`${name}: duplicate/empty ID ${d.id}`);maps[name].set(d.id,d);}}
  const ref=(name,id,owner)=>{if(id!=null&&!maps[name].has(id))fail(`${owner}: missing ${name} ${id}`);};

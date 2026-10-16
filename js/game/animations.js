@@ -1,5 +1,5 @@
 'use strict';
-const iconScales={ice1:.5,fish1:.75,shell6:.9,shell10:1.1};
+const iconScales={ice1:.5,fish1:.75,shell6:.9,shell10:1.1,hammer1:.6,hammer2:.75,hammer3:.9,mirror1:.6,mirror2:.75,mirror3:.9};
 const iconScale=item=>iconScales[item.type+item.level]??1;
 const itemShadows=new Map();
 function itemShadow(item,img){
@@ -229,7 +229,8 @@ function createPlaytestRenderer(session){
  }
  function drawDetailsItem(c,box,item,index,time,authoredImage=null){
   const img=authoredImage||session.pictures[item.type+item.level];if(!img)return;
-  const size=authoredImage?166:128,g={cells:{[index]:box}},icon={x:box.x+(box.width-size)/2,y:box.y+(box.height-size)/2,width:size};
+  const tool=item.type==='hammer'||item.type==='mirror';
+  const size=(authoredImage?166:128)*(tool ? .9*iconScale(item) : 1),g={cells:{[index]:box}},icon={x:box.x+(box.width-size)/2,y:box.y+(box.height-size)/2,width:size};
   drawMaxLevelSparkles(c,g,item,index,time,true);
   c.drawImage(img,icon.x,icon.y,size,size);drawPrismaticSweep(c,g,item,index,time,icon,img);
   drawMaxLevelSparkles(c,g,item,index,time);

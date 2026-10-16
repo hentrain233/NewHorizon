@@ -1,7 +1,6 @@
 'use strict';
 function createPlaytestFeedback(session,label,message,center){
  function feedback(result){
-  if(result.kind==='chest-pending'){notify('宝箱打开规则暂未配置。');return;}
   if(result.kind==='none'&&result.source>=0&&session.board.slots[result.source])session.failures.set(result.source,performance.now());
   if(result.kind==='full'||result.kind==='no-energy'){session.failures.set(result.source,performance.now());message(result.kind==='full'?'盘面已满，请先合成。':'体力不足，请等待倒计时恢复。');return;}
   if(result.index>=0){if(result.kind!=='spawn')session.selected=result.index;session.effects.set(result.index,performance.now());}
@@ -11,6 +10,10 @@ function createPlaytestFeedback(session,label,message,center){
    session.effects.set(result.source,performance.now());message('已生成'+label(session.board.slots[result.index])+'。');
   }
   if(result.kind==='merge')message('合成成功：'+label(result.item)+(result.item.level===session.board.max[result.item.type]?'（最高级）':''));
+  if(result.kind==='tool'){
+   for(const index of result.indices){session.effects.set(index,performance.now());if(index!==result.source)session.flights.set(index,{from:center(geometry.cells[result.source]),to:center(geometry.cells[index]),start:performance.now(),duration:260});}
+   message((result.toolType==='hammer'?'已拆分为':'已复制')+result.count+'个物品。');
+  }
   if(result.kind==='swap')message('已交换位置。');if(result.kind==='move')message('已移动到空格。');drawCanvas();
  }
  return feedback;

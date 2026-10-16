@@ -203,7 +203,7 @@ function drawCanvas(target=canvas,includeHelpers=true,separateOrders=false){
  if(target===canvas&&includeHelpers)window.mergePlayTest?.draw(c,g,separateOrders);
  if(!state.boardOnly)drawCurrencyUI(c,g);
  if(target===canvas&&includeHelpers&&!window.mergePlayTest?.active&&typeof drawOrderPayouts==='function')drawOrderPayouts(c,g);
- if(target===canvas&&includeHelpers)window.renovationScreen?.drawOverlay(c,g);
+ if(target===canvas&&includeHelpers){window.gameHUD?.draw(g);window.renovationScreen?.drawOverlay(c,g);}
  return target;
 }
 // Orders own a short, full-width surface. The board is refreshed only for its own changes/effects.
@@ -230,5 +230,5 @@ function drawPlayFrame(){
  if(g.bleed&&bleedFront)d.drawImage(bleedFront,0,b.y,b.W,barH,-b.x,0,b.W,barH);else d.drawImage(playSceneLayers(g,true).front,0,0,g.W,barH,0,0,g.W,barH);
  drawCustomerBubbles(d,g,game.orderMarkers);refreshOrderButtons();game.drawOrderDrag(d,g);
  drawCurrencyUI(d,g);drawOrderPayouts(d,g);d.restore();
- window.renovationScreen?.drawOverlay(ctx,g);
+ window.gameHUD?.draw(g);window.renovationScreen?.drawOverlay(ctx,g);
 }

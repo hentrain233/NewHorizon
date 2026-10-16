@@ -29,7 +29,10 @@
  const label=item=>item?`${board.definition(item)?.name||item.type} · ${item.level} 级`:'';
  const feedback=createPlaytestFeedback(session,label,message,center);
  bindPlaytestInput(session,feedback,message,busy,label,center);
- window.itemDetails=createItemDetails(session,renderer,runtime);
+ const scenePause=createScenePause(renderer);
+ const popupHost=createPopupHost(session,runtime,scenePause);
+ window.itemDetails=createItemDetails(session,renderer,runtime,popupHost);
+ window.gameHUD=createGameHUD(runtime);
  const editor=window.gameTools?.bind({session,toggle,restart,message,busy,label});
  function message(text){if(editor)editor.message(text);}
  function loadPictures(){return ready||(ready=Promise.all(Object.entries(window.MERGE_GAME_ASSETS||{}).map(([name,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{pictures[name]=img;resolve();};img.onerror=()=>reject(new Error('图标加载失败：'+name));img.src=url;}))).then(()=>{if(GameContent.items.some(i=>!pictures[i.assetId]))throw new Error('缺少测试图标，请保留 game-assets.js。');}).catch(e=>{ready=null;throw e;}));}
@@ -54,14 +57,7 @@
   effects.delete(selected);session.failures.delete(selected);selected=-1;keyboardSource=-1;
   notify('已回收，获得 '+result.coins+' 金币。');drawCanvas();return true;
  }
- let frozenAt=null;
- function freeze(value){
-  if(value){if(frozenAt===null)frozenAt=performance.now();return;}
-  if(frozenAt===null)return;const elapsed=performance.now()-frozenAt;frozenAt=null;renderer.resume(elapsed);
-  for(const entry of orderQueue.entries)for(const key of ['arrivedAt','completedAt'])if(entry[key]!=null)entry[key]+=elapsed;
-  for(const payout of orderPayouts)payout.start+=elapsed;
-  if(orderQueue.refillReadyAt!=null)orderQueue.refillReadyAt+=elapsed;orderFrame=performance.now();
- }
+ function freeze(value){scenePause.set('map',value);}
  window.mergePlayTest={get active(){return active;},get animating(){return flights.size>0;},get boardMoving(){return !!drag||flights.size>0||effects.size>0||session.failures.size>0;},get boardVisualKey(){return JSON.stringify([board.slots,selected,keyboardSource,orderQueue.entries.map(e=>[e.id,e.phase,e.requirements])]);},get boardAnimated(){return selected>=0||board.slots.some(i=>i&&board.getEffectTier(i)!=='none');},get orderMarkers(){return orderMarkerState(orderQueue.entries,board.slots);},drawOrderDrag:renderer.drawOrderDrag,get moving(){return session.orderPanning||!!drag||flights.size>0||effects.size>0||session.failures.size>0||orderPayouts.length>0||orderQueue.entries.some((e,i)=>e.arrivedAt===undefined||e.entering||e.phase==='complete'||Math.abs(e.slot-i)>.001);},freeze,draw,toggle,restart,getSnapshot:()=>structuredClone(board.slots),submitOrderItem,getItemImage:item=>pictures[item.type+item.level]};
  window.mergePlayTest.recycleSelected=recycleSelected;
  window.welcomeBundle=createWelcomeBundle(runtime,window.itemDetails);

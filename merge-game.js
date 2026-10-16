@@ -1,5 +1,7 @@
 // Pure game rules: independent of Canvas, layout, editor settings and storage.
 const BoardContent=typeof module!=='undefined'?require('./js/game/content/catalog.js'):GameContent;
+const BoardToolRules=typeof module!=='undefined'?require('./js/game/domain/tool-rules.js'):ToolRules;
+const BoardChestRules=typeof module!=='undefined'?require('./js/game/domain/chest-rules.js'):ChestRules;
 class MergeTestBoard {
  constructor(random=Math.random,content=BoardContent){this.random=random;this.content=content;this.slots=Array(63).fill(null);this.max=Object.fromEntries(content.chains.map(c=>[c.key,c.maxTier]));this.generatorTypes=new Set(content.items.filter(i=>i.producerId).map(i=>i.type));this.onChange=()=>{};this.isProducerAvailable=()=>true;}
  definition(item){return item&&this.content.items.find(d=>d.type===item.type&&d.tier===item.level);}
@@ -12,10 +14,12 @@ class MergeTestBoard {
   return item.level===max?'max':item.level===max-1?'near-max':'none';
  }
  empty(){return this.slots.flatMap((item,i)=>item?[]:[i]);}
+ isOrdinary(item){const d=this.definition(item);return !!d&&!d.producerId&&!d.tags.some(t=>t==='tool'||t==='chest');}
+ useTool(source,target){return BoardToolRules.use(this,source,target);}
  add(type='drinkgen',level=1){const free=this.empty();if(!free.length||!this.definition({type,level}))return -1;const i=free[Math.floor(this.random()*free.length)];this.slots[i]={type,level};this.onChange('ITEM_ADDED',this.slots[i]);return i;}
  reset(){this.slots.fill(null);return this.add();}
  generate(i){
-  if(this.definition(this.slots[i])?.tags.includes('chest'))return {kind:'chest-pending',source:i};
+  if(this.definition(this.slots[i])?.tags.includes('chest'))return BoardChestRules.open(this,i);
   const generator=this.slots[i],producer=this.content.producers.find(p=>p.id===this.definition(generator)?.producerId);if(!producer||!this.isProducerAvailable(producer))return {kind:'none',source:i};
   const free=this.empty();if(!free.length)return {kind:'full',source:i};
   if(this.spendGenerationEnergy&&!this.spendGenerationEnergy(producer))return {kind:'no-energy',source:i};
@@ -36,6 +40,10 @@ class MergeTestBoard {
   if(!result&&b&&this.definition(a)?.id===this.definition(b)?.id)return {kind:'none',source:from};
   if(result){
    this.slots[to]={type:result.type,level:result.tier};this.slots[from]=null;this.onChange('ITEM_MERGED',this.slots[to]);return {kind:'merge',index:to,item:this.slots[to]};
+  }
+  if(b){
+   if(this.definition(a)?.tags.includes('tool')&&this.isOrdinary(b))return this.useTool(from,to);
+   if(this.definition(b)?.tags.includes('tool')&&this.isOrdinary(a))return this.useTool(to,from);
   }
   this.slots[to]=a;this.slots[from]=b;this.onChange('ITEM_MOVED',a);return {kind:b?'swap':'move',index:to};
  }

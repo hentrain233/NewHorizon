@@ -15,21 +15,10 @@
  mapView.appendChild(mapWorld);document.body.appendChild(mapView);
  let worldReady=false,worldStage=-1,buildingNode=null;const cloudNodes=[];
  const style=(el,key,value)=>{if(el.style[key]!==value)el.style[key]=value;};
+ const hud=window.gameHUD,{overlay,nav}=hud;
+ const transitionVeil=document.createElement('div');transitionVeil.id='scene-transition';transitionVeil.hidden=true;transitionVeil.setAttribute('aria-hidden','true');transitionVeil.style.cssText='position:fixed;inset:0;background:#fff;pointer-events:none;z-index:30';document.body.appendChild(transitionVeil);
  const sweepCanvas=document.createElement('canvas');sweepCanvas.width=640;sweepCanvas.height=457;
  const sweepContext=sweepCanvas.getContext('2d');
- const wrap=document.getElementById('canvas-wrap');wrap.style.position='relative';
- const overlay=document.createElement('div');overlay.style.cssText='position:absolute;pointer-events:none;z-index:3';wrap.appendChild(overlay);
- const transitionVeil=document.createElement('div');transitionVeil.id='scene-transition';transitionVeil.hidden=true;transitionVeil.setAttribute('aria-hidden','true');transitionVeil.style.cssText='position:fixed;inset:0;background:#fff;pointer-events:none;z-index:30';document.body.appendChild(transitionVeil);
- function placeOverlay(){overlay.style.left=canvas.offsetLeft+'px';overlay.style.top=canvas.offsetTop+'px';overlay.style.width=canvas.clientWidth+'px';overlay.style.height=canvas.clientHeight+'px';}
- new ResizeObserver(placeOverlay).observe(wrap);new ResizeObserver(placeOverlay).observe(canvas);placeOverlay();
- const nav=document.createElement('button');nav.id='renovation-nav';nav.setAttribute('aria-label','翻新餐厅');nav.className='renovation-nav';overlay.appendChild(nav);
- nav.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 C82 3 94 12 97 46 C99 80 89 94 55 97 C20 99 6 90 3 56 C0 21 12 4 50 3Z" fill="#FFEBD2" stroke="#A18166" stroke-width="2"/></svg><img src="assets/map-icon.png" alt="">';
- const inventory=document.createElement('button');inventory.type='button';inventory.id='inventory-nav';inventory.className='renovation-nav inventory-nav';inventory.setAttribute('aria-label','仓库');
- inventory.innerHTML=nav.innerHTML;inventory.querySelector('img').src='assets/inventory-icon.png';overlay.appendChild(inventory);
- const recycle=document.createElement('button');recycle.type='button';recycle.id='recycle-item';recycle.className='renovation-nav recycle-nav';recycle.setAttribute('aria-label','回收物品');recycle.hidden=true;
- recycle.innerHTML='<img src="assets/info-ui/infoUI_recycle2.png" alt="">';overlay.appendChild(recycle);
- recycle.onclick=()=>window.mergePlayTest.recycleSelected();
- for(const button of [nav,inventory,recycle])button.addEventListener('pointerdown',()=>{if(!button.disabled)button.animate([{transform:'scale(1)'},{transform:'scale(1.12,.82)',offset:.35},{transform:'scale(.97,1.05)',offset:.75},{transform:'scale(1)'}],{duration:170,easing:'ease-out'});});
  const controls=document.createElement('div');controls.className='renovation-map-controls';controls.hidden=true;
  controls.innerHTML='<button aria-label="缩小地图">−</button><span>75%</span><button aria-label="放大地图">＋</button><button class="locate" aria-label="定位当前清理任务">定位任务</button>';overlay.appendChild(controls);
  const zoomText=controls.querySelector('span'),[minus,plus,locate]=controls.querySelectorAll('button');
@@ -47,6 +36,7 @@
  function loadAssets(){return ready||(ready=new Promise((resolve,reject)=>{if(window.RENOVATION_ASSETS)return resolve();const script=document.createElement('script');script.src='js/game/renovation-assets.js';script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('餐厅素材加载失败'));};document.head.appendChild(script);}).then(async()=>{background=await loadImage(window.RENOVATION_ASSETS.background);cloudSprite=await loadImage(window.RENOVATION_ASSETS.cloudSprite);building=window.RENOVATION_ASSETS.building;}).catch(e=>{ready=null;throw e;}));}
  async function loadStage(n){if(!images.has(n))images.set(n,await loadImage(window.RENOVATION_ASSETS.stages[n]));for(const key of images.keys())if(Math.abs(key-n)>1)images.delete(key);return images.get(n);}
  function setZoom(z,p={x:W/2,y:H/2}){if(animation||transition)return;const x=camera.x+(p.x-W/2)/camera.zoom,y=camera.y+(p.y-H/2)/camera.zoom;camera.zoom=limit(z,fitZoom(),1.2);camera.x=x-(p.x-W/2)/camera.zoom;camera.y=y-(p.y-H/2)/camera.zoom;clampCamera();zoomText.textContent=Math.round(camera.zoom*100)+'%';if(!pointers.size)saveCamera();}
+ hud.navigate=navigate;
  minus.onclick=()=>setZoom(camera.zoom-.05);plus.onclick=()=>setZoom(camera.zoom+.05);
  function focusTask(smooth=true){const t=task();if(!t)return;const target={x:t.mapAnchor[0],y:t.mapAnchor[1]-H*.17/camera.zoom};if(smooth)cameraTween={from:{...camera},to:target,start:performance.now()};else{Object.assign(camera,target);clampCamera();saveCamera();}}
  locate.onclick=()=>{if(!animation&&!transition)focusTask();};
@@ -56,13 +46,6 @@
  async function navigate(){if(loading||transition)return;if(active){saveCamera();window.flushGameSave();animation=null;cameraTween=null;beginTransition(false);return;}
   loading=true;nav.disabled=true;nav.setAttribute('aria-label','加载中…');try{if(!window.mergePlayTest.active)await window.mergePlayTest.toggle();if(!window.mergePlayTest.active)return;await loadAssets();stage=completed();await loadStage(stage);Object.assign(camera,{x:1573,y:2354},runtime.state.renovation.camera||{},{zoom:.75});clampCamera();zoomText.textContent='75%';beginTransition(true);}catch(e){notify(e.message);}finally{loading=false;if(!transition){nav.disabled=false;nav.setAttribute('aria-label','翻新餐厅');}}
  }
- // Some mobile browsers suppress the compatibility click immediately after a drag.
- // Handle a stationary touch release too, without navigating twice on normal browsers.
- let navTouch=null,lastNavTouch=-Infinity;
- nav.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&e.isPrimary)navTouch={id:e.pointerId,x:e.clientX,y:e.clientY};});
- nav.addEventListener('pointercancel',()=>{navTouch=null;});
- nav.addEventListener('pointerup',e=>{const touch=navTouch;navTouch=null;if(!touch||touch.id!==e.pointerId||nav.disabled||Math.hypot(e.clientX-touch.x,e.clientY-touch.y)>10)return;lastNavTouch=performance.now();void navigate();});
- nav.onclick=e=>{if(e.detail===0||performance.now()-lastNavTouch>700)void navigate();};
  function bubble(){const t=animation?.task||task();if(!t)return null;const p=screen(...t.mapAnchor);return {x:p.x-100,y:p.y-250,width:200,height:210,anchor:p};}
  async function buy(){if(animation||loading||transition||!task())return;const t=task(),check=runtime.canPurchaseTask(t.id);if(!check.ok){notify(check.reason==='insufficient-coins'?'金币不足，需要 '+t.coinCost+' 金币。':'当前步骤暂时不能清理。');return;}
   loading=true;try{await loadStage(stage+1);await prepareStars(stage);if(!active||transition)return;const before=runtime.state.currencies.coins,result=runtime.purchaseTask(t.id);if(!result.ok)return;
@@ -134,32 +117,9 @@
  function draw(c,g){const now=syncView(g);presentWorld(g,now);
   c.save();c.scale(g.W/W,g.H/H);c.save();c.translate(W/2,H/2);c.scale(camera.zoom,camera.zoom);c.translate(-camera.x,-camera.y);
   drawRepairEffect(c,now);drawRepairStars(c,now);c.restore();
-  drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();drawOverlay(c,g);
- }
- function placeInfoButton(el,box){
-  style(el,'left',box[0]/1320*100+'%');style(el,'top',box[1]/2868*100+'%');style(el,'width',box[2]/1320*100+'%');style(el,'height',box[3]/2868*100+'%');
-  style(el,'right','auto');style(el,'bottom','auto');style(el,'aspectRatio','auto');style(el,'opacity','1');
+  drawBubble(c,now);drawDust(c,now);c.textAlign='center';c.font='bold 30px sans-serif';c.fillStyle='#285D65';c.fillText(stage===5?'餐厅已清理完成':`${stage+1} / 5 · ${task()?.name||''}`,W/2,H-110);c.restore();drawCurrencyUI(c,g);c.save();c.scale(g.W/W,g.H/H);drawFlights(c,now);c.restore();hud.draw(g);drawOverlay(c,g);
  }
  function drawOverlay(c,g){
-  window.welcomeBundle?.placeEntry();
-  recycle.hidden=active||!window.mergePlayTest.active||runtime.recyclePrice(window.mergePlayTest.selectedItem)===0;
-  if(!recycle.hidden){
-   placeInfoButton(recycle,infoLayout().recycle);recycle.disabled=!window.mergePlayTest.canRecycle;
-   const src='assets/info-ui/'+(state.fxInfoRecycleArt==='solid'?'infoUI_recycle.png':'infoUI_recycle2.png');
-   if(recycle.querySelector('img').getAttribute('src')!==src)recycle.querySelector('img').src=src;
-   const label='回收物品，获得 '+runtime.recyclePrice(window.mergePlayTest.selectedItem)+' 金币';
-   if(recycle.getAttribute('aria-label')!==label)recycle.setAttribute('aria-label',label);
-  }
-  nav.classList.toggle('info-art',!active);inventory.classList.add('info-art');
-  const navImage=active?'assets/stall-icon.png':'assets/info-ui/infoUI_ButtonRight.png';
-  if(nav.querySelector('img').getAttribute('src')!==navImage)nav.querySelector('img').src=navImage;
-  if(inventory.querySelector('img').getAttribute('src')!=='assets/info-ui/infoUI_ButtonLeft.png')inventory.querySelector('img').src='assets/info-ui/infoUI_ButtonLeft.png';
-  const bottom=(g?.navBottom??state.fxNavBottom)+'%';
-  if(active){if(nav.style.bottom!==bottom)nav.style.bottom=bottom;for(const key of ['top','left','width','height','right','aspectRatio','opacity'])style(nav,key,'');inventory.hidden=true;style(inventory,'bottom',bottom);style(inventory,'opacity','');}
-  else{placeInfoButton(nav,infoLayout().right);placeInfoButton(inventory,infoLayout().left);inventory.hidden=false;}
-  // Keep the test-only restart control away from both the new icon and the bottom board row.
-  const restart=document.querySelector('.player-restart');if(restart){style(restart,'bottom',active?'':'auto');style(restart,'top',active?'':'max(8px, env(safe-area-inset-top))');}
-  const stallScale=String((state.fxNavStallScale??100)/100);if(nav.style.getPropertyValue('--stall-icon-scale')!==stallScale)nav.style.setProperty('--stall-icon-scale',stallScale);
   if(!transition)return;const t=limit((performance.now()-transition.start)/transition.duration,0,1);if(t>=.5&&!transition.switched){transition.switched=true;setActive(transition.toMap);}const alpha=1-Math.abs(2*t-1);if(g.bleed){transitionVeil.hidden=t===1;transitionVeil.style.opacity=alpha;}else{c.save();c.globalAlpha=alpha;c.fillStyle='#FFFFFF';c.fillRect(0,0,g.W,g.H);c.restore();}if(t===1){transition=null;nav.disabled=false;}}
  function stop(e){e.preventDefault();e.stopImmediatePropagation();}
  canvas.addEventListener('pointerdown',e=>{if(!active&&!transition)return;stop(e);if(!active||transition||e.button!==0)return;const p=point(e);pointers.set(e.pointerId,p);canvas.setPointerCapture(e.pointerId);if(animation)return;cameraTween=null;pan={id:e.pointerId,start:p,from:{...camera},moved:false};if(pointers.size===2){const a=[...pointers.values()];pinch={distance:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),zoom:camera.zoom};pan=null;}},true);

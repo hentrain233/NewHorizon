@@ -3,10 +3,13 @@
 const GameContent = (() => {
  const chains=[['drinkgen','饮料生成器',3],['ice','冰品',9],['drink','饮料',9],['fishnet','渔网生成器',5],['fish','鱼',10],['shell','贝壳',10]].map(([key,name,maxTier])=>({id:'chain_'+key,key,name,maxTier,itemIds:Array.from({length:maxTier},(_,i)=>`item_${key}_${String(i+1).padStart(2,'0')}`)}));
  chains.push({id:'chain_chest',key:'chest',name:'宝箱',maxTier:1,itemIds:['item_chest_01']});
+ for(const [key,name,maxTier]of [['card','卡牌',7],['hammer','羊角锤',6],['mirror','梳妆镜',6]])chains.push({id:'chain_'+key,key,name,maxTier,itemIds:Array.from({length:maxTier},(_,i)=>`item_${key}_${String(i+1).padStart(2,'0')}`)});
  const producerChains={drinkgen:['ice','drink'],fishnet:['fish','shell']};
  const itemNames={fish:'小虾 花甲 青口贝 扇贝 海星 生蚝 鲍鱼 章鱼 帝王蟹 大龙虾'.split(' '),shell:'海草 海葵 海螺 碎贝壳 贝壳 珍珠 贝壳手链 海滨风铃 海滨纪念球 瓶中海滨'.split(' '),ice:'一颗冰块 三颗冰块 一杯碎冰 一桶碎冰 刨冰 果酱刨冰 草莓刨冰 鲜果刨冰 豪华鲜果刨冰'.split(' '),drink:'瓶装水 苏打水 罐装汽水 瓶装汽水 冰啤酒 阿佩罗 夏日气泡特调 椰子水 无酒精椰子水特调'.split(' '),fishnet:'渔网 改良渔网 简易木筏 捕捞木筏 高级捕捞船'.split(' ')};
  const items=chains.flatMap(c=>c.itemIds.map((id,i)=>({id,name:itemNames[c.key]?.[i]||c.name,chainId:c.id,tier:i+1,mergeResultId:c.itemIds[i+1]||null,assetId:c.key+(i+1),type:c.key,tags:producerChains[c.key]?['producer']:[],producerId:producerChains[c.key]?'producer_'+c.key+'_'+(i+1):null,canStore:true,canSell:false,sellValue:0,description:''})));
  items.find(i=>i.type==='chest').tags.push('chest');
+ for(const item of items)if(['card','hammer','mirror'].includes(item.type))item.tags.push('tool');
+ const chest={defaultCharges:5,unlimited:true,series:['card','hammer','mirror'],tierWeights:[10,7,5]};
  // Per generator tier: [output tier, probability], shared by all producer families.
  const outputOdds=[[[1,.8],[2,.2]],[[1,.1],[2,.7],[3,.2]],[[2,.1],[3,.65],[4,.25]],[[3,.1],[4,.62],[5,.25],[6,.03]],[[4,.1],[5,.62],[6,.25],[7,.03]]];
  const producers=items.filter(i=>i.producerId).map(item=>({id:item.producerId,outputs:producerChains[item.type].flatMap(type=>outputOdds[item.tier-1].map(([tier,weight])=>({itemId:`item_${type}_${String(tier).padStart(2,'0')}`,weight:weight/2}))),energyCost:1,cooldown:0,charges:null,unlockId:null}));
@@ -19,7 +22,7 @@ const GameContent = (() => {
  tasks.push({id:'restaurant_premium_reserved',name:'后续装修（未开放）',zoneId:'zone_restaurant',phase:'premium',available:false,coinCost:0,prerequisiteIds:[basicIds[4]],rewards:[],unlockIds:[]});
  const areas=[{id:'area_restaurant',zoneIds:['zone_restaurant'],phaseRule:'all-basic-before-premium',rewards:[]}];
  const zones=[{id:'zone_restaurant',areaId:'area_restaurant',basicTaskIds:basicIds,premiumTaskIds:['restaurant_premium_reserved']}];
- const data={contentVersion:2,energy:{initial:100,max:999,recoveryMs:300000},chains,items,producers,customers,unlocks,orders,levels:[{id:'level_1',level:1,xpToNext:null,rewards:[],unlockIds:[]}],areas,zones,tasks};
+ const data={contentVersion:3,chest,energy:{initial:100,max:999,recoveryMs:300000},chains,items,producers,customers,unlocks,orders,levels:[{id:'level_1',level:1,xpToNext:null,rewards:[],unlockIds:[]}],areas,zones,tasks};
  const freeze=o=>{Object.values(o).forEach(v=>{if(v&&typeof v==='object')freeze(v);});return Object.freeze(o);};
  return freeze(data);
 })();
